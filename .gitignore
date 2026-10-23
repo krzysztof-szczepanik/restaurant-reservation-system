@@ -1,0 +1,26 @@
+# Wyniki kompilacji
+[Bb]in/
+[Oo]bj/
+# Visual Studio
+.vs/
+*.user
+*.suo
+*.sln.docstates
+.idea/
+# Lokalne ustawienia i sekrety
+.env
+.env.*
+!.env.example
+appsettings.Local.json
+# Lokalne bazy SQLite
+*.db
+*.db-shm
+*.db-wal
+*.sqlite
+*.sqlite-shm
+*.sqlite-wal
+*.sqlite3
+*.sqlite3-shm
+*.sqlite3-wal
+# Logi
+*.log
