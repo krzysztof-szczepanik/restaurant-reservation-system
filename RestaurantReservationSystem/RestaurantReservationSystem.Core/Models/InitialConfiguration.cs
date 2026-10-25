@@ -15,7 +15,7 @@ namespace RestaurantReservationSystem.Core.Models
         public bool PhoneNumberVisible { get; set; } = true;
         public bool PhoneNumberRequired { get; set; } = false;
         public bool TableNumberVisible { get; set; } = true;
-        public bool TableNumberRequired { get; set; } = false;
+        public bool TableNumberRequired { get; set; } = true;
         public bool TableLabelVisible { get; set; } = true;
         public bool TableLabelRequired { get; set; } = false;
         public bool TableZoneVisible { get; set; } = true;
