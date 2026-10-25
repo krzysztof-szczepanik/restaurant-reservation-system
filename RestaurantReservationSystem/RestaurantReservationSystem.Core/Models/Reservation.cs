@@ -1,12 +1,7 @@
 ﻿using RestaurantReservationSystem.Core.Enums;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
-namespace RestaurantReservationSystem.Core.Models
-{
-    public class Reservation
-    {
+namespace RestaurantReservationSystem.Core.Models {
+    public class Reservation {
         public int Id { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public DateOnly Date { get; set; }

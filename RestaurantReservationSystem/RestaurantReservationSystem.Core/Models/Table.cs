@@ -1,11 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace RestaurantReservationSystem.Core.Models
-{
-    public class Table
-    {
+﻿namespace RestaurantReservationSystem.Core.Models {
+    public class Table {
         public int Id { get; set; }
         public int? Number { get; set; } = null;
         public string? Label { get; set; } = null;
