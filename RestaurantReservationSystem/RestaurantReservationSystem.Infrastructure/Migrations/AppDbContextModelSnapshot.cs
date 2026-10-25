@@ -35,7 +35,6 @@ namespace RestaurantReservationSystem.Infrastructure.Migrations
             modelBuilder.Entity("RestaurantReservationSystem.Core.Models.InitialConfiguration", b =>
                 {
                     b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
                     b.Property<bool>("FirstNameRequired")

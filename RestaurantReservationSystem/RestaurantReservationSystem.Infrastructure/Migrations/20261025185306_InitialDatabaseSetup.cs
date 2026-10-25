@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace RestaurantReservationSystem.Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class AddReservationTableRelationAndEnums : Migration
+    public partial class InitialDatabaseSetup : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -15,8 +15,7 @@ namespace RestaurantReservationSystem.Infrastructure.Migrations
                 name: "InitialConfigurations",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "INTEGER", nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
+                    Id = table.Column<int>(type: "INTEGER", nullable: false),
                     FirstNameVisible = table.Column<bool>(type: "INTEGER", nullable: false),
                     FirstNameRequired = table.Column<bool>(type: "INTEGER", nullable: false),
                     LastNameVisible = table.Column<bool>(type: "INTEGER", nullable: false),

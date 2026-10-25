@@ -15,6 +15,7 @@ namespace RestaurantReservationSystem.Infrastructure.Persistence
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
+
             modelBuilder.Entity<Reservation>()
                 .HasMany(r => r.Tables)
                 .WithMany(t => t.Reservations)
@@ -27,6 +28,10 @@ namespace RestaurantReservationSystem.Infrastructure.Persistence
             modelBuilder.Entity<InitialConfiguration>()
                 .Property(c => c.TableIdentifierOrder)
                 .HasConversion<string>();
+
+            modelBuilder.Entity<InitialConfiguration>()
+            .Property(c => c.Id)
+            .ValueGeneratedNever();
         }
     }
 }

@@ -11,8 +11,8 @@ using RestaurantReservationSystem.Infrastructure.Persistence;
 namespace RestaurantReservationSystem.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20261024215014_AddReservationTableRelationAndEnums")]
-    partial class AddReservationTableRelationAndEnums
+    [Migration("20261025185306_InitialDatabaseSetup")]
+    partial class InitialDatabaseSetup
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -38,7 +38,6 @@ namespace RestaurantReservationSystem.Infrastructure.Migrations
             modelBuilder.Entity("RestaurantReservationSystem.Core.Models.InitialConfiguration", b =>
                 {
                     b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
                     b.Property<bool>("FirstNameRequired")

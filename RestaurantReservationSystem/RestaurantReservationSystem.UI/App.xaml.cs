@@ -19,13 +19,12 @@ public partial class App : System.Windows.Application
         var services = new ServiceCollection();
 
         string dbPath = ConnectionStringProvider.GetConnectionString();
-        string connectionString = $"Data Source={dbPath}";
 
         services.AddDbContext<AppDbContext>(options =>
-            options.UseSqlite(connectionString));
+            options.UseSqlite(dbPath));
 
         services.AddDbContextFactory<AppDbContext>(options =>
-            options.UseSqlite(connectionString));
+            options.UseSqlite(dbPath), ServiceLifetime.Scoped);
 
         services.AddScoped<ITableRepository, TableRepository>();
         services.AddScoped<IConfigurationRepository, ConfigurationRepository>();
@@ -33,10 +32,16 @@ public partial class App : System.Windows.Application
 
         ServiceProvider = services.BuildServiceProvider();
 
-        using (var scope = ServiceProvider.CreateScope())
+        try
         {
+            using var scope = ServiceProvider.CreateScope();
             var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
             dbContext.Database.Migrate();
+        }
+        catch (Exception)
+        {
+            Shutdown(-1);
+            throw;
         }
     }
 }
