@@ -1,12 +1,7 @@
 ﻿using RestaurantReservationSystem.Core.Models;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
-namespace RestaurantReservationSystem.Core.Repositories
-{
-    public interface ITableRepository
-    {
+namespace RestaurantReservationSystem.Core.Repositories {
+    public interface ITableRepository {
         Task<Table?> GetByIdAsync(int id, CancellationToken cancellationToken = default);
         Task<IReadOnlyList<Table>> GetAllAsync(CancellationToken cancellationToken = default);
         Task AddAsync(Table table, CancellationToken cancellationToken = default);
