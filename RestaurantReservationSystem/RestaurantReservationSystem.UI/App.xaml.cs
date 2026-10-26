@@ -3,28 +3,33 @@ using Microsoft.Extensions.DependencyInjection;
 using RestaurantReservationSystem.Core.Repositories;
 using RestaurantReservationSystem.Infrastructure.Persistence;
 using RestaurantReservationSystem.Infrastructure.Repositories;
-using System.IO;
 using System.Windows;
 
 namespace RestaurantReservationSystem.UI;
 
-public partial class App : System.Windows.Application
-{
+public partial class App : System.Windows.Application {
     public static IServiceProvider ServiceProvider { get; private set; } = null!;
 
-    protected override void OnStartup(StartupEventArgs e)
-    {
-        base.OnStartup(e);
+    protected override void OnStartup(StartupEventArgs e) {
+        string connectionString;
+
+        try {
+            connectionString = ConnectionStringProvider.GetConnectionString();
+        } catch (Exception ex) {
+            MessageBox.Show(
+                $"Failed to initialize the database.\n\n{ex.Message}",
+                "Database Error",
+                MessageBoxButton.OK,
+                MessageBoxImage.Error);
+
+            Shutdown(-1);
+            return;
+        }
 
         var services = new ServiceCollection();
 
-        string dbPath = ConnectionStringProvider.GetConnectionString();
-
-        services.AddDbContext<AppDbContext>(options =>
-            options.UseSqlite(dbPath));
-
-        services.AddDbContextFactory<AppDbContext>(options =>
-            options.UseSqlite(dbPath), ServiceLifetime.Scoped);
+        services.AddDbContext<AppDbContext>(options => options.UseSqlite(connectionString));
+        services.AddDbContextFactory<AppDbContext>(options => options.UseSqlite(connectionString), ServiceLifetime.Scoped);
 
         services.AddScoped<ITableRepository, TableRepository>();
         services.AddScoped<IConfigurationRepository, ConfigurationRepository>();
@@ -32,16 +37,21 @@ public partial class App : System.Windows.Application
 
         ServiceProvider = services.BuildServiceProvider();
 
-        try
-        {
+        try {
             using var scope = ServiceProvider.CreateScope();
             var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
             dbContext.Database.Migrate();
-        }
-        catch (Exception)
-        {
+        } catch (Exception ex) {
+            MessageBox.Show(
+                $"Failed to create the database directory.\n\n{ex.Message}",
+                "Database Initialization Error",
+                MessageBoxButton.OK,
+                MessageBoxImage.Error);
+
             Shutdown(-1);
-            throw;
+            return;
         }
+
+        base.OnStartup(e);
     }
 }
