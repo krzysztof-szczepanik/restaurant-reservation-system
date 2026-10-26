@@ -1,19 +1,13 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using RestaurantReservationSystem.Core.Models;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
-namespace RestaurantReservationSystem.Infrastructure.Persistence
-{
-    public class AppDbContext : DbContext
-    {
+namespace RestaurantReservationSystem.Infrastructure.Persistence {
+    public class AppDbContext : DbContext {
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
         public DbSet<Reservation> Reservations => Set<Reservation>();
         public DbSet<Table> Tables => Set<Table>();
         public DbSet<InitialConfiguration> InitialConfigurations => Set<InitialConfiguration>();
-        protected override void OnModelCreating(ModelBuilder modelBuilder)
-        {
+        protected override void OnModelCreating(ModelBuilder modelBuilder) {
             base.OnModelCreating(modelBuilder);
 
             modelBuilder.Entity<Reservation>()

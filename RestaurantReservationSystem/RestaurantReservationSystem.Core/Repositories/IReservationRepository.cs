@@ -8,10 +8,15 @@ namespace RestaurantReservationSystem.Core.Repositories {
         void Update(Reservation reservation);
         void Delete(Reservation reservation);
         Task SaveChangesAsync(CancellationToken cancellationToken = default);
-        Task<IReadOnlyList<Reservation>> SearchAndFilterAsync(
-            DateTime? date = null,
-            ReservationStatus? status = null,
-            string? searchTerm = null,
-            CancellationToken cancellationToken = default);
+
+        // TODO: Wrócić do tej metody po zaimplementowaniu ReservationService.
+        // Dostosować wyszukiwanie i filtrowanie do ReservationFilterCriteria oraz zasad biznesowych.
+        // Obecnie zaimplementowano tylko filtrowanie po statusie; parametry date i searchTerm są ignorowane.
+
+        // Task<IReadOnlyList<Reservation>> SearchAndFilterAsync(
+        //     DateTime? date = null,
+        //     ReservationStatus? status = null,
+        //     string? searchTerm = null,
+        //     CancellationToken cancellationToken = default);
     }
 }

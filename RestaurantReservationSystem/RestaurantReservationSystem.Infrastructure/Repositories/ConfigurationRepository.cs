@@ -5,35 +5,36 @@ using RestaurantReservationSystem.Infrastructure.Persistence;
 
 namespace RestaurantReservationSystem.Infrastructure.Repositories;
 
-public class ConfigurationRepository : IConfigurationRepository
-{
+public class ConfigurationRepository : IConfigurationRepository {
+
+    // FIELDS:
+    private const int ConfigurationId = 1;
     private readonly AppDbContext _context;
 
-    public ConfigurationRepository(AppDbContext context)
-    {
+
+    // CONSTRUCTORS:
+    public ConfigurationRepository(AppDbContext context) {
         _context = context;
     }
 
-    public async Task<InitialConfiguration?> GetConfigurationAsync(CancellationToken cancellationToken = default)
-    {
-        return await _context.InitialConfigurations.FirstOrDefaultAsync(cancellationToken);
+    // METHODS:
+    public async Task<InitialConfiguration?> GetConfigurationAsync(CancellationToken cancellationToken = default) {
+        return await _context.InitialConfigurations.FirstOrDefaultAsync(c => c.Id == ConfigurationId, cancellationToken);
     }
 
-    public async Task AddOrUpdateAsync(InitialConfiguration configuration, CancellationToken cancellationToken = default)
-    {
-        var existing = await _context.InitialConfigurations.FirstOrDefaultAsync(cancellationToken);
-        if (existing is null)
-        {
+    public async Task AddOrUpdateAsync(InitialConfiguration configuration, CancellationToken cancellationToken = default) {
+        configuration.Id = ConfigurationId;
+        
+        var existing = await _context.InitialConfigurations.FirstOrDefaultAsync(c => c.Id == ConfigurationId, cancellationToken);
+
+        if (existing is null) {
             await _context.InitialConfigurations.AddAsync(configuration, cancellationToken);
-        }
-        else
-        {
+        } else {
             _context.Entry(existing).CurrentValues.SetValues(configuration);
         }
     }
 
-    public async Task SaveChangesAsync(CancellationToken cancellationToken = default)
-    {
+    public async Task SaveChangesAsync(CancellationToken cancellationToken = default) {
         await _context.SaveChangesAsync(cancellationToken);
     }
 }
