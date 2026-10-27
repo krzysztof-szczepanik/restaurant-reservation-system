@@ -1,24 +1,22 @@
 ﻿using System.Windows;
 
-namespace RestaurantReservationSystem.UI.Features.Ustawienia.Dialogs
+namespace RestaurantReservationSystem.UI.Features.Settings.Dialogs
 {
-    public partial class AppResDial : Window
-    {
-        public AppResDial()
-        {
-            InitializeComponent();
-        }
+	public partial class ApplicationResetDialog : Window
+	{
+		public ApplicationResetDialog()
+		{
+			InitializeComponent();
+		}
 
-        private void Cancel_Click(object sender, RoutedEventArgs e)
-        {
-            this.Close();
-        }
+		private void Cancel_Click(object sender, RoutedEventArgs e)
+		{
+			this.Close();
+		}
 
-        private void Reset_Click(object sender, RoutedEventArgs e)
-        {
-            // Tutaj będzie implementacja wywołania czyszczenia bazy
-            // i przeniesienie do InitialSetupView
-            this.Close();
-        }
-    }
+		private void Reset_Click(object sender, RoutedEventArgs e)
+		{
+			this.Close();
+		}
+	}
 }

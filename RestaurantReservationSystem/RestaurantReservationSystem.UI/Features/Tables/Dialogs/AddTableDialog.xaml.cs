@@ -1,29 +1,22 @@
 ﻿using System.Windows;
 
-namespace RestaurantReservationSystem.UI.Features.Stoliki.Dialogs
+namespace RestaurantReservationSystem.UI.Features.Tables.Dialogs
 {
-    public partial class AddTabDial : Window
-    {
-        public AddTabDial()
-        {
-            InitializeComponent();
-        }
+	public partial class AddTableDialog : Window
+	{
+		public AddTableDialog()
+		{
+			InitializeComponent();
+		}
 
-        private void Cancel_Click(object sender, RoutedEventArgs e)
-        {
-            this.Close();
-        }
+		private void Cancel_Click(object sender, RoutedEventArgs e)
+		{
+			this.Close();
+		}
 
-        private void Add_Click(object sender, RoutedEventArgs e)
-        {
-            // Tu odbywać się będzie walidacja 
-            // i wywołanie zapisu
-            this.Close();
-        }
-
-        private void ZoneBox_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
-        {
-
-        }
-    }
+		private void Add_Click(object sender, RoutedEventArgs e)
+		{
+			this.Close();
+		}
+	}
 }

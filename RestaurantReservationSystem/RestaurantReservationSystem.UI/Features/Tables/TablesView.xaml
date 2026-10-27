@@ -5,65 +5,130 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              mc:Ignorable="d" 
              d:DesignHeight="700" d:DesignWidth="1000"
-             Background="{StaticResource Background}">
+             Background="#F1F5F9">
 
-    <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="88"/>
-            <RowDefinition Height="*"/>
-        </Grid.RowDefinitions>
+	<Grid>
+		<Border Background="{StaticResource Surface}" 
+                CornerRadius="6" 
+                BorderBrush="{StaticResource Border}" 
+                BorderThickness="1" 
+                Margin="24">
 
-        <Grid Grid.Row="0" Margin="24,0">
-            <TextBlock Text="Stoliki" 
-                       FontSize="32" 
-                       FontWeight="SemiBold" 
-                       VerticalAlignment="Center"/>
+			<Grid>
+				<Grid.RowDefinitions>
+					<RowDefinition Height="Auto"/>
+					<RowDefinition Height="*"/>
+				</Grid.RowDefinitions>
 
-            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+				<Grid Grid.Row="0" Margin="24,20">
+					<TextBlock Text="Tables" 
+                               FontSize="22" 
+                               FontWeight="SemiBold" 
+                               Foreground="{StaticResource PrimaryText}"
+                               VerticalAlignment="Center"/>
 
-                <Button Content="Dodaj" Width="88" Margin="0,0,8,0" Click="Add_Click"/>
+					<StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+						<Button Content="Add" Width="72" Height="36" Margin="0,0,8,0" 
+                                Background="{StaticResource Primary}" 
+                                Foreground="White"
+                                BorderThickness="0"
+                                Click="Add_Click"/>
 
-                <Button Content="Edytuj" Width="88" Margin="0,0,8,0" Click="Edit_Click"
-                        Background="{StaticResource Surface}" 
-                        Foreground="{StaticResource Text}"
-                        BorderBrush="{StaticResource Border}"
-                        BorderThickness="1"/>
+						<Button Content="Edit" Width="72" Height="36" Margin="0,0,8,0" 
+                                Background="#F8FAFC" 
+                                Foreground="{StaticResource SecondaryText}"
+                                BorderBrush="{StaticResource Border}"
+                                BorderThickness="1"
+                                Click="Edit_Click"/>
 
-                <Button Content="Usuń" Width="88" Click="DeleteTab_Click"
-                        Background="{StaticResource Surface}" 
-                        Foreground="{StaticResource Text}"
-                        BorderBrush="{StaticResource Border}"
-                        BorderThickness="1"/>
-            </StackPanel>
-        </Grid>
+						<Button Content="Delete" Width="72" Height="36" 
+                                Background="#F8FAFC" 
+                                Foreground="{StaticResource SecondaryText}"
+                                BorderBrush="{StaticResource Border}"
+                                BorderThickness="1"
+                                Click="DeleteTab_Click"/>
+					</StackPanel>
+				</Grid>
 
-        <DataGrid x:Name="StolikiDataGrid" 
-                  Grid.Row="1" Margin="24,0,24,24" 
-                  AutoGenerateColumns="False" 
-                  Background="{StaticResource Surface}"
-                  BorderBrush="{StaticResource Border}"
-                  BorderThickness="1"
-                  RowHeight="44"
-                  HeadersVisibility="Column"
-                  GridLinesVisibility="Horizontal"
-                  HorizontalGridLinesBrush="{StaticResource Border}"
-                  IsReadOnly="True"
-                  SelectionMode="Single">
+				<DataGrid x:Name="StolikiDataGrid" 
+                          Grid.Row="1" 
+                          AutoGenerateColumns="False" 
+                          Background="Transparent"
+                          BorderBrush="{StaticResource Border}"
+                          BorderThickness="0,1,0,0"
+                          RowHeight="44"
+                          HeadersVisibility="Column"
+                          GridLinesVisibility="Horizontal"
+                          HorizontalGridLinesBrush="{StaticResource Border}"
+                          IsReadOnly="True"
+                          SelectionMode="Single"
+                          RowBackground="{StaticResource Surface}"
+                          AlternatingRowBackground="{StaticResource Surface}">
 
-            <DataGrid.Columns>
-                <DataGridTextColumn Header="Numer stolika" Binding="{Binding Numer stolika}" Width="*"/>
-                <DataGridTextColumn Header="Etykieta" Binding="{Binding Etykieta}" Width="*"/>
-                <DataGridTextColumn Header="Strefa" Binding="{Binding Strefa}" Width="2*"/>
-                <DataGridTextColumn Header="Liczba miejsc" Binding="{Binding Liczba miejsc}" Width="*"/>
-            </DataGrid.Columns>
-        </DataGrid>
+					<DataGrid.ColumnHeaderStyle>
+						<Style TargetType="DataGridColumnHeader">
+							<Setter Property="Background" Value="#F8FAFC"/>
+							<Setter Property="Foreground" Value="{StaticResource PrimaryText}"/>
+							<Setter Property="FontWeight" Value="SemiBold"/>
+							<Setter Property="FontSize" Value="13"/>
+							<Setter Property="Height" Value="40"/>
+							<Setter Property="Padding" Value="24,0,16,0"/>
+							<Setter Property="BorderBrush" Value="{StaticResource Border}"/>
+							<Setter Property="BorderThickness" Value="0,0,0,1"/>
+						</Style>
+					</DataGrid.ColumnHeaderStyle>
 
-        <TextBlock x:Name="EmptyStateText"
-                   Grid.Row="1"
-                   Text="Brak stolików" 
-                   Foreground="{StaticResource SecondaryText}"
-                   HorizontalAlignment="Center" 
-                   VerticalAlignment="Center"
-                   Visibility="Visible"/>
-    </Grid>
+					<DataGrid.CellStyle>
+						<Style TargetType="DataGridCell">
+							<Setter Property="Padding" Value="24,0,16,0"/>
+							<Setter Property="Foreground" Value="{StaticResource SecondaryText}"/>
+							<Setter Property="FontSize" Value="13"/>
+							<Setter Property="Template">
+								<Setter.Value>
+									<ControlTemplate TargetType="DataGridCell">
+										<Border Padding="{TemplateBinding Padding}" 
+                                                Background="Transparent" 
+                                                BorderThickness="0" 
+                                                SnapsToDevicePixels="True">
+											<ContentPresenter VerticalAlignment="Center" SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}"/>
+										</Border>
+									</ControlTemplate>
+								</Setter.Value>
+							</Setter>
+							<Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+							<Setter Property="BorderThickness" Value="0"/>
+						</Style>
+					</DataGrid.CellStyle>
+
+					<DataGrid.RowStyle>
+						<Style TargetType="DataGridRow">
+							<Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+							<Style.Triggers>
+								<Trigger Property="IsSelected" Value="True">
+									<Setter Property="Background" Value="#F1F5F9"/>
+								</Trigger>
+							</Style.Triggers>
+						</Style>
+					</DataGrid.RowStyle>
+
+					<DataGrid.Columns>
+						<DataGridTextColumn Header="Number" Binding="{Binding Number}" Width="120"/>
+						<DataGridTextColumn Header="Label" Binding="{Binding Label}" Width="120"/>
+						<DataGridTextColumn Header="Zone" Binding="{Binding Zone}" Width="160"/>
+						<DataGridTextColumn Header="Seats" Binding="{Binding Seats}" Width="120"/>
+						<DataGridTextColumn Width="*"/>
+					</DataGrid.Columns>
+				</DataGrid>
+
+				<TextBlock x:Name="EmptyStateText"
+                           Grid.Row="1"
+                           Text="No tables yet." 
+                           Foreground="{StaticResource SecondaryText}"
+                           FontSize="13"
+                           HorizontalAlignment="Center" 
+                           VerticalAlignment="Center"
+                           Visibility="Visible"/>
+			</Grid>
+		</Border>
+	</Grid>
 </UserControl>

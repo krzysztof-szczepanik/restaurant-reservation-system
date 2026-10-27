@@ -16,7 +16,6 @@ namespace RestaurantReservationSystem.UI.Features.Stoliki.Dialogs
 
         private void Delete_Click(object sender, RoutedEventArgs e)
         {
-            // Logika usuwania stolika
             this.Close();
         }
     }

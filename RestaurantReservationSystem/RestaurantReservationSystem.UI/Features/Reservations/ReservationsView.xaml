@@ -5,91 +5,204 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              mc:Ignorable="d" 
              d:DesignHeight="700" d:DesignWidth="1000"
-             Background="{StaticResource Background}">
+             Background="#F1F5F9">
 
-    <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="100"/>
-            <RowDefinition Height="*"/>
-        </Grid.RowDefinitions>
+	<Grid Margin="24">
+		<Grid.RowDefinitions>
+			<RowDefinition Height="Auto"/>
+			<RowDefinition Height="16"/>
+			<RowDefinition Height="*"/>
+		</Grid.RowDefinitions>
 
-        <Grid Grid.Row="0" Margin="24,16,24,0">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="Auto"/>
-            </Grid.ColumnDefinitions>
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-            </Grid.RowDefinitions>
+		<Border Grid.Row="0" Background="{StaticResource Surface}" CornerRadius="6" BorderBrush="{StaticResource Border}" BorderThickness="1" Padding="24">
+			<Grid>
+				<Grid.RowDefinitions>
+					<RowDefinition Height="Auto"/>
+					<RowDefinition Height="Auto"/>
+				</Grid.RowDefinitions>
 
-            <TextBlock Grid.Row="0" Grid.Column="0" 
-                       Text="Rezerwacje" 
-                       FontSize="32" 
-                       FontWeight="SemiBold"/>
+				<Grid Grid.Row="0">
+					<TextBlock Text="Reservations" FontSize="22" FontWeight="SemiBold" VerticalAlignment="Center" Foreground="{StaticResource PrimaryText}"/>
+					<StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+						<Button Content="Add" Width="72" Height="36" Margin="0,0,8,0" Background="{StaticResource Primary}" Foreground="White" BorderThickness="0" Click="AddRes_Click"/>
+						<Button Content="Edit" Width="72" Height="36" Margin="0,0,8,0" Click="EditRes_Click" Background="{StaticResource Surface}" Foreground="{StaticResource PrimaryText}" BorderBrush="{StaticResource Border}" BorderThickness="1"/>
+						<Button Content="Delete" Width="72" Height="36" Click="DeleteRes_Click" Background="{StaticResource Surface}" Foreground="{StaticResource PrimaryText}" BorderBrush="{StaticResource Border}" BorderThickness="1"/>
+					</StackPanel>
+				</Grid>
 
-            <TextBox Grid.Row="1" Grid.Column="0" 
-                     Width="250" 
-                     HorizontalAlignment="Left" 
-                     Margin="0,8,0,0"/>
+				<Grid Grid.Row="1" Margin="0,20,0,0">
+					<Grid.ColumnDefinitions>
+						<ColumnDefinition Width="*"/>
+						<ColumnDefinition Width="12"/>
+						<ColumnDefinition Width="Auto"/>
+					</Grid.ColumnDefinitions>
 
-            <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
-                <Button Content="Dodaj" Width="88" Margin="0,0,8,0" Click="AddRes_Click"/>
+					<TextBox Grid.Column="0" Height="36" VerticalContentAlignment="Center" Padding="12,0" Foreground="{StaticResource SecondaryText}" Text="Search"/>
 
-                <Button Content="Edytuj" Width="88" Margin="0,0,8,0" Click="EditRes_Click"
-                        Background="{StaticResource Surface}" 
-                        Foreground="{StaticResource Text}"
-                        BorderBrush="{StaticResource Border}"
-                        BorderThickness="1"/>
+					<Button Grid.Column="2" Width="88" Height="36" Background="{StaticResource Surface}" BorderBrush="{StaticResource Border}" BorderThickness="1" Click="Filter_Click">
+						<StackPanel Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Center">
+							<TextBlock Text="Filter" FontSize="13" Foreground="{StaticResource PrimaryText}" VerticalAlignment="Center"/>
+							<TextBlock Text=" • " FontSize="20" Foreground="#FF939FB0" VerticalAlignment="Center" Margin="6,-2,0,2"/>
+						</StackPanel>
+					</Button>
+				</Grid>
+			</Grid>
+		</Border>
 
-                <Button Content="Usuń" Width="88" Click="DeleteRes_Click"
-                        Background="{StaticResource Surface}" 
-                        Foreground="{StaticResource Text}"
-                        BorderBrush="{StaticResource Border}"
-                        BorderThickness="1"/>
-            </StackPanel>
+		<Border Grid.Row="2" Background="{StaticResource Surface}" CornerRadius="6" BorderBrush="{StaticResource Border}" BorderThickness="1" Padding="0">
+			<Grid>
+				<Grid.RowDefinitions>
+					<RowDefinition Height="Auto"/>
+					<RowDefinition Height="*"/>
+				</Grid.RowDefinitions>
 
-            <Button Grid.Row="1" Grid.Column="1" 
-                    Content="Filtruj" 
-                    Background="Transparent" 
-                    Foreground="{StaticResource Text}" 
-                    BorderThickness="0" 
-                    HorizontalAlignment="Right" 
-                    Margin="0,8,0,0" 
-                    Click="Filter_Click"/>
-        </Grid>
+				<Border Grid.Row="0" Background="#F8FAFC" BorderBrush="{StaticResource Border}" BorderThickness="0,0,0,1" Padding="24,16">
+					<Grid>
+						<Grid.ColumnDefinitions>
+							<ColumnDefinition Width="110"/>
+							<ColumnDefinition Width="80"/>
+							<ColumnDefinition Width="110"/>
+							<ColumnDefinition Width="110"/>
+							<ColumnDefinition Width="130"/>
+							<ColumnDefinition Width="80"/>
+							<ColumnDefinition Width="160"/>
+							<ColumnDefinition Width="*"/>
+						</Grid.ColumnDefinitions>
 
-        <DataGrid x:Name="ResDataGrid" 
-                  Grid.Row="1" Margin="24,16,24,24" 
-                  AutoGenerateColumns="False" 
-                  Background="{StaticResource Surface}"
-                  BorderBrush="{StaticResource Border}"
-                  BorderThickness="1"
-                  RowHeight="52"
-                  HeadersVisibility="Column"
-                  GridLinesVisibility="Horizontal"
-                  HorizontalGridLinesBrush="{StaticResource Border}"
-                  IsReadOnly="True"
-                  SelectionMode="Single">
+						<TextBlock Grid.Column="0" Text="Date" FontSize="13" Foreground="{StaticResource PrimaryText}" FontWeight="Bold"/>
+						<TextBlock Grid.Column="1" Text="Time" FontSize="13" Foreground="{StaticResource PrimaryText}" FontWeight="Bold"/>
+						<TextBlock Grid.Column="2" Text="First Name" FontSize="13" Foreground="{StaticResource PrimaryText}" FontWeight="Bold"/>
+						<TextBlock Grid.Column="3" Text="Last Name" FontSize="13" Foreground="{StaticResource PrimaryText}" FontWeight="Bold"/>
+						<TextBlock Grid.Column="4" Text="Phone Number" FontSize="13" Foreground="{StaticResource PrimaryText}" FontWeight="Bold"/>
+						<TextBlock Grid.Column="5" Text="Guests" FontSize="13" Foreground="{StaticResource PrimaryText}" FontWeight="Bold"/>
+						<TextBlock Grid.Column="6" Text="Tables" FontSize="13" Foreground="{StaticResource PrimaryText}" FontWeight="Bold"/>
+						<TextBlock Grid.Column="7" Text="Note" FontSize="13" Foreground="{StaticResource PrimaryText}" FontWeight="Bold"/>
+					</Grid>
+				</Border>
 
-            <DataGrid.Columns>
-                <DataGridTextColumn Header="Data" Binding="{Binding Data}" Width="*"/>
-                <DataGridTextColumn Header="Godzina" Binding="{Binding Godzina}" Width="1.2*"/>
-                <DataGridTextColumn Header="Imię" Binding="{Binding Imie}" Width="1.5*"/>
-                <DataGridTextColumn Header="Nazwisko" Binding="{Binding Nazwisko}" Width="1.5*"/>
-                <DataGridTextColumn Header="Numer telefonu" Binding="{Binding NumerTelefonu}" Width="2*"/>
-                <DataGridTextColumn Header="Osoby" Binding="{Binding LiczbaOsob}" Width="*"/>
-                <DataGridTextColumn Header="Stoliki" Binding="{Binding Stolik}" Width="1.5*"/>
-                <DataGridTextColumn Header="Notatka" Binding="{Binding Notatka}" Width="2.5*"/>
-            </DataGrid.Columns>
-        </DataGrid>
+				<ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+					<StackPanel>
 
-        <TextBlock x:Name="EmptyStateText"
-                   Grid.Row="1"
-                   Text="Brak rezerwacji" 
-                   Foreground="{StaticResource SecondaryText}"
-                   HorizontalAlignment="Center" 
-                   VerticalAlignment="Center"
-                   Visibility="Visible"/>
-    </Grid>
+						<Border Background="{StaticResource Surface}" BorderBrush="{StaticResource Border}" BorderThickness="0,0,0,1" Padding="24,14">
+							<Grid>
+								<Grid.ColumnDefinitions>
+									<ColumnDefinition Width="110"/>
+									<ColumnDefinition Width="80"/>
+									<ColumnDefinition Width="110"/>
+									<ColumnDefinition Width="110"/>
+									<ColumnDefinition Width="130"/>
+									<ColumnDefinition Width="80"/>
+									<ColumnDefinition Width="160"/>
+									<ColumnDefinition Width="*"/>
+								</Grid.ColumnDefinitions>
+								<TextBlock Grid.Column="0" Text="23.10.2026" FontSize="13" Foreground="{StaticResource PrimaryText}" VerticalAlignment="Center"/>
+								<TextBlock Grid.Column="1" Text="18:30" FontSize="13" Foreground="{StaticResource PrimaryText}" VerticalAlignment="Center"/>
+								<TextBlock Grid.Column="2" Text="Anna" FontSize="13" Foreground="{StaticResource PrimaryText}" VerticalAlignment="Center"/>
+								<TextBlock Grid.Column="3" Text="Kowalska" FontSize="13" Foreground="{StaticResource PrimaryText}" VerticalAlignment="Center"/>
+								<TextBlock Grid.Column="4" Text="501 234 567" FontSize="13" Foreground="{StaticResource PrimaryText}" VerticalAlignment="Center"/>
+								<TextBlock Grid.Column="5" Text="6" FontSize="13" Foreground="{StaticResource PrimaryText}" VerticalAlignment="Center"/>
+								<TextBlock Grid.Column="6" Text="Main Hall: Table 2..." FontSize="13" Foreground="{StaticResource PrimaryText}" VerticalAlignment="Center"/>
+								<TextBlock Grid.Column="7" Text="Birthday dinner. Please..." FontSize="13" Foreground="{StaticResource SecondaryText}" VerticalAlignment="Center"/>
+							</Grid>
+						</Border>
+
+						<Border Background="{StaticResource Surface}" BorderBrush="{StaticResource Border}" BorderThickness="0,0,0,1" Padding="24,14">
+							<Grid>
+								<Grid.ColumnDefinitions>
+									<ColumnDefinition Width="110"/>
+									<ColumnDefinition Width="80"/>
+									<ColumnDefinition Width="110"/>
+									<ColumnDefinition Width="110"/>
+									<ColumnDefinition Width="130"/>
+									<ColumnDefinition Width="80"/>
+									<ColumnDefinition Width="160"/>
+									<ColumnDefinition Width="*"/>
+								</Grid.ColumnDefinitions>
+								<TextBlock Grid.Column="0" Text="23.10.2026" FontSize="13" Foreground="{StaticResource PrimaryText}" VerticalAlignment="Center"/>
+								<TextBlock Grid.Column="1" Text="19:00" FontSize="13" Foreground="{StaticResource PrimaryText}" VerticalAlignment="Center"/>
+								<TextBlock Grid.Column="2" Text="James" FontSize="13" Foreground="{StaticResource PrimaryText}" VerticalAlignment="Center"/>
+								<TextBlock Grid.Column="3" Text="Wilson" FontSize="13" Foreground="{StaticResource PrimaryText}" VerticalAlignment="Center"/>
+								<TextBlock Grid.Column="4" Text="602 345 678" FontSize="13" Foreground="{StaticResource PrimaryText}" VerticalAlignment="Center"/>
+								<TextBlock Grid.Column="5" Text="4" FontSize="13" Foreground="{StaticResource PrimaryText}" VerticalAlignment="Center"/>
+								<TextBlock Grid.Column="6" Text="Terrace: Table 3" FontSize="13" Foreground="{StaticResource PrimaryText}" VerticalAlignment="Center"/>
+								<TextBlock Grid.Column="7" Text="" FontSize="13" Foreground="{StaticResource SecondaryText}" VerticalAlignment="Center"/>
+							</Grid>
+						</Border>
+
+						<Border Background="{StaticResource Surface}" BorderBrush="{StaticResource Border}" BorderThickness="0,0,0,1" Padding="24,14">
+							<Grid>
+								<Grid.ColumnDefinitions>
+									<ColumnDefinition Width="110"/>
+									<ColumnDefinition Width="80"/>
+									<ColumnDefinition Width="110"/>
+									<ColumnDefinition Width="110"/>
+									<ColumnDefinition Width="130"/>
+									<ColumnDefinition Width="80"/>
+									<ColumnDefinition Width="160"/>
+									<ColumnDefinition Width="*"/>
+								</Grid.ColumnDefinitions>
+								<TextBlock Grid.Column="0" Text="24.10.2026" FontSize="13" Foreground="{StaticResource PrimaryText}" VerticalAlignment="Center"/>
+								<TextBlock Grid.Column="1" Text="12:15" FontSize="13" Foreground="{StaticResource PrimaryText}" VerticalAlignment="Center"/>
+								<TextBlock Grid.Column="2" Text="Marta" FontSize="13" Foreground="{StaticResource PrimaryText}" VerticalAlignment="Center"/>
+								<TextBlock Grid.Column="3" Text="Nowak" FontSize="13" Foreground="{StaticResource PrimaryText}" VerticalAlignment="Center"/>
+								<TextBlock Grid.Column="4" Text="703 456 789" FontSize="13" Foreground="{StaticResource PrimaryText}" VerticalAlignment="Center"/>
+								<TextBlock Grid.Column="5" Text="8" FontSize="13" Foreground="{StaticResource PrimaryText}" VerticalAlignment="Center"/>
+								<TextBlock Grid.Column="6" Text="Main Hall: Table 1, 2" FontSize="13" Foreground="{StaticResource PrimaryText}" VerticalAlignment="Center"/>
+								<TextBlock Grid.Column="7" Text="High chair requested." FontSize="13" Foreground="{StaticResource SecondaryText}" VerticalAlignment="Center"/>
+							</Grid>
+						</Border>
+
+						<Border Background="{StaticResource Surface}" BorderBrush="{StaticResource Border}" BorderThickness="0,0,0,1" Padding="24,14">
+							<Grid>
+								<Grid.ColumnDefinitions>
+									<ColumnDefinition Width="110"/>
+									<ColumnDefinition Width="80"/>
+									<ColumnDefinition Width="110"/>
+									<ColumnDefinition Width="110"/>
+									<ColumnDefinition Width="130"/>
+									<ColumnDefinition Width="80"/>
+									<ColumnDefinition Width="160"/>
+									<ColumnDefinition Width="*"/>
+								</Grid.ColumnDefinitions>
+								<TextBlock Grid.Column="0" Text="24.10.2026" FontSize="13" Foreground="{StaticResource PrimaryText}" VerticalAlignment="Center"/>
+								<TextBlock Grid.Column="1" Text="18:45" FontSize="13" Foreground="{StaticResource PrimaryText}" VerticalAlignment="Center"/>
+								<TextBlock Grid.Column="2" Text="Oliver" FontSize="13" Foreground="{StaticResource PrimaryText}" VerticalAlignment="Center"/>
+								<TextBlock Grid.Column="3" Text="Brown" FontSize="13" Foreground="{StaticResource PrimaryText}" VerticalAlignment="Center"/>
+								<TextBlock Grid.Column="4" Text="504 567 890" FontSize="13" Foreground="{StaticResource PrimaryText}" VerticalAlignment="Center"/>
+								<TextBlock Grid.Column="5" Text="2" FontSize="13" Foreground="{StaticResource PrimaryText}" VerticalAlignment="Center"/>
+								<TextBlock Grid.Column="6" Text="Terrace: Table 4" FontSize="13" Foreground="{StaticResource PrimaryText}" VerticalAlignment="Center"/>
+								<TextBlock Grid.Column="7" Text="Window seat, if possible." FontSize="13" Foreground="{StaticResource SecondaryText}" VerticalAlignment="Center"/>
+							</Grid>
+						</Border>
+
+						<Border Background="{StaticResource Surface}" BorderBrush="{StaticResource Border}" BorderThickness="0,0,0,1" Padding="24,14">
+							<Grid>
+								<Grid.ColumnDefinitions>
+									<ColumnDefinition Width="110"/>
+									<ColumnDefinition Width="80"/>
+									<ColumnDefinition Width="110"/>
+									<ColumnDefinition Width="110"/>
+									<ColumnDefinition Width="130"/>
+									<ColumnDefinition Width="80"/>
+									<ColumnDefinition Width="160"/>
+									<ColumnDefinition Width="*"/>
+								</Grid.ColumnDefinitions>
+								<TextBlock Grid.Column="0" Text="25.10.2026" FontSize="13" Foreground="{StaticResource PrimaryText}" VerticalAlignment="Center"/>
+								<TextBlock Grid.Column="1" Text="17:00" FontSize="13" Foreground="{StaticResource PrimaryText}" VerticalAlignment="Center"/>
+								<TextBlock Grid.Column="2" Text="Sophie" FontSize="13" Foreground="{StaticResource PrimaryText}" VerticalAlignment="Center"/>
+								<TextBlock Grid.Column="3" Text="Martin" FontSize="13" Foreground="{StaticResource PrimaryText}" VerticalAlignment="Center"/>
+								<TextBlock Grid.Column="4" Text="605 678 901" FontSize="13" Foreground="{StaticResource PrimaryText}" VerticalAlignment="Center"/>
+								<TextBlock Grid.Column="5" Text="4" FontSize="13" Foreground="{StaticResource PrimaryText}" VerticalAlignment="Center"/>
+								<TextBlock Grid.Column="6" Text="Table 5" FontSize="13" Foreground="{StaticResource PrimaryText}" VerticalAlignment="Center"/>
+								<TextBlock Grid.Column="7" Text="" FontSize="13" Foreground="{StaticResource SecondaryText}" VerticalAlignment="Center"/>
+							</Grid>
+						</Border>
+
+						<Border Height="180"/>
+
+					</StackPanel>
+				</ScrollViewer>
+			</Grid>
+		</Border>
+	</Grid>
 </UserControl>

@@ -1,6 +1,6 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
-using RestaurantReservationSystem.UI.Features.Ustawienia.Dialogs;
+using RestaurantReservationSystem.UI.Features.Settings.Dialogs;
 
 namespace RestaurantReservationSystem.UI.Features.Ustawienia
 {
@@ -11,11 +11,11 @@ namespace RestaurantReservationSystem.UI.Features.Ustawienia
             InitializeComponent();
         }
 
-        private void Reset_Click(object sender, RoutedEventArgs e)
-        {
-            var dialog = new AppResDial();
-            dialog.Owner = Window.GetWindow(this);
-            dialog.ShowDialog();
-        }
-    }
+		private void Reset_Click(object sender, RoutedEventArgs e)
+		{
+			var dialog = new ApplicationResetDialog();
+			dialog.Owner = Window.GetWindow(this);
+			dialog.ShowDialog();
+		}
+	}
 }

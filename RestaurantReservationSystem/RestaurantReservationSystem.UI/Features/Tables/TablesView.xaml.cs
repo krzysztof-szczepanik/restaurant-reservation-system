@@ -1,6 +1,7 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
 using RestaurantReservationSystem.UI.Features.Stoliki.Dialogs;
+using RestaurantReservationSystem.UI.Features.Tables.Dialogs;
 
 namespace RestaurantReservationSystem.UI.Features.Stoliki
 {
@@ -11,14 +12,14 @@ namespace RestaurantReservationSystem.UI.Features.Stoliki
             InitializeComponent();
         }
 
-        private void Add_Click(object sender, RoutedEventArgs e)
-        {
-            var dialog = new AddTabDial();
-            dialog.Owner = Window.GetWindow(this); 
-            dialog.ShowDialog();
-        }
+		private void Add_Click(object sender, RoutedEventArgs e)
+		{
+			var dialog = new AddTableDialog(); 
+			dialog.Owner = Window.GetWindow(this);
+			dialog.ShowDialog();
+		}
 
-        private void Edit_Click(object sender, RoutedEventArgs e)
+		private void Edit_Click(object sender, RoutedEventArgs e)
         {
             var dialog = new EditTabDial();
             dialog.Owner = Window.GetWindow(this);
