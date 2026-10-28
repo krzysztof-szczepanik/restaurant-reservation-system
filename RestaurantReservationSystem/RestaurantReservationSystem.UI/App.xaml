@@ -3,9 +3,29 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              StartupUri="MainWindow.xaml">
 
-    <!-- xmlns:local="clr-namespace:RestaurantReservationSystem.UI" // temporarily commented out -->
-
     <Application.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
 
+                <!-- COLORS -->
+                <ResourceDictionary Source="/Resources/Colors.xaml"/>
+
+                <!-- TYPOGRAPHY -->
+                <ResourceDictionary Source="/Resources/Typography.xaml"/>
+
+                <!-- CONTROL STYLES -->
+                <ResourceDictionary Source="/Resources/Styles/ButtonStyles.xaml"/>
+                <ResourceDictionary Source="/Resources/Styles/CheckBoxStyles.xaml"/>
+                <ResourceDictionary Source="/Resources/Styles/SearchBarStyles.xaml"/>
+                <ResourceDictionary Source="/Resources/Styles/ScrollBarStyles.xaml"/>
+                <ResourceDictionary Source="/Resources/Styles/DialogStyles.xaml"/>
+                <ResourceDictionary Source="/Resources/Styles/SidebarStyles.xaml"/>
+
+                <!-- VIEW STYLES -->
+                <ResourceDictionary Source="/Resources/Styles/ViewStyles.xaml"/>
+
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
     </Application.Resources>
+
 </Application>

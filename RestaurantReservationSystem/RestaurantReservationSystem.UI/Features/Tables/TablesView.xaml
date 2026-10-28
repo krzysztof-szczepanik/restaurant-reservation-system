@@ -1,0 +1,74 @@
+﻿<UserControl x:Class="RestaurantReservationSystem.UI.Features.Tables.TablesView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:controls="clr-namespace:RestaurantReservationSystem.UI.Controls"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             mc:Ignorable="d"
+             d:DesignHeight="640" d:DesignWidth="992">
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- HEADER -->
+        <Border Grid.Row="0" Style="{StaticResource ViewHeaderStyle}">
+            <Grid>
+                <TextBlock Text="Tables" Style="{StaticResource ViewTitleStyle}"/>
+
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                    <Button Content="Add" Margin="0,0,8,0" Style="{StaticResource PrimaryButtonStyle}" Click="Add_Click"/>
+                    <Button Content="Edit" Margin="0,0,8,0" Style="{StaticResource SecondaryButtonStyle}" Click="Edit_Click"/>
+                    <Button Content="Delete" Style="{StaticResource SecondaryButtonStyle}" Click="DeleteTab_Click"/>
+                </StackPanel>
+
+                <!--
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+
+                    <Button Content="Add" Margin="0,0,8,0" Style="{StaticResource PrimaryButtonStyle}" Click="Add_Click"/>
+
+                    <Button Content="Edit" Margin="0,0,8,0" Click="Edit_Click">
+                        <Button.Style>
+                            <Style TargetType="Button" BasedOn="{StaticResource SecondaryButtonStyle}">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding SelectedItem, ElementName=TablesDataGrid}" Value="{x:Null}">
+                                        <Setter Property="IsEnabled" Value="False"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Button.Style>
+                    </Button>
+
+                    <Button Content="Delete" Click="DeleteTab_Click">
+                        <Button.Style>
+                            <Style TargetType="Button" BasedOn="{StaticResource SecondaryButtonStyle}">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding SelectedItem, ElementName=TablesDataGrid}" Value="{x:Null}">
+                                        <Setter Property="IsEnabled" Value="False"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Button.Style>
+                    </Button>
+
+                </StackPanel>
+                -->
+
+            </Grid>
+        </Border>
+
+        <!-- CONTENT -->
+        <Border Grid.Row="1" Style="{StaticResource ViewContentStyle}">
+            <controls:DataTable x:Name="TablesDataGrid" EmptyMessage="No tables yet.">
+                <controls:DataTable.Columns>
+                    <DataGridTextColumn Header="Number" Binding="{Binding Number}"/>
+                    <DataGridTextColumn Header="Label" Binding="{Binding Label}"/>
+                    <DataGridTextColumn Header="Zone" Binding="{Binding Zone}"/>
+                    <DataGridTextColumn Header="Seats" Binding="{Binding Seats}"/>
+                </controls:DataTable.Columns>
+            </controls:DataTable>
+        </Border>
+    </Grid>
+</UserControl>

@@ -1,0 +1,46 @@
+<UserControl xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:controls="clr-namespace:RestaurantReservationSystem.UI.Controls"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="RestaurantReservationSystem.UI.Features.Reservations.Dialogs.UnlockReservationDialog">
+
+    <controls:Dialog Header="Unlock Reservation" Width="480">
+
+        <!-- CONTENT -->
+        <controls:Dialog.DialogContent>
+            <ScrollViewer MaxHeight="440" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                <StackPanel>
+
+                    <!-- RESERVATION STATUS -->
+                    <TextBlock FontSize="13" Foreground="{StaticResource SecondaryText}" TextWrapping="Wrap" Margin="0,0,0,4">
+                        <Run Text="This reservation is currently " />
+                        <Run Text="Cancelled" FontWeight="SemiBold" Foreground="{StaticResource PrimaryText}" />
+                        <Run Text=" or marked as " />
+                        <Run Text="No show" FontWeight="SemiBold" Foreground="{StaticResource PrimaryText}" />
+                        <Run Text="." />
+                    </TextBlock>
+
+                    <!-- UNLOCK INFORMATION -->
+                    <TextBlock Text="Editing it requires unlocking the reservation." FontSize="13" Foreground="{StaticResource SecondaryText}" TextWrapping="Wrap" Margin="0,0,0,16" />
+
+                    <!-- STATUS AFTER SAVE -->
+                    <TextBlock Text="After a successful save, the reservation status will change" FontSize="13" Foreground="{StaticResource SecondaryText}" TextWrapping="Wrap" />
+                    <TextBlock FontSize="13" Foreground="{StaticResource SecondaryText}" TextWrapping="Wrap">
+                        <Run Text="to " />
+                        <Run Text="Expected" FontWeight="SemiBold" Foreground="{StaticResource PrimaryText}" />
+                        <Run Text="." />
+                    </TextBlock>
+
+                </StackPanel>
+            </ScrollViewer>
+        </controls:Dialog.DialogContent>
+
+        <!-- FOOTER -->
+        <controls:Dialog.FooterRight>
+            <StackPanel Orientation="Horizontal">
+                <Button Content="Cancel" Height="36" Margin="0,0,8,0" Click="Cancel_Click" Style="{StaticResource SecondaryButtonStyle}" />
+                <Button Content="Confirm" Height="36" Click="Confirm_Click" Style="{StaticResource PrimaryButtonStyle}" />
+            </StackPanel>
+        </controls:Dialog.FooterRight>
+
+    </controls:Dialog>
+</UserControl>

@@ -1,0 +1,74 @@
+<UserControl xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:controls="clr-namespace:RestaurantReservationSystem.UI.Controls"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="RestaurantReservationSystem.UI.Features.Reservations.Dialogs.SelectTablesDialog">
+
+    <controls:Dialog Header="Select Tables" Width="520">
+
+        <!-- CONTENT -->
+        <controls:Dialog.DialogContent>
+            <StackPanel>
+
+                <!-- RESERVATION DETAILS -->
+                <Grid Margin="0,0,0,14">
+                    <TextBlock x:Name="ReservationDateText" FontWeight="SemiBold" FontSize="13" Foreground="{StaticResource PrimaryText}" HorizontalAlignment="Left" VerticalAlignment="Center" />
+                    <TextBlock x:Name="GuestsText" FontSize="13" Foreground="{StaticResource SecondaryText}" HorizontalAlignment="Right" VerticalAlignment="Center" />
+                </Grid>
+
+
+                <!-- SEARCH -->
+                <Grid Margin="0,0,0,16">
+                    <TextBox x:Name="SearchBox" Height="36" VerticalContentAlignment="Center" Padding="12,0" Style="{StaticResource ReservationFormTextBoxStyle}" TextChanged="SearchBox_TextChanged" />
+
+                    <TextBlock Text="Search tables" Foreground="{StaticResource SecondaryText}" VerticalAlignment="Center" Margin="24,0,0,0" IsHitTestVisible="False" FontSize="13">
+                        <TextBlock.Style>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="Visibility" Value="Collapsed"/>
+                                <Style.Triggers>
+                                    <MultiDataTrigger>
+                                        <MultiDataTrigger.Conditions>
+                                            <Condition Binding="{Binding Text, ElementName=SearchBox}" Value=""/>
+                                            <Condition Binding="{Binding IsKeyboardFocusWithin, ElementName=SearchBox}" Value="False"/>
+                                        </MultiDataTrigger.Conditions>
+                                        <Setter Property="Visibility" Value="Visible"/>
+                                    </MultiDataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
+                </Grid>
+
+
+                <!-- TABLE LIST -->
+                <Border BorderBrush="{StaticResource Border}" BorderThickness="1" CornerRadius="6" Height="300" Margin="0,0,0,16" Background="{StaticResource Surface}">
+                    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Padding="16">
+                        <StackPanel x:Name="ZonesPanel"/>
+                    </ScrollViewer>
+                </Border>
+
+
+                <!-- VALIDATION -->
+                <TextBlock x:Name="UnavailableWarning" Text="One or more selected tables are unavailable." FontSize="12" Foreground="#EF4444" Margin="0,0,0,4" Visibility="Collapsed" />
+
+                <!-- SUMMARY -->
+                <TextBlock x:Name="SelectionSummaryText" Text="Selected tables: 0 | Total seats: 0" FontSize="13" FontWeight="SemiBold" Foreground="{StaticResource PrimaryText}" Margin="0,0,0,2" />
+
+                <!-- CAPACITY WARNING -->
+                <Grid Height="34">
+                    <TextBlock x:Name="CapacityWarning" Text="The number of guests exceeds the total seating capacity of the selected tables." FontSize="12" Foreground="#D97706" TextWrapping="Wrap" VerticalAlignment="Center" Visibility="Hidden" />
+                </Grid>
+
+            </StackPanel>
+        </controls:Dialog.DialogContent>
+
+
+        <!-- FOOTER -->
+        <controls:Dialog.FooterRight>
+            <StackPanel Orientation="Horizontal">
+                <Button Content="Cancel" Height="36" Margin="0,0,8,0" Click="Cancel_Click" Style="{StaticResource SecondaryButtonStyle}" />
+                <Button Content="Confirm" Height="36" Click="Confirm_Click" Style="{StaticResource PrimaryButtonStyle}" />
+            </StackPanel>
+        </controls:Dialog.FooterRight>
+
+    </controls:Dialog>
+</UserControl>

@@ -1,0 +1,34 @@
+<UserControl xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:controls="clr-namespace:RestaurantReservationSystem.UI.Controls"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="RestaurantReservationSystem.UI.Features.Reservations.Dialogs.ChangeStatusDialog">
+
+    <controls:Dialog Header="Change Status" Width="480">
+
+        <!-- CONTENT -->
+        <controls:Dialog.DialogContent>
+            <ScrollViewer MaxHeight="440" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                <StackPanel>
+
+                    <!-- CONFIRMATION MESSAGE -->
+                    <TextBlock Text="Are you sure you want to change this reservation's" FontSize="14" FontWeight="SemiBold" Foreground="{StaticResource PrimaryText}" TextWrapping="Wrap" />
+                    <TextBlock Text="status to Cancelled?" FontSize="14" FontWeight="SemiBold" Foreground="{StaticResource PrimaryText}" TextWrapping="Wrap" Margin="0,0,0,16" />
+
+                    <!-- AVAILABILITY INFORMATION -->
+                    <TextBlock Text="This reservation will no longer block the availability" FontSize="13" Foreground="{StaticResource SecondaryText}" TextWrapping="Wrap" />
+                    <TextBlock Text="of its assigned tables." FontSize="13" Foreground="{StaticResource SecondaryText}" TextWrapping="Wrap" Margin="0,3,0,0" />
+
+                </StackPanel>
+            </ScrollViewer>
+        </controls:Dialog.DialogContent>
+
+        <!-- FOOTER -->
+        <controls:Dialog.FooterRight>
+            <StackPanel Orientation="Horizontal">
+                <Button Content="Cancel" Height="36" Margin="0,0,8,0" Click="Cancel_Click" Style="{StaticResource SecondaryButtonStyle}" />
+                <Button Content="Confirm" Height="36" Click="Confirm_Click" Style="{StaticResource DangerButtonStyle}" />
+            </StackPanel>
+        </controls:Dialog.FooterRight>
+
+    </controls:Dialog>
+</UserControl>

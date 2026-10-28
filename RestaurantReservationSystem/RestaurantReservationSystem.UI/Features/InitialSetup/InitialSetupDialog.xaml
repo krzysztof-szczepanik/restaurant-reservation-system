@@ -1,0 +1,260 @@
+﻿<UserControl x:Class="RestaurantReservationSystem.UI.Features.InitialSetup.InitialSetupDialog"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:controls="clr-namespace:RestaurantReservationSystem.UI.Controls"
+             MaxHeight="680">
+
+    <UserControl.Resources>
+
+        <!-- RADIO BUTTON -->
+        <Style x:Key="InitialSetupRadioButtonStyle" TargetType="RadioButton">
+            <Setter Property="Foreground" Value="{DynamicResource PrimaryText}"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="RadioButton">
+                        <StackPanel Orientation="Horizontal" Background="Transparent">
+                            <Grid Width="20" Height="20" Margin="0,0,12,0" VerticalAlignment="Center">
+                                <Ellipse x:Name="OuterRing" Stroke="{DynamicResource SecondaryText}" StrokeThickness="1.5" Fill="Transparent"/>
+                                <Ellipse x:Name="InnerDot" Fill="{DynamicResource Primary}" Width="10" Height="10" HorizontalAlignment="Center" VerticalAlignment="Center" Visibility="Collapsed"/>
+                            </Grid>
+                            <ContentPresenter VerticalAlignment="Center" Margin="0,1,0,0"/>
+                        </StackPanel>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="OuterRing" Property="Stroke" Value="{DynamicResource Primary}"/>
+                                <Setter TargetName="InnerDot" Property="Visibility" Value="Visible"/>
+                            </Trigger>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="OuterRing" Property="Stroke" Value="{DynamicResource Primary}"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="Opacity" Value="0.5"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- FIELD ROW -->
+        <Style x:Key="FieldRowStyle" TargetType="Grid">
+            <Setter Property="Margin" Value="0,0,0,12"/>
+        </Style>
+
+        <!-- FIELD LABEL -->
+        <Style x:Key="FieldLabelStyle" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="Foreground" Value="{DynamicResource PrimaryText}"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+        </Style>
+
+        <!-- SECTION TITLE -->
+        <Style x:Key="SectionTitleStyle" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Foreground" Value="{DynamicResource PrimaryText}"/>
+            <Setter Property="Margin" Value="0,0,0,16"/>
+        </Style>
+
+        <!-- VALIDATION MESSAGE -->
+        <Style x:Key="ValidationMessageStyle" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="Foreground" Value="{DynamicResource Danger}"/>
+            <Setter Property="TextWrapping" Value="Wrap"/>
+            <Setter Property="Visibility" Value="Collapsed"/>
+        </Style>
+
+    </UserControl.Resources>
+
+    <!-- DIALOG -->
+    <controls:Dialog Header="Initial Setup" Width="800" MaxWidth="800">
+
+        <!-- CONTENT -->
+        <controls:Dialog.DialogContent>
+            <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" MaxHeight="580">
+                <StackPanel>
+
+                    <!-- INTRODUCTION -->
+                    <StackPanel Margin="0,0,0,24">
+                        <TextBlock Text="Welcome to Restaurant Reservation System!" FontSize="20" FontWeight="SemiBold" Foreground="{DynamicResource PrimaryText}" Margin="0,0,0,12"/>
+
+                        <TextBlock FontSize="14" Foreground="{DynamicResource SecondaryText}" LineHeight="22" Margin="0,0,0,4" TextWrapping="Wrap">
+                            Before you start, choose which reservation and table fields should be visible and required.
+                        </TextBlock>
+
+                        <TextBlock FontSize="14" Foreground="{DynamicResource SecondaryText}" LineHeight="22" TextWrapping="Wrap">
+                            These settings can only be configured once. To change them later, you will need to reset the application, which deletes all saved data.
+                        </TextBlock>
+                    </StackPanel>
+
+                    <!-- FIELD CONFIGURATION -->
+                    <Grid Margin="0,0,0,24">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="32"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <!-- RESERVATION FIELDS -->
+                        <StackPanel Grid.Column="0">
+                            <TextBlock Text="RESERVATION FIELDS" Style="{StaticResource SectionTitleStyle}"/>
+
+                            <!-- COLUMN HEADERS -->
+                            <Border BorderBrush="{DynamicResource Border}" BorderThickness="0,0,0,1" Padding="0,0,0,8" Margin="0,0,0,12">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="2*"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+
+                                    <TextBlock Text="Field" FontSize="14" Foreground="{DynamicResource SecondaryText}"/>
+                                    <TextBlock Grid.Column="1" Text="Visible" FontSize="14" Foreground="{DynamicResource SecondaryText}" HorizontalAlignment="Center"/>
+                                    <TextBlock Grid.Column="2" Text="Required" FontSize="14" Foreground="{DynamicResource SecondaryText}" HorizontalAlignment="Center"/>
+                                </Grid>
+                            </Border>
+
+                            <!-- FIRST NAME -->
+                            <Grid Style="{StaticResource FieldRowStyle}">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="2*"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+
+                                <TextBlock Text="First name" Style="{StaticResource FieldLabelStyle}"/>
+                                <CheckBox x:Name="FirstNameVisibleBox" Grid.Column="1" IsChecked="True" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                <CheckBox x:Name="FirstNameRequiredBox" Grid.Column="2" IsChecked="False" IsEnabled="{Binding IsChecked, ElementName=FirstNameVisibleBox}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Grid>
+
+                            <!-- LAST NAME -->
+                            <Grid Style="{StaticResource FieldRowStyle}">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="2*"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+
+                                <TextBlock Text="Last name" Style="{StaticResource FieldLabelStyle}"/>
+                                <CheckBox x:Name="LastNameVisibleBox" Grid.Column="1" IsChecked="True" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                <CheckBox x:Name="LastNameRequiredBox" Grid.Column="2" IsChecked="True" IsEnabled="{Binding IsChecked, ElementName=LastNameVisibleBox}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Grid>
+
+                            <!-- PHONE NUMBER -->
+                            <Border BorderBrush="{DynamicResource Border}" BorderThickness="0,0,0,1" Padding="0,0,0,16" Margin="0,0,0,12">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="2*"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+
+                                    <TextBlock Text="Phone number" Style="{StaticResource FieldLabelStyle}"/>
+                                    <CheckBox x:Name="PhoneVisibleBox" Grid.Column="1" IsChecked="True" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                    <CheckBox x:Name="PhoneRequiredBox" Grid.Column="2" IsEnabled="False" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </Grid>
+                            </Border>
+
+                            <TextBlock x:Name="ReservationValidationText" Text="At least one contact field must be visible and required." Style="{StaticResource ValidationMessageStyle}"/>
+                        </StackPanel>
+
+                        <!-- TABLE FIELDS -->
+                        <StackPanel Grid.Column="2">
+                            <TextBlock Text="TABLE FIELDS" Style="{StaticResource SectionTitleStyle}"/>
+
+                            <!-- COLUMN HEADERS -->
+                            <Border BorderBrush="{DynamicResource Border}" BorderThickness="0,0,0,1" Padding="0,0,0,8" Margin="0,0,0,12">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="2*"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+
+                                    <TextBlock Text="Field" FontSize="14" Foreground="{DynamicResource SecondaryText}"/>
+                                    <TextBlock Grid.Column="1" Text="Visible" FontSize="14" Foreground="{DynamicResource SecondaryText}" HorizontalAlignment="Center"/>
+                                    <TextBlock Grid.Column="2" Text="Required" FontSize="14" Foreground="{DynamicResource SecondaryText}" HorizontalAlignment="Center"/>
+                                </Grid>
+                            </Border>
+
+                            <!-- NUMBER -->
+                            <Grid Style="{StaticResource FieldRowStyle}">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="2*"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+
+                                <TextBlock Text="Number" Style="{StaticResource FieldLabelStyle}"/>
+                                <CheckBox x:Name="NumberVisibleBox" Grid.Column="1" IsChecked="True" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                <CheckBox x:Name="NumberRequiredBox" Grid.Column="2" IsChecked="True" IsEnabled="{Binding IsChecked, ElementName=NumberVisibleBox}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Grid>
+
+                            <!-- LABEL -->
+                            <Grid Style="{StaticResource FieldRowStyle}">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="2*"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+
+                                <TextBlock Text="Label" Style="{StaticResource FieldLabelStyle}"/>
+                                <CheckBox x:Name="LabelVisibleBox" Grid.Column="1" IsChecked="True" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                <CheckBox x:Name="LabelRequiredBox" Grid.Column="2" IsChecked="False" IsEnabled="{Binding IsChecked, ElementName=LabelVisibleBox}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Grid>
+
+                            <!-- ZONE -->
+                            <Border BorderBrush="{DynamicResource Border}" BorderThickness="0,0,0,1" Padding="0,0,0,16" Margin="0,0,0,12">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="2*"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+
+                                    <TextBlock Text="Zone" Style="{StaticResource FieldLabelStyle}"/>
+                                    <CheckBox x:Name="ZoneVisibleBox" Grid.Column="1" IsChecked="True" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                    <CheckBox x:Name="ZoneRequiredBox" Grid.Column="2" IsEnabled="False" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </Grid>
+                            </Border>
+
+                            <TextBlock x:Name="TableValidationText" Text="At least one of Number or Label must be visible and required." Style="{StaticResource ValidationMessageStyle}"/>
+                        </StackPanel>
+                    </Grid>
+
+                    <!-- TABLE IDENTIFIER ORDER -->
+                    <StackPanel Margin="0,0,0,8">
+                        <StackPanel.Style>
+                            <Style TargetType="StackPanel">
+                                <Setter Property="IsEnabled" Value="False"/>
+                                <Style.Triggers>
+                                    <MultiDataTrigger>
+                                        <MultiDataTrigger.Conditions>
+                                            <Condition Binding="{Binding IsChecked, ElementName=NumberVisibleBox}" Value="True"/>
+                                            <Condition Binding="{Binding IsChecked, ElementName=LabelVisibleBox}" Value="True"/>
+                                        </MultiDataTrigger.Conditions>
+                                        <Setter Property="IsEnabled" Value="True"/>
+                                    </MultiDataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </StackPanel.Style>
+
+                        <TextBlock Text="TABLE IDENTIFIER ORDER" Style="{StaticResource SectionTitleStyle}"/>
+                        <RadioButton x:Name="NumberFirstRadio" GroupName="TableIdentifierOrder" Style="{StaticResource InitialSetupRadioButtonStyle}" Content="Number → Label (e.g., 1A, 2B)" IsChecked="True" Margin="0,0,0,12"/>
+                        <RadioButton x:Name="LabelFirstRadio" GroupName="TableIdentifierOrder" Style="{StaticResource InitialSetupRadioButtonStyle}" Content="Label → Number (e.g., A1, B2)"/>
+                    </StackPanel>
+
+                </StackPanel>
+            </ScrollViewer>
+        </controls:Dialog.DialogContent>
+
+        <!-- FOOTER RIGHT -->
+        <controls:Dialog.FooterRight>
+            <Button Content="Save" Width="88" Style="{StaticResource PrimaryButtonStyle}" Click="Submit_Click"/>
+        </controls:Dialog.FooterRight>
+
+    </controls:Dialog>
+</UserControl>
