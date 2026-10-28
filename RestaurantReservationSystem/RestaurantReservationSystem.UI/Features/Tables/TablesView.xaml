@@ -1,134 +1,74 @@
-﻿<UserControl x:Class="RestaurantReservationSystem.UI.Features.Stoliki.TabView"
+﻿<UserControl x:Class="RestaurantReservationSystem.UI.Features.Tables.TablesView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
-             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-             mc:Ignorable="d" 
-             d:DesignHeight="700" d:DesignWidth="1000"
-             Background="#F1F5F9">
+             xmlns:controls="clr-namespace:RestaurantReservationSystem.UI.Controls"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             mc:Ignorable="d"
+             d:DesignHeight="640" d:DesignWidth="992">
 
-	<Grid>
-		<Border Background="{StaticResource Surface}" 
-                CornerRadius="6" 
-                BorderBrush="{StaticResource Border}" 
-                BorderThickness="1" 
-                Margin="24">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
 
-			<Grid>
-				<Grid.RowDefinitions>
-					<RowDefinition Height="Auto"/>
-					<RowDefinition Height="*"/>
-				</Grid.RowDefinitions>
+        <!-- HEADER -->
+        <Border Grid.Row="0" Style="{StaticResource ViewHeaderStyle}">
+            <Grid>
+                <TextBlock Text="Tables" Style="{StaticResource ViewTitleStyle}"/>
 
-				<Grid Grid.Row="0" Margin="24,20">
-					<TextBlock Text="Tables" 
-                               FontSize="22" 
-                               FontWeight="SemiBold" 
-                               Foreground="{StaticResource PrimaryText}"
-                               VerticalAlignment="Center"/>
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                    <Button Content="Add" Margin="0,0,8,0" Style="{StaticResource PrimaryButtonStyle}" Click="Add_Click"/>
+                    <Button Content="Edit" Margin="0,0,8,0" Style="{StaticResource SecondaryButtonStyle}" Click="Edit_Click"/>
+                    <Button Content="Delete" Style="{StaticResource SecondaryButtonStyle}" Click="DeleteTab_Click"/>
+                </StackPanel>
 
-					<StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
-						<Button Content="Add" Width="72" Height="36" Margin="0,0,8,0" 
-                                Background="{StaticResource Primary}" 
-                                Foreground="White"
-                                BorderThickness="0"
-                                Click="Add_Click"/>
+                <!--
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
 
-						<Button Content="Edit" Width="72" Height="36" Margin="0,0,8,0" 
-                                Background="#F8FAFC" 
-                                Foreground="{StaticResource SecondaryText}"
-                                BorderBrush="{StaticResource Border}"
-                                BorderThickness="1"
-                                Click="Edit_Click"/>
+                    <Button Content="Add" Margin="0,0,8,0" Style="{StaticResource PrimaryButtonStyle}" Click="Add_Click"/>
 
-						<Button Content="Delete" Width="72" Height="36" 
-                                Background="#F8FAFC" 
-                                Foreground="{StaticResource SecondaryText}"
-                                BorderBrush="{StaticResource Border}"
-                                BorderThickness="1"
-                                Click="DeleteTab_Click"/>
-					</StackPanel>
-				</Grid>
+                    <Button Content="Edit" Margin="0,0,8,0" Click="Edit_Click">
+                        <Button.Style>
+                            <Style TargetType="Button" BasedOn="{StaticResource SecondaryButtonStyle}">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding SelectedItem, ElementName=TablesDataGrid}" Value="{x:Null}">
+                                        <Setter Property="IsEnabled" Value="False"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Button.Style>
+                    </Button>
 
-				<DataGrid x:Name="StolikiDataGrid" 
-                          Grid.Row="1" 
-                          AutoGenerateColumns="False" 
-                          Background="Transparent"
-                          BorderBrush="{StaticResource Border}"
-                          BorderThickness="0,1,0,0"
-                          RowHeight="44"
-                          HeadersVisibility="Column"
-                          GridLinesVisibility="Horizontal"
-                          HorizontalGridLinesBrush="{StaticResource Border}"
-                          IsReadOnly="True"
-                          SelectionMode="Single"
-                          RowBackground="{StaticResource Surface}"
-                          AlternatingRowBackground="{StaticResource Surface}">
+                    <Button Content="Delete" Click="DeleteTab_Click">
+                        <Button.Style>
+                            <Style TargetType="Button" BasedOn="{StaticResource SecondaryButtonStyle}">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding SelectedItem, ElementName=TablesDataGrid}" Value="{x:Null}">
+                                        <Setter Property="IsEnabled" Value="False"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Button.Style>
+                    </Button>
 
-					<DataGrid.ColumnHeaderStyle>
-						<Style TargetType="DataGridColumnHeader">
-							<Setter Property="Background" Value="#F8FAFC"/>
-							<Setter Property="Foreground" Value="{StaticResource PrimaryText}"/>
-							<Setter Property="FontWeight" Value="SemiBold"/>
-							<Setter Property="FontSize" Value="13"/>
-							<Setter Property="Height" Value="40"/>
-							<Setter Property="Padding" Value="24,0,16,0"/>
-							<Setter Property="BorderBrush" Value="{StaticResource Border}"/>
-							<Setter Property="BorderThickness" Value="0,0,0,1"/>
-						</Style>
-					</DataGrid.ColumnHeaderStyle>
+                </StackPanel>
+                -->
 
-					<DataGrid.CellStyle>
-						<Style TargetType="DataGridCell">
-							<Setter Property="Padding" Value="24,0,16,0"/>
-							<Setter Property="Foreground" Value="{StaticResource SecondaryText}"/>
-							<Setter Property="FontSize" Value="13"/>
-							<Setter Property="Template">
-								<Setter.Value>
-									<ControlTemplate TargetType="DataGridCell">
-										<Border Padding="{TemplateBinding Padding}" 
-                                                Background="Transparent" 
-                                                BorderThickness="0" 
-                                                SnapsToDevicePixels="True">
-											<ContentPresenter VerticalAlignment="Center" SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}"/>
-										</Border>
-									</ControlTemplate>
-								</Setter.Value>
-							</Setter>
-							<Setter Property="FocusVisualStyle" Value="{x:Null}"/>
-							<Setter Property="BorderThickness" Value="0"/>
-						</Style>
-					</DataGrid.CellStyle>
+            </Grid>
+        </Border>
 
-					<DataGrid.RowStyle>
-						<Style TargetType="DataGridRow">
-							<Setter Property="FocusVisualStyle" Value="{x:Null}"/>
-							<Style.Triggers>
-								<Trigger Property="IsSelected" Value="True">
-									<Setter Property="Background" Value="#F1F5F9"/>
-								</Trigger>
-							</Style.Triggers>
-						</Style>
-					</DataGrid.RowStyle>
-
-					<DataGrid.Columns>
-						<DataGridTextColumn Header="Number" Binding="{Binding Number}" Width="120"/>
-						<DataGridTextColumn Header="Label" Binding="{Binding Label}" Width="120"/>
-						<DataGridTextColumn Header="Zone" Binding="{Binding Zone}" Width="160"/>
-						<DataGridTextColumn Header="Seats" Binding="{Binding Seats}" Width="120"/>
-						<DataGridTextColumn Width="*"/>
-					</DataGrid.Columns>
-				</DataGrid>
-
-				<TextBlock x:Name="EmptyStateText"
-                           Grid.Row="1"
-                           Text="No tables yet." 
-                           Foreground="{StaticResource SecondaryText}"
-                           FontSize="13"
-                           HorizontalAlignment="Center" 
-                           VerticalAlignment="Center"
-                           Visibility="Visible"/>
-			</Grid>
-		</Border>
-	</Grid>
+        <!-- CONTENT -->
+        <Border Grid.Row="1" Style="{StaticResource ViewContentStyle}">
+            <controls:DataTable x:Name="TablesDataGrid" EmptyMessage="No tables yet.">
+                <controls:DataTable.Columns>
+                    <DataGridTextColumn Header="Number" Binding="{Binding Number}"/>
+                    <DataGridTextColumn Header="Label" Binding="{Binding Label}"/>
+                    <DataGridTextColumn Header="Zone" Binding="{Binding Zone}"/>
+                    <DataGridTextColumn Header="Seats" Binding="{Binding Seats}"/>
+                </controls:DataTable.Columns>
+            </controls:DataTable>
+        </Border>
+    </Grid>
 </UserControl>

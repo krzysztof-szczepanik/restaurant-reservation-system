@@ -1,44 +1,54 @@
-﻿using System.Windows;
+using System;
+using System.Windows;
+using System.Windows.Controls;
 
-namespace RestaurantReservationSystem.UI.Features.Reservations.Dialogs
-{
-	public partial class FilterResDial : Window
-	{
-		public FilterResDial()
-		{
-			InitializeComponent();
-		}
+namespace RestaurantReservationSystem.UI.Features.Reservations.Dialogs {
+    public partial class FilterReservationsDialog : UserControl {
 
-		private void Cancel_Click(object sender, RoutedEventArgs e)
-		{
-			this.Close();
-		}
+        // EVENTS:
+        public event EventHandler? CancelRequested;
+        public event EventHandler? ApplyRequested;
 
-		private void Apply_Click(object sender, RoutedEventArgs e)
-		{
-			this.Close();
-		}
 
-		private void Reset_Click(object sender, RoutedEventArgs e)
-		{
-		}
+        // CONSTRUCTORS:
+        public FilterReservationsDialog() {
+            InitializeComponent();
+        }
 
-		private void Clean_Click(object sender, RoutedEventArgs e)
-		{
-		}
 
-		private void SelectZones_Click(object sender, RoutedEventArgs e)
-		{
-			var selectZonesDialog = new SelectZonesDialog();
-			selectZonesDialog.Owner = this;
-			selectZonesDialog.ShowDialog();
-		}
+        // EVENT HANDLERS:
+        private void Cancel_Click(object sender, RoutedEventArgs e) {
+            CancelRequested?.Invoke(this, EventArgs.Empty);
+        }
 
-		private void SelectTables_Click(object sender, RoutedEventArgs e)
-		{
-			var selectTablesDialog = new SelectTablesDialog();
-			selectTablesDialog.Owner = this;
-			selectTablesDialog.ShowDialog();
-		}
-	}
+        private void Apply_Click(object sender, RoutedEventArgs e) {
+            ApplyRequested?.Invoke(this, EventArgs.Empty);
+        }
+
+        private void Reset_Click(object sender, RoutedEventArgs e) {
+        }
+
+        private void Clean_Click(object sender, RoutedEventArgs e) {
+        }
+
+        private void SelectZones_Click(object sender, RoutedEventArgs e) {
+            var mainWindow = Window.GetWindow(this) as MainWindow;
+            if (mainWindow == null) { return; }
+
+            var selectZonesDialog = new SelectZonesDialog();
+            selectZonesDialog.CancelRequested += (_, _) => mainWindow.DialogHost.Close(selectZonesDialog, false);
+            selectZonesDialog.ConfirmRequested += (_, _) => mainWindow.DialogHost.Close(selectZonesDialog, true);
+            mainWindow.DialogHost.Show(selectZonesDialog);
+        }
+
+        private void SelectTables_Click(object sender, RoutedEventArgs e) {
+            var mainWindow = Window.GetWindow(this) as MainWindow;
+            if (mainWindow == null) { return; }
+
+            var selectTablesDialog = new SelectTablesDialog();
+            selectTablesDialog.CancelRequested += (_, _) => mainWindow.DialogHost.Close(selectTablesDialog, false);
+            selectTablesDialog.ConfirmRequested += (_, _) => mainWindow.DialogHost.Close(selectTablesDialog, true);
+            mainWindow.DialogHost.Show(selectTablesDialog);
+        }
+    }
 }

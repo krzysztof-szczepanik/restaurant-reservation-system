@@ -1,0 +1,32 @@
+<UserControl xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:controls="clr-namespace:RestaurantReservationSystem.UI.Controls"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="RestaurantReservationSystem.UI.Features.Reservations.Dialogs.AddEditNoteDialog">
+
+    <controls:Dialog x:Name="NoteDialog" Header="Add Note" Width="500">
+
+        <!-- CONTENT -->
+        <controls:Dialog.DialogContent>
+            <StackPanel>
+
+                <!-- NOTE -->
+                <TextBlock Text="Note" FontSize="13" FontWeight="SemiBold" Foreground="{StaticResource PrimaryText}" Margin="0,0,0,8" />
+
+                <Border BorderBrush="#2563EB" BorderThickness="1" CornerRadius="4" Background="{StaticResource Surface}">
+                    <TextBox x:Name="NoteBox" AcceptsReturn="True" TextWrapping="Wrap" Height="200" Padding="12" Foreground="{StaticResource PrimaryText}" Background="Transparent" BorderThickness="0" VerticalScrollBarVisibility="Auto" Style="{StaticResource ReservationFormTextBoxStyle}" VerticalContentAlignment="Top" />
+                </Border>
+
+            </StackPanel>
+        </controls:Dialog.DialogContent>
+
+
+        <!-- FOOTER -->
+        <controls:Dialog.FooterRight>
+            <StackPanel Orientation="Horizontal">
+                <Button Content="Cancel" Height="36" Margin="0,0,8,0" Click="Cancel_Click" Style="{StaticResource SecondaryButtonStyle}" />
+                <Button Content="Save" Height="36" Click="Save_Click" Style="{StaticResource PrimaryButtonStyle}" />
+            </StackPanel>
+        </controls:Dialog.FooterRight>
+
+    </controls:Dialog>
+</UserControl>

@@ -1,105 +1,29 @@
 ﻿<Window x:Class="RestaurantReservationSystem.UI.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Restaurant Reservation System" 
-        Height="768" Width="1024"
+        xmlns:controls="clr-namespace:RestaurantReservationSystem.UI.Controls.Sidebar"
+        xmlns:dialog="clr-namespace:RestaurantReservationSystem.UI.Controls"
+        Height="720" Width="1280"
         Background="{StaticResource Background}"
         WindowStartupLocation="CenterScreen">
 
-	<Window.Resources>
-		<Style x:Key="SidebarButtonStyle" TargetType="RadioButton">
-			<Setter Property="Height" Value="48"/>
-			<Setter Property="Padding" Value="16,0,16,0"/>
-			<Setter Property="Background" Value="Transparent"/>
-			<Setter Property="Foreground" Value="{StaticResource SecondaryText}"/>
-			<Setter Property="FontWeight" Value="Normal"/>
-			<Setter Property="Cursor" Value="Hand"/>
-			<Setter Property="Template">
-				<Setter.Value>
-					<ControlTemplate TargetType="RadioButton">
-						<Border Background="{TemplateBinding Background}" CornerRadius="6">
-							<ContentPresenter Margin="{TemplateBinding Padding}" VerticalAlignment="Center"/>
-						</Border>
-					</ControlTemplate>
-				</Setter.Value>
-			</Setter>
-			<Style.Triggers>
-				<Trigger Property="IsChecked" Value="True">
-					<Setter Property="Background" Value="{StaticResource Background}"/>
-					<Setter Property="Foreground" Value="{StaticResource Primary}"/>
-					<Setter Property="FontWeight" Value="SemiBold"/>
-				</Trigger>
-			</Style.Triggers>
-		</Style>
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="240"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
 
-		<Style TargetType="Path" x:Key="SidebarIconStyle">
-			<Setter Property="Stroke" Value="{Binding RelativeSource={RelativeSource AncestorType=RadioButton}, Path=Foreground}"/>
-			<Setter Property="StrokeThickness" Value="1.5"/>
-			<Setter Property="Fill" Value="Transparent"/>
-			<Setter Property="StrokeLineJoin" Value="Round"/>
-			<Setter Property="StrokeStartLineCap" Value="Round"/>
-			<Setter Property="StrokeEndLineCap" Value="Round"/>
-			<Setter Property="Width" Value="20"/>
-			<Setter Property="Height" Value="20"/>
-			<Setter Property="Stretch" Value="Uniform"/>
-			<Setter Property="Margin" Value="0,0,12,0"/>
-		</Style>
-	</Window.Resources>
+        <!-- SIDEBAR -->
+        <controls:Sidebar x:Name="MainSidebar" Grid.Column="0" NavigationRequested="Sidebar_NavigationRequested"/>
 
-	<Grid>
-		<Grid.ColumnDefinitions>
-			<ColumnDefinition Width="240"/>
-			<ColumnDefinition Width="*"/>
-		</Grid.ColumnDefinitions>
+        <!-- MAIN CONTENT -->
+        <ContentControl x:Name="MainContentArea" Grid.Column="1" Margin="24"/>
 
-		<Border Grid.Column="0" Background="{StaticResource Surface}" BorderBrush="{StaticResource Border}" BorderThickness="0,0,1,0">
-			<Grid>
-				<Grid.RowDefinitions>
-					<RowDefinition Height="Auto"/>
-					<RowDefinition Height="*"/>
-					<RowDefinition Height="Auto"/>
-				</Grid.RowDefinitions>
+        <!-- TOP BORDER -->
+        <Border Grid.Column="0" Grid.ColumnSpan="2" Height="1" VerticalAlignment="Top" Background="{StaticResource MainWindowTopBorder}" Panel.ZIndex="10" IsHitTestVisible="False"/>
 
-				<Border Grid.Row="0" BorderBrush="{StaticResource Border}" BorderThickness="0,0,0,1" Margin="24,24,24,12" Padding="0,0,0,16">
-					<TextBlock TextWrapping="Wrap" FontSize="15" FontWeight="SemiBold" Foreground="{StaticResource PrimaryText}">
-                         Restaurant<LineBreak/>Reservation System
-					</TextBlock>
-				</Border>
+        <!-- DIALOG HOST -->
+        <dialog:DialogHost x:Name="MainDialogHost" Grid.Column="0" Grid.ColumnSpan="2" Panel.ZIndex="1000"/>
 
-				<StackPanel Grid.Row="1" Margin="12,0">
-					<RadioButton Style="{StaticResource SidebarButtonStyle}" IsChecked="True" Checked="Menu_Today_Checked">
-						<StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-							<Path Style="{StaticResource SidebarIconStyle}" Data="M4 6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6z M16 2v4 M8 2v4 M4 10h16 M8 14h.01 M12 14h.01 M16 14h.01 M8 18h.01 M12 18h.01 M16 18h.01"/>
-							<TextBlock Text="Today" VerticalAlignment="Center"/>
-						</StackPanel>
-					</RadioButton>
-
-					<RadioButton Style="{StaticResource SidebarButtonStyle}" Checked="Menu_Reservations_Checked">
-						<StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-							<Path Style="{StaticResource SidebarIconStyle}" Data="M4 6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6z M16 2v4 M8 2v4 M4 10h16 M7 14h5 M15 14h1 M7 18h1 M11 18h5"/>
-							<TextBlock Text="Reservations" VerticalAlignment="Center"/>
-						</StackPanel>
-					</RadioButton>
-
-					<RadioButton Style="{StaticResource SidebarButtonStyle}" Checked="Menu_Tables_Checked">
-						<StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-							<Path Style="{StaticResource SidebarIconStyle}" Data="M19 9V6a2 2 0 0 0-2-2H7a2 2 0 0 0-2 2v3 M3 16a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-5a2 2 0 0 0-4 0v2H7v-2a2 2 0 0 0-4 0Z M5 18v2 M19 18v2"/>
-							<TextBlock Text="Tables" VerticalAlignment="Center"/>
-						</StackPanel>
-					</RadioButton>
-				</StackPanel>
-
-				<Border Grid.Row="2" Margin="12,0,12,24" BorderBrush="{StaticResource Border}" BorderThickness="0,1,0,0" Padding="0,16,0,0">
-					<RadioButton Style="{StaticResource SidebarButtonStyle}" Checked="Menu_Settings_Checked">
-						<StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-							<Path Style="{StaticResource SidebarIconStyle}" Data="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
-							<TextBlock Text="Settings" VerticalAlignment="Center"/>
-						</StackPanel>
-					</RadioButton>
-				</Border>
-			</Grid>
-		</Border>
-
-		<ContentControl x:Name="MainContentArea" Grid.Column="1" Margin="24"/>
-	</Grid>
+    </Grid>
 </Window>
