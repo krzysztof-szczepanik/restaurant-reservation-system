@@ -1,4 +1,4 @@
-﻿using RestaurantReservationSystem.UI.Controls;
+using RestaurantReservationSystem.UI.Controls;
 using RestaurantReservationSystem.UI.Features.InitialSetup;
 using RestaurantReservationSystem.UI.Features.Reservations;
 using RestaurantReservationSystem.UI.Features.Settings;
@@ -23,10 +23,8 @@ namespace RestaurantReservationSystem.UI {
 
         private const int TITLE_BAR_COLOR = 0x00EFE7E0;
 
-
         // PROPERTIES:
         public DialogHost DialogHost => MainDialogHost;
-
 
         // CONSTRUCTORS:
         public MainWindow() {
@@ -41,19 +39,18 @@ namespace RestaurantReservationSystem.UI {
             Loaded += MainWindow_Loaded;
         }
 
-
         // WINDOW CONFIGURATION:
         private void ConfigureTitleBar() {
             IntPtr hwnd = new WindowInteropHelper(this).Handle;
             long style = GetWindowLongPtr(hwnd, GWL_EXSTYLE).ToInt64();
 
             SetWindowLongPtr(hwnd, GWL_EXSTYLE, new IntPtr(style | WS_EX_DLGMODALFRAME));
-            SetWindowPos(hwnd, IntPtr.Zero, 0, 0, 0, 0, SWP_NOSIZE | SWP_NOMOVE | SWP_NOZORDER | SWP_FRAMECHANGED);
+            SetWindowPos(hwnd, IntPtr.Zero, 0, 0, 0, 0,
+                SWP_NOSIZE | SWP_NOMOVE | SWP_NOZORDER | SWP_FRAMECHANGED);
 
             int captionColor = TITLE_BAR_COLOR;
             DwmSetWindowAttribute(hwnd, DWMWA_CAPTION_COLOR, ref captionColor, sizeof(int));
         }
-
 
         // NAVIGATION:
         private void NavigateTo(string destination) {
@@ -76,7 +73,6 @@ namespace RestaurantReservationSystem.UI {
             }
         }
 
-
         // EVENT HANDLERS:
         private void MainWindow_Loaded(object sender, RoutedEventArgs e) {
             Loaded -= MainWindow_Loaded;
@@ -92,18 +88,22 @@ namespace RestaurantReservationSystem.UI {
             NavigateTo(destination);
         }
 
-
         // NATIVE METHODS:
         [DllImport("dwmapi.dll")]
-        private static extern int DwmSetWindowAttribute(IntPtr hwnd, int attribute, ref int value, int size);
+        private static extern int DwmSetWindowAttribute(
+            IntPtr hwnd, int attribute, ref int value, int size);
 
         [DllImport("user32.dll", EntryPoint = "GetWindowLongPtrW")]
-        private static extern IntPtr GetWindowLongPtr(IntPtr hwnd, int index);
+        private static extern IntPtr GetWindowLongPtr(
+            IntPtr hwnd, int index);
 
         [DllImport("user32.dll", EntryPoint = "SetWindowLongPtrW")]
-        private static extern IntPtr SetWindowLongPtr(IntPtr hwnd, int index, IntPtr newStyle);
+        private static extern IntPtr SetWindowLongPtr(
+            IntPtr hwnd, int index, IntPtr newStyle);
 
         [DllImport("user32.dll")]
-        private static extern bool SetWindowPos(IntPtr hwnd, IntPtr insertAfter, int x, int y, int width, int height, uint flags);
+        private static extern bool SetWindowPos(
+            IntPtr hwnd, IntPtr insertAfter, int x, int y,
+            int width, int height, uint flags);
     }
 }
