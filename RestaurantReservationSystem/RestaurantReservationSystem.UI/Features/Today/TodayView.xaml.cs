@@ -10,7 +10,6 @@ namespace RestaurantReservationSystem.UI.Features.Today
 {
 	public partial class TodayView : UserControl
 	{
-
 		public TodayView()
 		{
 			InitializeComponent();
@@ -31,6 +30,7 @@ namespace RestaurantReservationSystem.UI.Features.Today
 			var dzisiejszeRezerwacje = ReservationsView.MockReservations
 				.Where(r => r.Date == DateOnly.FromDateTime(DateTime.Today)).ToList();
 
+			TodayDataGrid.ItemsSource = null;
 			TodayDataGrid.ItemsSource = dzisiejszeRezerwacje;
 		}
 
@@ -44,70 +44,91 @@ namespace RestaurantReservationSystem.UI.Features.Today
 
 				if (reservation == null || mainWindow == null) return;
 
-				if (newStatusString == "Arrived")
+				ReservationStatus previousStatus = reservation.Status;
+
+				// Zatrzymujemy nasłuchiwanie zdarzenia, aby uniknąć zapętlenia przy programowej zmianie statusu
+				comboBox.SelectionChanged -= StatusComboBox_SelectionChanged;
+
+				if (newStatusString == "Arrived" || newStatusString == "Expected" || newStatusString == "Late")
 				{
-					reservation.Status = ReservationStatus.Arrived;
-					comboBox.Background = new System.Windows.Media.SolidColorBrush((System.Windows.Media.Color)System.Windows.Media.ColorConverter.ConvertFromString("#F0FDF4"));
-					comboBox.Foreground = new System.Windows.Media.SolidColorBrush((System.Windows.Media.Color)System.Windows.Media.ColorConverter.ConvertFromString("#16A34A"));
-					RefreshTodayList();
+					if (Enum.TryParse<ReservationStatus>(newStatusString, out var parsed))
+					{
+						reservation.Status = parsed;
+					}
+					comboBox.SelectionChanged += StatusComboBox_SelectionChanged;
 				}
 				else if (newStatusString == "Cancelled" || newStatusString == "NoShow" || newStatusString == "No-show")
 				{
 					var dialog = new RestaurantReservationSystem.UI.Features.Today.Dialogs.ChangeStatusDialog(newStatusString);
+
 					dialog.CancelRequested += (_, _) => {
+						// Przywracamy stary status w przypadku kliknięcia Cancel
+						foreach (ComboBoxItem item in comboBox.Items)
+						{
+							if (item.Content.ToString() == previousStatus.ToString())
+							{
+								comboBox.SelectedItem = item;
+								break;
+							}
+						}
+
 						mainWindow.DialogHost.Close(dialog, false);
+						comboBox.SelectionChanged += StatusComboBox_SelectionChanged;
 					};
+
 					dialog.ConfirmRequested += (_, _) => {
-						if (Enum.TryParse<ReservationStatus>(newStatusString.Replace("-", ""), out var parsed))
+						string parseString = newStatusString.Replace("-", "");
+						if (Enum.TryParse<ReservationStatus>(parseString, out var parsed))
 						{
 							reservation.Status = parsed;
 						}
+
+						// Opcjonalne odświeżenie całej siatki, aby wymusić przepięcie triggerów XAML (jeśli potrzebne)
 						RefreshTodayList();
+
 						mainWindow.DialogHost.Close(dialog, true);
+						comboBox.SelectionChanged += StatusComboBox_SelectionChanged;
 					};
+
 					mainWindow.DialogHost.Show(dialog);
 				}
 				else if (newStatusString == "Unlock")
 				{
 					var dialog = new RestaurantReservationSystem.UI.Features.Reservations.Dialogs.UnlockReservationDialog();
+
 					dialog.CancelRequested += (_, _) => {
+						foreach (ComboBoxItem item in comboBox.Items)
+						{
+							if (item.Content.ToString() == previousStatus.ToString())
+							{
+								comboBox.SelectedItem = item;
+								break;
+							}
+						}
+
 						mainWindow.DialogHost.Close(dialog, false);
+						comboBox.SelectionChanged += StatusComboBox_SelectionChanged;
 					};
+
 					dialog.ConfirmRequested += (_, _) => {
 						mainWindow.DialogHost.Close(dialog, true);
-
-						mainWindow.MainContentArea.Content = new ReservationsView();
+						mainWindow.MainContentArea.Content = new RestaurantReservationSystem.UI.Features.Reservations.ReservationsView();
 
 						var editDialog = new RestaurantReservationSystem.UI.Features.Reservations.Dialogs.AddEditReservationDialog(isEditMode: true);
 						editDialog.CancelRequested += (_, _) => mainWindow.DialogHost.Close(editDialog, false);
 						editDialog.SaveRequested += (_, _) => mainWindow.DialogHost.Close(editDialog, true);
 						mainWindow.DialogHost.Show(editDialog);
+
+						comboBox.SelectionChanged += StatusComboBox_SelectionChanged;
 					};
+
 					mainWindow.DialogHost.Show(dialog);
 				}
 				else
 				{
-					if (Enum.TryParse<ReservationStatus>(newStatusString.Replace("-", ""), out var parsed))
-					{
-						reservation.Status = parsed;
-					}
-
-					comboBox.ClearValue(ComboBox.BackgroundProperty);
-					comboBox.ClearValue(ComboBox.ForegroundProperty);
-
-					RefreshTodayList();
+					comboBox.SelectionChanged += StatusComboBox_SelectionChanged;
 				}
 			}
-		}
-
-		private ComboBoxItem? GetItemForStatus(ReservationStatus status)
-		{
-			return null;
-		}
-
-		private void TodayDataGrid_Loaded(object sender, RoutedEventArgs e)
-		{
-			RefreshTodayList();
 		}
 	}
 }

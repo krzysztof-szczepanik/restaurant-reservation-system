@@ -77,7 +77,7 @@
 			<controls:DataTable x:Name="ReservationsDataGrid" EmptyMessage="No reservations yet.">
 				<controls:DataTable.Columns>
 					<DataGridTextColumn Header="Date" Binding="{Binding Date, StringFormat={}{0:dd.MM.yyyy}}"/>
-					<DataGridTextColumn Header="Time" Binding="{Binding Time, StringFormat={}{0:hh\:mm}}"/>
+					<DataGridTextColumn Header="Time" Binding="{Binding Time, StringFormat=HH\\:mm}" />
 					<DataGridTextColumn Header="First Name" Binding="{Binding FirstName}"/>
 					<DataGridTextColumn Header="Last Name" Binding="{Binding LastName}"/>
 					<DataGridTextColumn Header="Phone Number" Binding="{Binding PhoneNumber}"/>

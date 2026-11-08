@@ -39,8 +39,79 @@
 						<DataGridTemplateColumn.CellTemplate>
 							<DataTemplate>
 								<ComboBox SelectedValue="{Binding Status, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
+                      SelectedValuePath="Content" 
                       SelectionChanged="StatusComboBox_SelectionChanged"
-                      Width="120" Height="32" Padding="8,0">
+                      Width="120" Height="32" Padding="8,0"
+                      BorderThickness="0">
+									<ComboBox.Style>
+										<Style TargetType="ComboBox">
+											<!-- Default Values -->
+											<Setter Property="Background" Value="Transparent" />
+											<Setter Property="Foreground" Value="Black" />
+											<Setter Property="Template">
+												<Setter.Value>
+													<ControlTemplate TargetType="ComboBox">
+														<Grid>
+															<Border Background="{TemplateBinding Background}" BorderThickness="0" CornerRadius="4">
+																<Grid>
+																	<Grid.ColumnDefinitions>
+																		<ColumnDefinition Width="*"/>
+																		<ColumnDefinition Width="20"/>
+																	</Grid.ColumnDefinitions>
+																	<!-- Tekst dziedziczy Foreground z ComboBoxa -->
+																	<ContentPresenter Margin="8,0,0,0" VerticalAlignment="Center" 
+                                                                  Content="{TemplateBinding SelectionBoxItem}" 
+                                                                  TextBlock.Foreground="{TemplateBinding Foreground}"/>
+																	<!-- Strzałka -->
+																	<ToggleButton Grid.Column="1" 
+                                                              IsChecked="{Binding IsDropDownOpen, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}" 
+                                                              Background="Transparent" BorderThickness="0" Opacity="0.5">
+																		<Path Data="M0,0 L4,4 L8,0" Stroke="Black" StrokeThickness="1" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+																	</ToggleButton>
+																</Grid>
+															</Border>
+															<Popup IsOpen="{TemplateBinding IsDropDownOpen}" Placement="Bottom">
+																<Border Background="White" BorderBrush="#E2E8F0" BorderThickness="1" MinWidth="{TemplateBinding ActualWidth}">
+																	<ScrollViewer>
+																		<StackPanel IsItemsHost="True" KeyboardNavigation.DirectionalNavigation="Contained" />
+																	</ScrollViewer>
+																</Border>
+															</Popup>
+														</Grid>
+													</ControlTemplate>
+												</Setter.Value>
+											</Setter>
+											<!-- Triggery nakładane bezpośrednio na ComboBox -->
+											<Style.Triggers>
+												<!-- EXPECTED -->
+												<DataTrigger Binding="{Binding Status}" Value="Expected">
+													<Setter Property="Background" Value="#EFF6FF" />
+													<Setter Property="Foreground" Value="#2563EB" />
+												</DataTrigger>
+												<!-- LATE -->
+												<DataTrigger Binding="{Binding Status}" Value="Late">
+													<Setter Property="Background" Value="#FFFBEB" />
+													<Setter Property="Foreground" Value="#B45309" />
+												</DataTrigger>
+												<!-- ARRIVED -->
+												<DataTrigger Binding="{Binding Status}" Value="Arrived">
+													<Setter Property="Background" Value="#F0FDF4" />
+													<Setter Property="Foreground" Value="#15803D" />
+												</DataTrigger>
+												<!-- CANCELLED -->
+												<DataTrigger Binding="{Binding Status}" Value="Cancelled">
+													<Setter Property="Background" Value="#F1F5F9" />
+													<Setter Property="Foreground" Value="#64748B" />
+												</DataTrigger>
+												<!-- NOSHOW -->
+												<DataTrigger Binding="{Binding Status}" Value="NoShow">
+													<Setter Property="Background" Value="#FEF2F2" />
+													<Setter Property="Foreground" Value="#B91C1C" />
+												</DataTrigger>
+											</Style.Triggers>
+										</Style>
+									</ComboBox.Style>
+
 									<ComboBoxItem Content="Expected" />
 									<ComboBoxItem Content="Late" />
 									<ComboBoxItem Content="Arrived" />
