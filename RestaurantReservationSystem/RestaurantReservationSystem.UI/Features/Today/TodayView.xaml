@@ -1,0 +1,59 @@
+﻿<UserControl x:Class="RestaurantReservationSystem.UI.Features.Today.TodayView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:controls="clr-namespace:RestaurantReservationSystem.UI.Controls"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             mc:Ignorable="d"
+             d:DesignHeight="640" d:DesignWidth="992">
+
+	<Grid>
+		<Grid.RowDefinitions>
+			<RowDefinition Height="Auto"/>
+			<RowDefinition Height="*"/>
+		</Grid.RowDefinitions>
+
+		<!-- HEADER -->
+		<Border Grid.Row="0" Style="{StaticResource ViewHeaderStyle}">
+			<Grid>
+				<TextBlock Text="Today" Style="{StaticResource ViewTitleStyle}"/>
+				<TextBlock x:Name="CurrentDateText" Text="20.10.2026" FontSize="18" FontWeight="SemiBold" HorizontalAlignment="Right" VerticalAlignment="Center" Foreground="{StaticResource PrimaryText}"/>
+			</Grid>
+		</Border>
+
+		<!-- CONTENT -->
+		<Border Grid.Row="1" Style="{StaticResource ViewContentStyle}">
+			<controls:DataTable x:Name="TodayDataGrid" ItemsSource="{Binding TodayReservations}" EmptyMessage="No reservations for today.">
+				<controls:DataTable.Columns>
+					<DataGridTextColumn Header="Date" Binding="{Binding Date}" IsReadOnly="True"/>
+					<DataGridTextColumn Header="Time" Binding="{Binding Time}" IsReadOnly="True"/>
+					<DataGridTextColumn Header="First Name" Binding="{Binding FirstName}" IsReadOnly="True"/>
+					<DataGridTextColumn Header="Last Name" Binding="{Binding LastName}" IsReadOnly="True"/>
+					<DataGridTextColumn Header="Phone Number" Binding="{Binding PhoneNumber}" IsReadOnly="True"/>
+					<DataGridTextColumn Header="Guests" Binding="{Binding Guests}" IsReadOnly="True"/>
+					<DataGridTextColumn Header="Tables" Binding="{Binding Tables}" IsReadOnly="True"/>
+					<DataGridTextColumn Header="Note" Binding="{Binding Note}" IsReadOnly="True"/>
+
+					<!-- STATUS COLUMN -->
+					<DataGridTemplateColumn Header="Status" Width="140">
+						<DataGridTemplateColumn.CellTemplate>
+							<DataTemplate>
+								<ComboBox SelectedValue="{Binding Status, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
+                      SelectionChanged="StatusComboBox_SelectionChanged"
+                      Width="120" Height="32" Padding="8,0">
+									<ComboBoxItem Content="Expected" />
+									<ComboBoxItem Content="Late" />
+									<ComboBoxItem Content="Arrived" />
+									<ComboBoxItem Content="Cancelled" />
+									<ComboBoxItem Content="NoShow" />
+									<Separator />
+									<ComboBoxItem Content="Unlock" />
+								</ComboBox>
+							</DataTemplate>
+						</DataGridTemplateColumn.CellTemplate>
+					</DataGridTemplateColumn>
+				</controls:DataTable.Columns>
+			</controls:DataTable>
+		</Border>
+	</Grid>
+</UserControl>

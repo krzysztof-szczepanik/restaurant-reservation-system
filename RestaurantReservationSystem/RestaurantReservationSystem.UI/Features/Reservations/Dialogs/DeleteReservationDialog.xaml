@@ -1,0 +1,21 @@
+<UserControl
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:controls="clr-namespace:RestaurantReservationSystem.UI.Controls"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Class="RestaurantReservationSystem.UI.Features.Reservations.Dialogs.DeleteReservationsDialog">
+    <controls:Dialog Header="Delete Reservation" Width="480">
+        <controls:Dialog.DialogContent>
+            <ScrollViewer MaxHeight="440" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                <StackPanel>
+                    <TextBlock Text="Delete this reservation?" FontSize="14" FontWeight="SemiBold" Foreground="{StaticResource PrimaryText}" TextWrapping="Wrap" Margin="0,0,0,8" />
+                    <TextBlock Text="This action cannot be undone." FontSize="13" Foreground="{StaticResource SecondaryText}" TextWrapping="Wrap" />
+                </StackPanel>
+            </ScrollViewer>
+        </controls:Dialog.DialogContent>
+        <controls:Dialog.FooterRight>
+            <StackPanel Orientation="Horizontal">
+                <Button Content="Cancel" Height="36" Margin="0,0,8,0" Click="Cancel_Click" Style="{StaticResource SecondaryButtonStyle}" />
+                <Button Content="Delete" Height="36" Click="Delete_Click" Style="{StaticResource DangerButtonStyle}" />
+            </StackPanel>
+        </controls:Dialog.FooterRight>
+    </controls:Dialog>
+</UserControl>
