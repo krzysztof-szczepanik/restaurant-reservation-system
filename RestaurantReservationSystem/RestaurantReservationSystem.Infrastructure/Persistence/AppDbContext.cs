@@ -3,10 +3,18 @@ using RestaurantReservationSystem.Core.Models;
 
 namespace RestaurantReservationSystem.Infrastructure.Persistence {
     public class AppDbContext : DbContext {
+
+        // CONSTRUCTORS:
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
+
+
+        // DB SETS:
+        public DbSet<InitialConfiguration> InitialConfigurations => Set<InitialConfiguration>();
         public DbSet<Reservation> Reservations => Set<Reservation>();
         public DbSet<Table> Tables => Set<Table>();
-        public DbSet<InitialConfiguration> InitialConfigurations => Set<InitialConfiguration>();
+
+
+        // METHODS:
         protected override void OnModelCreating(ModelBuilder modelBuilder) {
             base.OnModelCreating(modelBuilder);
 
@@ -24,8 +32,8 @@ namespace RestaurantReservationSystem.Infrastructure.Persistence {
                 .HasConversion<string>();
 
             modelBuilder.Entity<InitialConfiguration>()
-            .Property(c => c.Id)
-            .ValueGeneratedNever();
+                .Property(c => c.Id)
+                .ValueGeneratedNever();
         }
     }
 }

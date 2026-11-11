@@ -49,16 +49,15 @@
             </Grid>
         </Border>
 
-
         <!-- CONTENT -->
         <Border Grid.Row="1" Style="{StaticResource ViewContentStyle}">
             <controls:DataTable x:Name="ReservationsDataGrid" EmptyMessage="No reservations yet.">
                 <controls:DataTable.Columns>
                     <DataGridTextColumn Header="Date" Binding="{Binding Date, StringFormat={}{0:dd.MM.yyyy}}"/>
                     <DataGridTextColumn Header="Time" Binding="{Binding Time, StringFormat={}{0:hh\:mm}}"/>
-                    <DataGridTextColumn Header="First Name" Binding="{Binding FirstName}"/>
-                    <DataGridTextColumn Header="Last Name" Binding="{Binding LastName}"/>
-                    <DataGridTextColumn Header="Phone Number" Binding="{Binding PhoneNumber}"/>
+                    <DataGridTextColumn Header="First Name" Binding="{Binding FirstName}" Visibility="Collapsed"/>
+                    <DataGridTextColumn Header="Last Name" Binding="{Binding LastName}" Visibility="Collapsed"/>
+                    <DataGridTextColumn Header="Phone Number" Binding="{Binding PhoneNumber}" Visibility="Collapsed"/>
                     <DataGridTextColumn Header="Guests" Binding="{Binding Guests}"/>
                     <DataGridTextColumn Header="Tables" Binding="{Binding Tables}"/>
                     <DataGridTextColumn Header="Note" Binding="{Binding Note}"/>

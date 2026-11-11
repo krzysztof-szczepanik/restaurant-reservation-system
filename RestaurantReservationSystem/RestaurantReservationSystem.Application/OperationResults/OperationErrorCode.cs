@@ -4,6 +4,7 @@
         ReservationNotFound,
         TableNotFound,
         InvalidStatusTransition,
-        ConfigurationAlreadyExists
+        ConfigurationAlreadyExists,
+        ConfigurationNotFound
     }
 }

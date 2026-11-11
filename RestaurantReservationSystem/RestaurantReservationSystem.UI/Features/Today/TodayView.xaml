@@ -24,12 +24,13 @@
         <!-- CONTENT -->
         <Border Grid.Row="1" Style="{StaticResource ViewContentStyle}">
             <controls:DataTable x:Name="ReservationsTable" ItemsSource="{Binding TodayReservations}" EmptyMessage="No reservations for today.">
+
                 <controls:DataTable.Columns>
                     <DataGridTextColumn Header="Date" Binding="{Binding Date}"/>
                     <DataGridTextColumn Header="Time" Binding="{Binding Time}"/>
-                    <DataGridTextColumn Header="First Name" Binding="{Binding FirstName}"/>
-                    <DataGridTextColumn Header="Last Name" Binding="{Binding LastName}"/>
-                    <DataGridTextColumn Header="Phone Number" Binding="{Binding PhoneNumber}"/>
+                    <DataGridTextColumn Header="First Name" Binding="{Binding FirstName}" Visibility="Collapsed"/>
+                    <DataGridTextColumn Header="Last Name" Binding="{Binding LastName}" Visibility="Collapsed"/>
+                    <DataGridTextColumn Header="Phone Number" Binding="{Binding PhoneNumber}" Visibility="Collapsed"/>
                     <DataGridTextColumn Header="Guests" Binding="{Binding Guests}"/>
                     <DataGridTextColumn Header="Tables" Binding="{Binding Tables}"/>
                     <DataGridTextColumn Header="Note" Binding="{Binding Note}"/>
@@ -40,13 +41,14 @@
                                 <Border Width="100" Height="30" HorizontalAlignment="Left" CornerRadius="4" BorderThickness="1" Padding="8,0" Background="{Binding StatusBackground}" BorderBrush="{Binding StatusBorder}">
                                     <Grid>
                                         <TextBlock Text="{Binding Status}" FontSize="12" FontWeight="SemiBold" Foreground="{Binding StatusForeground}" VerticalAlignment="Center"/>
-                                        <TextBlock Text="▾" FontSize="10" Foreground="{Binding StatusForeground}" HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                                        <TextBlock Text="▾" FontSize="10"  Foreground="{Binding StatusForeground}" HorizontalAlignment="Right" VerticalAlignment="Center"/>
                                     </Grid>
                                 </Border>
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>
                 </controls:DataTable.Columns>
+
             </controls:DataTable>
         </Border>
     </Grid>
