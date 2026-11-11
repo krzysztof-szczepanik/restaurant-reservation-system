@@ -8,6 +8,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\RestaurantReservationSystem.Core\RestaurantReservationSystem.Core.csproj" />
+    <ProjectReference Include="..\RestaurantReservationSystem.Infrastructure\RestaurantReservationSystem.Infrastructure.csproj" />
   </ItemGroup>
 
 </Project>

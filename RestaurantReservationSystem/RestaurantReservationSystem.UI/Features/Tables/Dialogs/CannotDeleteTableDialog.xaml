@@ -1,0 +1,22 @@
+﻿<UserControl x:Class="RestaurantReservationSystem.UI.Features.Tables.Dialogs.CannotDeleteTableDialog"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:controls="clr-namespace:RestaurantReservationSystem.UI.Controls">
+
+    <controls:Dialog Header="Cannot Delete Table" Width="480">
+
+        <!-- CONTENT -->
+        <controls:Dialog.DialogContent>
+            <StackPanel>
+                <TextBlock Text="This table cannot be deleted because it is assigned to reservations." FontSize="14" FontWeight="SemiBold" Foreground="{StaticResource PrimaryText}" TextWrapping="Wrap" Margin="0,0,0,8"/>
+                <TextBlock Text="Remove the table from its reservations before deleting it." FontSize="13" Foreground="{StaticResource SecondaryText}" TextWrapping="Wrap"/>
+            </StackPanel>
+        </controls:Dialog.DialogContent>
+
+        <!-- FOOTER RIGHT -->
+        <controls:Dialog.FooterRight>
+            <Button Content="OK" Style="{StaticResource PrimaryButtonStyle}" Click="Ok_Click"/>
+        </controls:Dialog.FooterRight>
+
+    </controls:Dialog>
+</UserControl>

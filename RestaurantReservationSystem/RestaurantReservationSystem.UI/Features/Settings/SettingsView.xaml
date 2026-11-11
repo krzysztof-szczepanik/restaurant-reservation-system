@@ -1,0 +1,31 @@
+﻿<UserControl x:Class="RestaurantReservationSystem.UI.Features.Settings.SettingsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             mc:Ignorable="d"
+             d:DesignHeight="640" d:DesignWidth="992">
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- HEADER -->
+        <Border Grid.Row="0" Style="{StaticResource ViewHeaderStyle}">
+            <TextBlock Text="Settings" Style="{StaticResource ViewTitleStyle}"/>
+        </Border>
+
+        <!-- CONTENT -->
+        <Border Grid.Row="1" Style="{StaticResource ViewContentPaddedStyle}">
+            <StackPanel>
+                <TextBlock Text="RESET APPLICATION" FontSize="13" FontWeight="SemiBold" Foreground="{StaticResource PrimaryText}" Margin="0,0,0,12"/>
+                <TextBlock Text="Resetting the application permanently deletes all reservations, tables, and the initial configuration." FontSize="14" Foreground="{StaticResource SecondaryText}" TextWrapping="Wrap" Margin="0,0,0,8"/>
+                <TextBlock Text="After the reset, the application will return to Initial Setup." FontSize="14" Foreground="{StaticResource SecondaryText}" TextWrapping="Wrap" Margin="0,0,0,24"/>
+
+                <Button Content="Reset Application" HorizontalAlignment="Right" Style="{StaticResource OutlineDangerButtonStyle}" Click="Reset_Click"/>
+            </StackPanel>
+        </Border>
+    </Grid>
+</UserControl>

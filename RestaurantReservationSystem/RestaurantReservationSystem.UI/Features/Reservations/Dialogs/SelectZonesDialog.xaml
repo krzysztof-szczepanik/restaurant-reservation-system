@@ -1,0 +1,38 @@
+<UserControl
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:controls="clr-namespace:RestaurantReservationSystem.UI.Controls"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Class="RestaurantReservationSystem.UI.Features.Reservations.Dialogs.SelectZonesDialog">
+    <controls:Dialog Header="Select Zones" Width="480">
+        <controls:Dialog.DialogContent>
+            <ScrollViewer MaxHeight="440" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                <StackPanel>
+                    <StackPanel Margin="0,0,0,16">
+                        <TextBox Height="36" VerticalContentAlignment="Center" Padding="12,0" Foreground="{StaticResource SecondaryText}" Text="Search zones" Margin="0,0,0,16" Style="{StaticResource ReservationFormTextBoxStyle}" />
+                        <Border Background="{StaticResource Surface}" BorderBrush="{StaticResource Border}" BorderThickness="1" CornerRadius="6" Padding="12" Height="220">
+                            <ScrollViewer VerticalScrollBarVisibility="Auto">
+                                <StackPanel>
+                                    <Border Background="#EFF6FF" CornerRadius="4" Padding="8,8" Margin="0,0,0,4">
+                                        <CheckBox Content="Main Hall" IsChecked="True" Foreground="{StaticResource PrimaryText}" FontSize="13" />
+                                    </Border>
+                                    <Border Background="Transparent" CornerRadius="4" Padding="8,8" Margin="0,0,0,4">
+                                        <CheckBox Content="Terrace" IsChecked="False" Foreground="{StaticResource PrimaryText}" FontSize="13" />
+                                    </Border>
+                                    <Border Background="Transparent" CornerRadius="4" Padding="8,8">
+                                        <CheckBox Content="No zone" IsChecked="False" Foreground="{StaticResource PrimaryText}" FontSize="13" />
+                                    </Border>
+                                </StackPanel>
+                            </ScrollViewer>
+                        </Border>
+                    </StackPanel>
+                    <TextBlock Text="Selected zones: 1" FontSize="13" FontWeight="SemiBold" Foreground="{StaticResource PrimaryText}" HorizontalAlignment="Left" />
+                </StackPanel>
+            </ScrollViewer>
+        </controls:Dialog.DialogContent>
+        <controls:Dialog.FooterRight>
+            <StackPanel Orientation="Horizontal">
+                <Button Content="Cancel" Height="36" Margin="0,0,8,0" Click="Cancel_Click" Style="{StaticResource SecondaryButtonStyle}" />
+                <Button Content="Confirm" Height="36" Click="Confirm_Click" Style="{StaticResource PrimaryButtonStyle}" />
+            </StackPanel>
+        </controls:Dialog.FooterRight>
+    </controls:Dialog>
+</UserControl>

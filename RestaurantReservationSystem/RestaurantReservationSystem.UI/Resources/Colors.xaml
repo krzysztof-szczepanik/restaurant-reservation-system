@@ -1,0 +1,35 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!-- BACKGROUNDS -->
+    <SolidColorBrush x:Key="Surface" Color="#FFFFFF"/>
+    <SolidColorBrush x:Key="Background" Color="#F8FAFC"/>
+
+    <!-- BORDERS -->
+    <SolidColorBrush x:Key="Border" Color="#E2E8F0"/>
+
+    <!-- PRIMARY -->
+    <SolidColorBrush x:Key="Primary" Color="#2563EB"/>
+    <SolidColorBrush x:Key="PrimaryHover" Color="#1D4ED8"/>
+
+    <!-- SECONDARY -->
+    <SolidColorBrush x:Key="SecondaryHover" Color="#F8FAFC"/>
+
+    <!-- TEXT -->
+    <SolidColorBrush x:Key="PrimaryText" Color="#0F172A"/>
+    <SolidColorBrush x:Key="SecondaryText" Color="#64748B"/>
+
+    <!-- DANGER -->
+    <SolidColorBrush x:Key="Danger" Color="#DC2626"/>
+    <SolidColorBrush x:Key="DangerHover" Color="#C92222"/>
+    <SolidColorBrush x:Key="DangerLight" Color="#FEF2F2"/>
+
+    <!-- SIDEBAR COLORS -->
+    <SolidColorBrush x:Key="SidebarHover" Color="#F5F9FF"/>
+    <SolidColorBrush x:Key="SidebarSelected" Color="#EFF6FF"/>
+    <SolidColorBrush x:Key="MainWindowTopBorder" Color="#D1D9E3"/>
+
+    <!-- DIALOG OVERLAY -->
+    <SolidColorBrush x:Key="DialogOverlay" Color="#800F172A"/>
+
+</ResourceDictionary>

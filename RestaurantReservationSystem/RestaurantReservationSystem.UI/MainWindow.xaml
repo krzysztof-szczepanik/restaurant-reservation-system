@@ -1,12 +1,29 @@
-﻿<Window x:Class="RestaurantReservation.MainWindow"
+﻿<Window x:Class="RestaurantReservationSystem.UI.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:RestaurantReservation"
-        mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
+        xmlns:controls="clr-namespace:RestaurantReservationSystem.UI.Controls.Sidebar"
+        xmlns:dialog="clr-namespace:RestaurantReservationSystem.UI.Controls"
+        Height="720" Width="1280"
+        Background="{StaticResource Background}"
+        WindowStartupLocation="CenterScreen">
+
     <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="240"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+
+        <!-- SIDEBAR -->
+        <controls:Sidebar x:Name="MainSidebar" Grid.Column="0" NavigationRequested="Sidebar_NavigationRequested"/>
+
+        <!-- MAIN CONTENT -->
+        <ContentControl x:Name="MainContentArea" Grid.Column="1" Margin="24"/>
+
+        <!-- TOP BORDER -->
+        <Border Grid.Column="0" Grid.ColumnSpan="2" Height="1" VerticalAlignment="Top" Background="{StaticResource MainWindowTopBorder}" Panel.ZIndex="10" IsHitTestVisible="False"/>
+
+        <!-- DIALOG HOST -->
+        <dialog:DialogHost x:Name="MainDialogHost" Grid.Column="0" Grid.ColumnSpan="2" Panel.ZIndex="1000"/>
 
     </Grid>
 </Window>

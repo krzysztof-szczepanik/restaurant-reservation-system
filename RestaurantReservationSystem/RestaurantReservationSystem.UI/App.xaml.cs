@@ -1,47 +1,68 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using RestaurantReservationSystem.Core.Repositories;
+using RestaurantReservationSystem.Application.Interfaces;
+using RestaurantReservationSystem.Application.Services;
 using RestaurantReservationSystem.Infrastructure.Persistence;
-using RestaurantReservationSystem.Infrastructure.Repositories;
 using System.IO;
 using System.Windows;
 
-namespace RestaurantReservationSystem.UI;
+namespace RestaurantReservationSystem.UI {
+    public partial class App : System.Windows.Application {
 
-public partial class App : System.Windows.Application
-{
-    public static IServiceProvider ServiceProvider { get; private set; } = null!;
+        // FIELDS:
+        public static IServiceProvider ServiceProvider { get; private set; } = null!;
 
-    protected override void OnStartup(StartupEventArgs e)
-    {
-        base.OnStartup(e);
 
-        var services = new ServiceCollection();
+        // METHODS:
+        protected override void OnStartup(StartupEventArgs e) {
+            string connectionString;
 
-        string dbPath = ConnectionStringProvider.GetConnectionString();
+            try {
+                connectionString = ConnectionStringProvider.GetConnectionString();
+            } catch (Exception ex) {
+                MessageBox.Show(
+                    $"Failed to initialize the database.\n\n{ex.Message}",
+                    "Database Error",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Error);
 
-        services.AddDbContext<AppDbContext>(options =>
-            options.UseSqlite(dbPath));
+                Shutdown(-1);
+                return;
+            }
 
-        services.AddDbContextFactory<AppDbContext>(options =>
-            options.UseSqlite(dbPath), ServiceLifetime.Scoped);
+            var services = new ServiceCollection();
 
-        services.AddScoped<ITableRepository, TableRepository>();
-        services.AddScoped<IConfigurationRepository, ConfigurationRepository>();
-        services.AddScoped<IReservationRepository, ReservationRepository>();
+            // Database:
+            services.AddDbContext<AppDbContext>(options => options.UseSqlite(connectionString));
 
-        ServiceProvider = services.BuildServiceProvider();
+            // Services:
+            services.AddScoped<IConfigurationService, ConfigurationService>();
+            services.AddScoped<ITableService, TableService>();
+            services.AddScoped<IReservationService, ReservationService>();
 
-        try
-        {
-            using var scope = ServiceProvider.CreateScope();
-            var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-            dbContext.Database.Migrate();
-        }
-        catch (Exception)
-        {
-            Shutdown(-1);
-            throw;
+            ServiceProvider = services.BuildServiceProvider();
+
+            try {
+                using var scope = ServiceProvider.CreateScope();
+                var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+
+                var databasePath = dbContext.Database.GetDbConnection().DataSource;
+
+                if (File.Exists(databasePath)) {
+                    dbContext.Database.Migrate();
+                }
+            } catch (Exception ex) {
+                MessageBox.Show(
+                    $"Failed to initialize the database.\n\n{ex.Message}",
+                    "Database Initialization Error",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Error);
+
+                Shutdown(-1);
+                return;
+            }
+
+            base.OnStartup(e);
         }
     }
 }
