@@ -1,6 +1,0 @@
-<Solution>
-  <Project Path="src/RestaurantReservationSystem.UI/RestaurantReservationSystem.UI.csproj" />
-  <Project Path="src/RestaurantReservationSystem.Application/RestaurantReservationSystem.Application.csproj" />
-  <Project Path="src/RestaurantReservationSystem.Core/RestaurantReservationSystem.Core.csproj" />
-  <Project Path="src/RestaurantReservationSystem.Infrastructure/RestaurantReservationSystem.Infrastructure.csproj" />
-</Solution>
