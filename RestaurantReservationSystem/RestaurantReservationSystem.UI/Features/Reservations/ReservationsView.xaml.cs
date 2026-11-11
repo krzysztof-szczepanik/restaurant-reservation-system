@@ -1,3 +1,5 @@
+using Microsoft.Extensions.DependencyInjection;
+using RestaurantReservationSystem.Application.Interfaces;
 using RestaurantReservationSystem.UI.Features.Reservations.Dialogs;
 using System.Windows;
 using System.Windows.Controls;
@@ -16,6 +18,8 @@ namespace RestaurantReservationSystem.UI.Features.Reservations {
         // CONSTRUCTORS:
         public ReservationsView() {
             InitializeComponent();
+
+            Loaded += ReservationsView_Loaded;
         }
 
 
@@ -24,10 +28,41 @@ namespace RestaurantReservationSystem.UI.Features.Reservations {
             return Window.GetWindow(this) as MainWindow;
         }
 
+        private async Task LoadConfigurationAsync() {
+            using var scope = App.ServiceProvider.CreateScope();
 
+            var configurationService = scope.ServiceProvider.GetRequiredService<IConfigurationService>();
+            var configuration = await configurationService.GetAsync();
+
+            if (configuration is null) {
+                throw new InvalidOperationException("Initial configuration does not exist.");
+            }
+
+            ReservationsDataGrid.Columns[2].Visibility = configuration.FirstNameVisible ? Visibility.Visible : Visibility.Collapsed;
+            ReservationsDataGrid.Columns[3].Visibility = configuration.LastNameVisible ? Visibility.Visible : Visibility.Collapsed;
+            ReservationsDataGrid.Columns[4].Visibility = configuration.PhoneNumberVisible ? Visibility.Visible : Visibility.Collapsed;
+        }
+
+        
         // EVENT HANDLERS:
+        private async void ReservationsView_Loaded(object sender, RoutedEventArgs e) {
+            Loaded -= ReservationsView_Loaded;
+
+            try {
+                await LoadConfigurationAsync();
+            } catch (Exception ex) {
+                MessageBox.Show(
+                    $"Failed to load reservation configuration.\n\n{ex.Message}",
+                    "Configuration Error",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Error);
+            }
+        }
+
         private void MainGrid_MouseDown(object sender, MouseButtonEventArgs e) {
-            if (!SearchBox.IsKeyboardFocusWithin) { return; }
+            if (!SearchBox.IsKeyboardFocusWithin) {
+                return;
+            }
 
             FocusManager.SetFocusedElement(FocusManager.GetFocusScope(SearchBox), null);
             Keyboard.ClearFocus();
@@ -36,7 +71,9 @@ namespace RestaurantReservationSystem.UI.Features.Reservations {
         private void AddReservations_Click(object sender, RoutedEventArgs e) {
             var mainWindow = GetMainWindow();
 
-            if (mainWindow == null) { return; }
+            if (mainWindow is null) {
+                return;
+            }
 
             var dialog = new AddEditReservationDialog();
 
@@ -53,7 +90,9 @@ namespace RestaurantReservationSystem.UI.Features.Reservations {
         private void EditReservations_Click(object sender, RoutedEventArgs e) {
             var mainWindow = GetMainWindow();
 
-            if (mainWindow == null) { return; }
+            if (mainWindow is null) {
+                return;
+            }
 
             var dialog = new AddEditReservationDialog(isEditMode: true);
 
@@ -75,7 +114,9 @@ namespace RestaurantReservationSystem.UI.Features.Reservations {
         private void DeleteReservations_Click(object sender, RoutedEventArgs e) {
             var mainWindow = GetMainWindow();
 
-            if (mainWindow == null) { return; }
+            if (mainWindow is null) {
+                return;
+            }
 
             var dialog = new DeleteReservationsDialog();
 
@@ -92,7 +133,9 @@ namespace RestaurantReservationSystem.UI.Features.Reservations {
         private void Filter_Click(object sender, RoutedEventArgs e) {
             var mainWindow = GetMainWindow();
 
-            if (mainWindow == null) { return; }
+            if (mainWindow is null) {
+                return;
+            }
 
             var dialog = new FilterReservationsDialog();
 

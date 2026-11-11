@@ -1,10 +1,14 @@
-﻿using System.Collections.ObjectModel;
+﻿using Microsoft.Extensions.DependencyInjection;
+using RestaurantReservationSystem.Application.Interfaces;
+using System.Collections.ObjectModel;
+using System.Windows;
 using System.Windows.Controls;
 
 namespace RestaurantReservationSystem.UI.Features.Today {
     public partial class TodayView : UserControl {
 
-        //  !!!!!!!!!! TEST DATA !!!!!!!!!!
+        // PROPERTIES:
+        // !!!!!!!!!! TEST DATA !!!!!!!!!!
         public ObservableCollection<TodayReservationRow> TodayReservations { get; } = new() {
             new("20.10.2026", "18:30", "Anna", "Kowalska", "501 234 567", 6, "Main Hall: Table 2...", "Birthday dinner...", "Expected"),
             new("20.10.2026", "20:00", "Ewa", "Wisniewska", "507 890 123", 5, "Main Hall: Table 7", "Nut allergy.", "Expected"),
@@ -15,16 +19,54 @@ namespace RestaurantReservationSystem.UI.Features.Today {
             new("20.10.2026", "18:30", "Piotr", "Zielinski", "606 789 012", 3, "Main Hall: Table 6", "", "No-show")
         };
 
+
         // CONSTRUCTORS:
         public TodayView() {
             InitializeComponent();
+
             DataContext = this;
+            Loaded += TodayView_Loaded;
+        }
+
+
+        // METHODS:
+        private async Task LoadConfigurationAsync() {
+            using var scope = App.ServiceProvider.CreateScope();
+
+            var configurationService = scope.ServiceProvider.GetRequiredService<IConfigurationService>();
+            var configuration = await configurationService.GetAsync();
+
+            if (configuration is null) {
+                throw new InvalidOperationException("Initial configuration does not exist.");
+            }
+
+            ReservationsTable.Columns[2].Visibility = configuration.FirstNameVisible ? Visibility.Visible : Visibility.Collapsed;
+            ReservationsTable.Columns[3].Visibility = configuration.LastNameVisible ? Visibility.Visible : Visibility.Collapsed;
+            ReservationsTable.Columns[4].Visibility = configuration.PhoneNumberVisible ? Visibility.Visible : Visibility.Collapsed;
+        }
+
+
+        // EVENT HANDLERS:
+        private async void TodayView_Loaded(object sender, RoutedEventArgs e) {
+            Loaded -= TodayView_Loaded;
+
+            try {
+                await LoadConfigurationAsync();
+            } catch (Exception ex) {
+                MessageBox.Show(
+                    $"Failed to load reservation configuration.\n\n{ex.Message}",
+                    "Configuration Error",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Error);
+            }
         }
     }
 
 
-    //  !!!!!!!!!! TEST STRUCT !!!!!!!!!!
+    // !!!!!!!!!! TEST STRUCT !!!!!!!!!!
     public class TodayReservationRow {
+
+        // PROPERTIES:
         public string Date { get; }
         public string Time { get; }
         public string FirstName { get; }
@@ -62,7 +104,10 @@ namespace RestaurantReservationSystem.UI.Features.Today {
             _ => "#64748B"
         };
 
+
+        // CONSTRUCTORS:
         public TodayReservationRow(string date, string time, string firstName, string lastName, string phoneNumber, int guests, string tables, string note, string status) {
+
             Date = date;
             Time = time;
             FirstName = firstName;

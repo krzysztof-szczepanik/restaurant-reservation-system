@@ -2,7 +2,10 @@
 
 namespace RestaurantReservationSystem.Core.Models {
     public class InitialConfiguration {
+
+        // PROPERTIES:
         public int Id { get; set; } = 1;
+
         public bool FirstNameVisible { get; set; } = true;
         public bool FirstNameRequired { get; set; } = false;
         public bool LastNameVisible { get; set; } = true;

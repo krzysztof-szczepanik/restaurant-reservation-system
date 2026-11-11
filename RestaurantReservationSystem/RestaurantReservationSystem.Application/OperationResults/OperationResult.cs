@@ -12,8 +12,7 @@
         // CONSTRUCTORS:
 
         // Success
-        protected OperationResult(
-        IReadOnlyList<ValidationError>? warnings) {
+        protected OperationResult(IReadOnlyList<ValidationError>? warnings) {
             IsSuccess = true;
             ValidationErrors = [];
             Warnings = warnings?.ToArray() ?? [];

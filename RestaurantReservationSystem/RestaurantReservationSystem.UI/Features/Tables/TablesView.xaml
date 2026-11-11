@@ -23,39 +23,6 @@
                     <Button Content="Edit" Margin="0,0,8,0" Style="{StaticResource SecondaryButtonStyle}" Click="Edit_Click"/>
                     <Button Content="Delete" Style="{StaticResource SecondaryButtonStyle}" Click="DeleteTab_Click"/>
                 </StackPanel>
-
-                <!--
-                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
-
-                    <Button Content="Add" Margin="0,0,8,0" Style="{StaticResource PrimaryButtonStyle}" Click="Add_Click"/>
-
-                    <Button Content="Edit" Margin="0,0,8,0" Click="Edit_Click">
-                        <Button.Style>
-                            <Style TargetType="Button" BasedOn="{StaticResource SecondaryButtonStyle}">
-                                <Style.Triggers>
-                                    <DataTrigger Binding="{Binding SelectedItem, ElementName=TablesDataGrid}" Value="{x:Null}">
-                                        <Setter Property="IsEnabled" Value="False"/>
-                                    </DataTrigger>
-                                </Style.Triggers>
-                            </Style>
-                        </Button.Style>
-                    </Button>
-
-                    <Button Content="Delete" Click="DeleteTab_Click">
-                        <Button.Style>
-                            <Style TargetType="Button" BasedOn="{StaticResource SecondaryButtonStyle}">
-                                <Style.Triggers>
-                                    <DataTrigger Binding="{Binding SelectedItem, ElementName=TablesDataGrid}" Value="{x:Null}">
-                                        <Setter Property="IsEnabled" Value="False"/>
-                                    </DataTrigger>
-                                </Style.Triggers>
-                            </Style>
-                        </Button.Style>
-                    </Button>
-
-                </StackPanel>
-                -->
-
             </Grid>
         </Border>
 
@@ -63,9 +30,9 @@
         <Border Grid.Row="1" Style="{StaticResource ViewContentStyle}">
             <controls:DataTable x:Name="TablesDataGrid" EmptyMessage="No tables yet.">
                 <controls:DataTable.Columns>
-                    <DataGridTextColumn Header="Number" Binding="{Binding Number}"/>
-                    <DataGridTextColumn Header="Label" Binding="{Binding Label}"/>
-                    <DataGridTextColumn Header="Zone" Binding="{Binding Zone}"/>
+                    <DataGridTextColumn Header="Number" Binding="{Binding Number}" Visibility="Collapsed"/>
+                    <DataGridTextColumn Header="Label" Binding="{Binding Label}" Visibility="Collapsed"/>
+                    <DataGridTextColumn Header="Zone" Binding="{Binding Zone}" Visibility="Collapsed"/>
                     <DataGridTextColumn Header="Seats" Binding="{Binding Seats}"/>
                 </controls:DataTable.Columns>
             </controls:DataTable>

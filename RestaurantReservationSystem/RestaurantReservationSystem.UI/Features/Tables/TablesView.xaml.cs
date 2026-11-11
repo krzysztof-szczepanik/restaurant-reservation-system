@@ -1,4 +1,7 @@
-﻿using RestaurantReservationSystem.UI.Features.Tables.Dialogs;
+﻿using Microsoft.Extensions.DependencyInjection;
+using RestaurantReservationSystem.Application.Interfaces;
+using RestaurantReservationSystem.Core.Enums;
+using RestaurantReservationSystem.UI.Features.Tables.Dialogs;
 using System.Windows;
 using System.Windows.Controls;
 
@@ -8,6 +11,8 @@ namespace RestaurantReservationSystem.UI.Features.Tables {
         // CONSTRUCTORS:
         public TablesView() {
             InitializeComponent();
+
+            Loaded += TablesView_Loaded;
         }
 
 
@@ -16,8 +21,45 @@ namespace RestaurantReservationSystem.UI.Features.Tables {
             return Window.GetWindow(this) as MainWindow;
         }
 
+        private async Task LoadConfigurationAsync() {
+            using var scope = App.ServiceProvider.CreateScope();
+
+            var configurationService = scope.ServiceProvider.GetRequiredService<IConfigurationService>();
+            var configuration = await configurationService.GetAsync();
+
+            if (configuration is null) {
+                throw new InvalidOperationException("Initial configuration does not exist.");
+            }
+
+            TablesDataGrid.Columns[0].Visibility = configuration.TableNumberVisible ? Visibility.Visible : Visibility.Collapsed;
+            TablesDataGrid.Columns[1].Visibility = configuration.TableLabelVisible ? Visibility.Visible : Visibility.Collapsed;
+            TablesDataGrid.Columns[2].Visibility = configuration.TableZoneVisible ? Visibility.Visible : Visibility.Collapsed;
+
+            if (configuration.TableIdentifierOrder == TableIdentifierOrder.LabelThenNumber) {
+                TablesDataGrid.Columns[0].DisplayIndex = 1;
+                TablesDataGrid.Columns[1].DisplayIndex = 0;
+            } else {
+                TablesDataGrid.Columns[0].DisplayIndex = 0;
+                TablesDataGrid.Columns[1].DisplayIndex = 1;
+            }
+        }
+
 
         // EVENT HANDLERS:
+        private async void TablesView_Loaded(object sender, RoutedEventArgs e) {
+            Loaded -= TablesView_Loaded;
+
+            try {
+                await LoadConfigurationAsync();
+            } catch (Exception ex) {
+                MessageBox.Show(
+                    $"Failed to load table configuration.\n\n{ex.Message}",
+                    "Configuration Error",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Error);
+            }
+        }
+
         private void Add_Click(object sender, RoutedEventArgs e) {
             var mainWindow = GetMainWindow();
 
@@ -30,7 +72,7 @@ namespace RestaurantReservationSystem.UI.Features.Tables {
             dialog.CancelRequested += (_, _) => mainWindow.DialogHost.Close(false);
 
             dialog.SaveRequested += (_, _) => {
-                // TODO: Dodawanie stolika.
+                // TODO: Add table.
                 mainWindow.DialogHost.Close(true);
             };
 
@@ -39,10 +81,10 @@ namespace RestaurantReservationSystem.UI.Features.Tables {
 
         private void Edit_Click(object sender, RoutedEventArgs e) {
 
-            // Tymczasowo zakomentowane do testów:
-            //if (TablesDataGrid.SelectedItem == null) {
-            //    return;
-            //}
+            // Temporarily disabled for testing:
+            // if (TablesDataGrid.SelectedItem == null) {
+            //     return;
+            // }
 
             var mainWindow = GetMainWindow();
 
@@ -50,13 +92,13 @@ namespace RestaurantReservationSystem.UI.Features.Tables {
                 return;
             }
 
-            // TODO: Pobranie danych zaznaczonego stolika.
+            // TODO: Load selected table data.
             var dialog = new AddEditTableDialog("5", "E", "Terrace", "4");
 
             dialog.CancelRequested += (_, _) => mainWindow.DialogHost.Close(false);
 
             dialog.SaveRequested += (_, _) => {
-                // TODO: Aktualizacja stolika.
+                // TODO: Update table.
                 mainWindow.DialogHost.Close(true);
             };
 
@@ -75,7 +117,7 @@ namespace RestaurantReservationSystem.UI.Features.Tables {
             dialog.CancelRequested += (_, _) => mainWindow.DialogHost.Close(false);
 
             dialog.DeleteRequested += (_, _) => {
-                // TODO: Usuwanie stolika.
+                // TODO: Delete table.
                 mainWindow.DialogHost.Close(true);
             };
 
