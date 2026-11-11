@@ -1,0 +1,9 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/RestaurantReservationSystem.Application/RestaurantReservationSystem.Application.csproj" />
+    <Project Path="src/RestaurantReservationSystem.Core/RestaurantReservationSystem.Core.csproj" />
+    <Project Path="src/RestaurantReservationSystem.Infrastructure/RestaurantReservationSystem.Infrastructure.csproj" />
+    <Project Path="src/RestaurantReservationSystem.UI/RestaurantReservationSystem.UI.csproj" />
+  </Folder>
+  <Folder Name="/tests/" />
+</Solution>
