@@ -5,5 +5,7 @@
     <Project Path="src/RestaurantReservationSystem.Infrastructure/RestaurantReservationSystem.Infrastructure.csproj" />
     <Project Path="src/RestaurantReservationSystem.UI/RestaurantReservationSystem.UI.csproj" />
   </Folder>
-  <Folder Name="/tests/" />
+  <Folder Name="/tests/">
+    <Project Path="tests/RestaurantReservationSystem.Tests/RestaurantReservationSystem.Tests.csproj" />
+  </Folder>
 </Solution>

@@ -13,12 +13,14 @@ namespace RestaurantReservationSystem.Application.Services {
         // FIELDS:
         private readonly AppDbContext _context;
         private readonly IConfigurationService _configurationService;
+        private readonly IDbContextFactory<AppDbContext> _contextFactory;
 
 
         // CONSTRUCTORS:
-        public ReservationService(AppDbContext context, IConfigurationService configurationService) {
+        public ReservationService(AppDbContext context, IConfigurationService configurationService, IDbContextFactory<AppDbContext> contextFactory) {
             _context = context;
             _configurationService = configurationService;
+            _contextFactory = contextFactory;
         }
 
 
@@ -95,7 +97,9 @@ namespace RestaurantReservationSystem.Application.Services {
                 .Distinct()
                 .ToList();
 
-            var query = _context.Reservations
+            using var searchContext = await _contextFactory.CreateDbContextAsync();
+
+            var query = searchContext.Reservations
                 .AsNoTracking()
                 .Include(r => r.Tables)
                 .AsQueryable();
@@ -541,6 +545,7 @@ namespace RestaurantReservationSystem.Application.Services {
 
             var errors = new List<ValidationError>();
 
+            using var searchContext = await _contextFactory.CreateDbContextAsync();
             // Zones:
             if (config.TableZoneVisible && criteria.Zones.Count > 0) {
                 var selectedZones = criteria.Zones
@@ -548,7 +553,7 @@ namespace RestaurantReservationSystem.Application.Services {
                     .Distinct(StringComparer.OrdinalIgnoreCase)
                     .ToList();
 
-                var availableZones = await _context.Tables
+                var availableZones = await searchContext.Tables
                     .AsNoTracking()
                     .Select(t => t.Zone)
                     .ToListAsync();
@@ -574,7 +579,7 @@ namespace RestaurantReservationSystem.Application.Services {
                     return errors;
                 }
 
-                var existingIds = await _context.Tables
+                var existingIds = await searchContext.Tables
                     .AsNoTracking()
                     .Where(t => selectedTableIds.Contains(t.Id))
                     .Select(t => t.Id)

@@ -34,11 +34,12 @@ namespace RestaurantReservationSystem.UI {
 
             // Database:
             services.AddDbContext<AppDbContext>(options => options.UseSqlite(connectionString));
-
+            services.AddDbContextFactory<AppDbContext>(options => options.UseSqlite(connectionString));
             // Services:
             services.AddScoped<IConfigurationService, ConfigurationService>();
             services.AddScoped<ITableService, TableService>();
             services.AddScoped<IReservationService, ReservationService>();
+            services.AddScoped<IApplicationResetService, ApplicationResetService>();
 
             ServiceProvider = services.BuildServiceProvider();
 
@@ -61,7 +62,6 @@ namespace RestaurantReservationSystem.UI {
                 Shutdown(-1);
                 return;
             }
-
             base.OnStartup(e);
         }
     }
