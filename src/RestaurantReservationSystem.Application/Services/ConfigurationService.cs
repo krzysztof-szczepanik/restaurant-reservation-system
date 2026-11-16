@@ -10,22 +10,26 @@ namespace RestaurantReservationSystem.Application.Services {
 
         // FIELDS:
         private const int ConfigurationId = 1;
-        private readonly AppDbContext _context;
+        private readonly IDbContextFactory<AppDbContext> _contextFactory;
 
 
         // CONSTRUCTORS:
-        public ConfigurationService(AppDbContext context) {
-            _context = context;
+        public ConfigurationService(IDbContextFactory<AppDbContext> contextFactory) {
+            _contextFactory = contextFactory;
         }
 
 
         // METHODS:
         public async Task<InitialConfiguration?> GetAsync() {
-            if (!await _context.Database.CanConnectAsync()) {
+            await using var context = await _contextFactory.CreateDbContextAsync();
+
+            if (!await context.Database.CanConnectAsync()) {
                 return null;
             }
 
-            return await _context.InitialConfigurations.FindAsync(ConfigurationId);
+            return await context.InitialConfigurations
+                .AsNoTracking()
+                .FirstOrDefaultAsync(c => c.Id == ConfigurationId);
         }
 
         public async Task<OperationResult<InitialConfiguration>> SaveInitialAsync(InitialConfiguration configuration) {
@@ -43,12 +47,14 @@ namespace RestaurantReservationSystem.Application.Services {
                 return OperationResult<InitialConfiguration>.Failure(OperationErrorCode.ConfigurationAlreadyExists, "Configuration already exists!");
             }
 
-            await _context.Database.MigrateAsync();
+            await using var context = await _contextFactory.CreateDbContextAsync();
+
+            await context.Database.MigrateAsync();
 
             configuration.Id = ConfigurationId;
 
-            await _context.InitialConfigurations.AddAsync(configuration);
-            await _context.SaveChangesAsync();
+            await context.InitialConfigurations.AddAsync(configuration);
+            await context.SaveChangesAsync();
 
             return OperationResult<InitialConfiguration>.Success(configuration);
         }
