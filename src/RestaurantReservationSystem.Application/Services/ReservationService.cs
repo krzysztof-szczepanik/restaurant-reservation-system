@@ -11,22 +11,23 @@ namespace RestaurantReservationSystem.Application.Services {
     public class ReservationService : IReservationService {
 
         // FIELDS:
-        private readonly AppDbContext _context;
-        private readonly IConfigurationService _configurationService;
         private readonly IDbContextFactory<AppDbContext> _contextFactory;
+        private readonly IConfigurationService _configurationService;
 
 
         // CONSTRUCTORS:
-        public ReservationService(AppDbContext context, IConfigurationService configurationService, IDbContextFactory<AppDbContext> contextFactory) {
-            _context = context;
-            _configurationService = configurationService;
+        public ReservationService(IDbContextFactory<AppDbContext> contextFactory, IConfigurationService configurationService) {
             _contextFactory = contextFactory;
+            _configurationService = configurationService;
         }
 
 
         // METHODS:
         public async Task<Reservation?> GetByIdAsync(int reservationId) {
-            return await _context.Reservations
+            await using var context = await _contextFactory.CreateDbContextAsync();
+
+            return await context.Reservations
+                .AsNoTracking()
                 .Include(r => r.Tables)
                 .FirstOrDefaultAsync(r => r.Id == reservationId);
         }
@@ -35,7 +36,10 @@ namespace RestaurantReservationSystem.Application.Services {
             var today = DateOnly.FromDateTime(DateTime.Now);
             var config = await _configurationService.GetAsync();
 
-            var reservations = await _context.Reservations
+            await using var context = await _contextFactory.CreateDbContextAsync();
+
+            var reservations = await context.Reservations
+                .AsNoTracking()
                 .Include(r => r.Tables)
                 .Where(r => r.Date == today)
                 .ToListAsync();
@@ -97,7 +101,7 @@ namespace RestaurantReservationSystem.Application.Services {
                 .Distinct()
                 .ToList();
 
-            using var searchContext = await _contextFactory.CreateDbContextAsync();
+            await using var searchContext = await _contextFactory.CreateDbContextAsync();
 
             var query = searchContext.Reservations
                 .AsNoTracking()
@@ -208,13 +212,15 @@ namespace RestaurantReservationSystem.Application.Services {
                 return OperationResult<Reservation>.Validation(validationErrors);
             }
 
-            var tablesResult = await GetAssignedTablesAsync(reservation);
+            await using var context = await _contextFactory.CreateDbContextAsync();
+
+            var tablesResult = await GetAssignedTablesAsync(context, reservation);
 
             if (tablesResult.Errors.Count > 0) {
                 return OperationResult<Reservation>.Validation(tablesResult.Errors);
             }
 
-            var availabilityErrors = await CheckTableAvailabilityAsync(reservation.Date, reservation.Time, tablesResult.Tables);
+            var availabilityErrors = await CheckTableAvailabilityAsync(context, reservation.Date, reservation.Time, tablesResult.Tables);
 
             if (availabilityErrors.Count > 0) {
                 return OperationResult<Reservation>.Validation(availabilityErrors);
@@ -227,8 +233,8 @@ namespace RestaurantReservationSystem.Application.Services {
             reservation.Status = ReservationStatus.Expected;
             reservation.Tables = tablesResult.Tables;
 
-            _context.Reservations.Add(reservation);
-            await _context.SaveChangesAsync();
+            context.Reservations.Add(reservation);
+            await context.SaveChangesAsync();
 
             return OperationResult<Reservation>.Success(reservation, warnings);
         }
@@ -236,7 +242,9 @@ namespace RestaurantReservationSystem.Application.Services {
         public async Task<OperationResult<Reservation>> UpdateAsync(Reservation reservation, bool unlockCancelledOrNoShow = false) {
             ArgumentNullException.ThrowIfNull(reservation);
 
-            var existingReservation = await _context.Reservations
+            await using var context = await _contextFactory.CreateDbContextAsync();
+
+            var existingReservation = await context.Reservations
                 .Include(r => r.Tables)
                 .FirstOrDefaultAsync(r => r.Id == reservation.Id);
 
@@ -264,13 +272,13 @@ namespace RestaurantReservationSystem.Application.Services {
                 return OperationResult<Reservation>.Validation(validationErrors);
             }
 
-            var tablesResult = await GetAssignedTablesAsync(reservation);
+            var tablesResult = await GetAssignedTablesAsync(context, reservation);
 
             if (tablesResult.Errors.Count > 0) {
                 return OperationResult<Reservation>.Validation(tablesResult.Errors);
             }
 
-            var availabilityErrors = await CheckTableAvailabilityAsync(reservation.Date, reservation.Time, tablesResult.Tables, existingReservation.Id);
+            var availabilityErrors = await CheckTableAvailabilityAsync(context, reservation.Date, reservation.Time, tablesResult.Tables, existingReservation.Id);
 
             if (availabilityErrors.Count > 0) {
                 return OperationResult<Reservation>.Validation(availabilityErrors);
@@ -292,27 +300,30 @@ namespace RestaurantReservationSystem.Application.Services {
                 existingReservation.Status = ReservationStatus.Expected;
             }
 
-            await _context.SaveChangesAsync();
+            await context.SaveChangesAsync();
 
             return OperationResult<Reservation>.Success(existingReservation, warnings);
         }
 
         public async Task<OperationResult> DeleteAsync(int reservationId) {
-            var reservation = await _context.Reservations.FindAsync(reservationId);
+            await using var context = await _contextFactory.CreateDbContextAsync();
+
+            var reservation = await context.Reservations.FindAsync(reservationId);
 
             if (reservation is null) {
                 return OperationResult.Failure(OperationErrorCode.ReservationNotFound, "Reservation was not found.");
             }
 
-            _context.Reservations.Remove(reservation);
-            await _context.SaveChangesAsync();
+            context.Reservations.Remove(reservation);
+            await context.SaveChangesAsync();
 
             return OperationResult.Success();
         }
 
         public async Task<OperationResult> ChangeStatusAsync(int reservationId, ReservationStatus status) {
+            await using var context = await _contextFactory.CreateDbContextAsync();
 
-            var reservation = await _context.Reservations.FindAsync(reservationId);
+            var reservation = await context.Reservations.FindAsync(reservationId);
 
             if (reservation is null) {
                 return OperationResult.Failure(OperationErrorCode.ReservationNotFound, "Reservation was not found.");
@@ -333,15 +344,17 @@ namespace RestaurantReservationSystem.Application.Services {
             }
 
             reservation.Status = status;
-            await _context.SaveChangesAsync();
+            await context.SaveChangesAsync();
 
             return OperationResult.Success();
         }
 
         public async Task RemovePastReservationsAsync() {
+            await using var context = await _contextFactory.CreateDbContextAsync();
+
             var today = DateOnly.FromDateTime(DateTime.Now);
 
-            var pastReservations = await _context.Reservations
+            var pastReservations = await context.Reservations
                 .Where(r => r.Date < today)
                 .ToListAsync();
 
@@ -349,8 +362,8 @@ namespace RestaurantReservationSystem.Application.Services {
                 return;
             }
 
-            _context.Reservations.RemoveRange(pastReservations);
-            await _context.SaveChangesAsync();
+            context.Reservations.RemoveRange(pastReservations);
+            await context.SaveChangesAsync();
         }
 
 
@@ -545,7 +558,8 @@ namespace RestaurantReservationSystem.Application.Services {
 
             var errors = new List<ValidationError>();
 
-            using var searchContext = await _contextFactory.CreateDbContextAsync();
+            await using var searchContext = await _contextFactory.CreateDbContextAsync();
+
             // Zones:
             if (config.TableZoneVisible && criteria.Zones.Count > 0) {
                 var selectedZones = criteria.Zones
@@ -593,7 +607,7 @@ namespace RestaurantReservationSystem.Application.Services {
             return errors;
         }
 
-        private async Task<(List<Table> Tables, List<ValidationError> Errors)> GetAssignedTablesAsync(Reservation reservation) {
+        private async Task<(List<Table> Tables, List<ValidationError> Errors)> GetAssignedTablesAsync(AppDbContext context, Reservation reservation) {
 
             var errors = new List<ValidationError>();
             var requestedIds = reservation.Tables?
@@ -612,7 +626,7 @@ namespace RestaurantReservationSystem.Application.Services {
                 return ([], errors);
             }
 
-            var tables = await _context.Tables
+            var tables = await context.Tables
                 .Where(t => requestedIds.Contains(t.Id))
                 .ToListAsync();
 
@@ -625,12 +639,12 @@ namespace RestaurantReservationSystem.Application.Services {
             return (tables, errors);
         }
 
-        private async Task<List<ValidationError>> CheckTableAvailabilityAsync(DateOnly date, TimeOnly time, IReadOnlyList<Table> tables, int? excludedReservationId = null) {
+        private async Task<List<ValidationError>> CheckTableAvailabilityAsync(AppDbContext context, DateOnly date, TimeOnly time, IReadOnlyList<Table> tables, int? excludedReservationId = null) {
 
             var errors = new List<ValidationError>();
             var tableIds = tables.Select(t => t.Id).ToList();
 
-            var conflictingTableIds = await _context.Reservations
+            var conflictingTableIds = await context.Reservations
                 .AsNoTracking()
                 .Where(r => r.Date == date &&
                     r.Time <= time &&

@@ -33,8 +33,8 @@ namespace RestaurantReservationSystem.UI {
             var services = new ServiceCollection();
 
             // Database:
-            services.AddDbContext<AppDbContext>(options => options.UseSqlite(connectionString));
             services.AddDbContextFactory<AppDbContext>(options => options.UseSqlite(connectionString));
+
             // Services:
             services.AddScoped<IConfigurationService, ConfigurationService>();
             services.AddScoped<ITableService, TableService>();

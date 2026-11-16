@@ -1,27 +1,26 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using RestaurantReservationSystem.Application.OperationResults;
 using RestaurantReservationSystem.Application.Services;
 using RestaurantReservationSystem.Core.Models;
 using RestaurantReservationSystem.Tests.Fixtures;
-using RestaurantReservationSystem.Application.OperationResults;
-using Xunit;
 
-namespace RestaurantReservationSystem.Tests.Services
-{
-    public class ConfigurationServiceTests : DatabaseTestBase
-    {
+namespace RestaurantReservationSystem.Tests.Services {
+    public class ConfigurationServiceTests : DatabaseTestBase {
 
+        // FIELDS:
         private readonly ConfigurationService _configurationService;
 
-        public ConfigurationServiceTests()
-        {
-            _configurationService = new ConfigurationService(Context);
+
+        // CONSTRUCTORS:
+        public ConfigurationServiceTests() {
+            _configurationService = new ConfigurationService(_contextFactory);
         }
 
+
+        // METHODS:
         [Fact]
-        public async Task SaveInitialAsync_ValidConfiguration_SavesToDatabaseAndReturnsSuccess()
-        {
-            var config = new InitialConfiguration
-            {
+        public async Task SaveInitialAsync_ValidConfiguration_SavesToDatabaseAndReturnsSuccess() {
+            var config = new InitialConfiguration {
                 FirstNameVisible = true,
                 FirstNameRequired = true,
                 TableNumberVisible = true,
@@ -33,17 +32,15 @@ namespace RestaurantReservationSystem.Tests.Services
             Assert.True(result.IsSuccess);
             Assert.NotNull(result.Data);
             Assert.Equal(1, result.Data.Id);
-            Assert.Equal(1, await Context.InitialConfigurations.CountAsync());
+            Assert.Equal(1, await _context.InitialConfigurations.CountAsync());
         }
 
         [Fact]
-        public async Task SaveInitialAsync_ConfigurationAlreadyExists_ReturnsFailure()
-        {
-            Context.InitialConfigurations.Add(new InitialConfiguration { Id = 1 });
-            await Context.SaveChangesAsync();
+        public async Task SaveInitialAsync_ConfigurationAlreadyExists_ReturnsFailure() {
+            _context.InitialConfigurations.Add(new InitialConfiguration { Id = 1 });
+            await _context.SaveChangesAsync();
 
-            var newConfig = new InitialConfiguration
-            {
+            var newConfig = new InitialConfiguration {
                 FirstNameVisible = true,
                 FirstNameRequired = true,
                 TableNumberVisible = true,
@@ -57,10 +54,8 @@ namespace RestaurantReservationSystem.Tests.Services
         }
 
         [Fact]
-        public async Task SaveInitialAsync_NoCustomerFieldsSelected_ReturnsValidationError()
-        {
-            var config = new InitialConfiguration
-            {
+        public async Task SaveInitialAsync_NoCustomerFieldsSelected_ReturnsValidationError() {
+            var config = new InitialConfiguration {
                 FirstNameVisible = false,
                 LastNameVisible = false,
                 PhoneNumberVisible = false,
@@ -73,14 +68,12 @@ namespace RestaurantReservationSystem.Tests.Services
 
             Assert.False(result.IsSuccess);
             Assert.Contains(result.ValidationErrors, e => e.FieldName == "ReservationFields");
-            Assert.Equal(0, await Context.InitialConfigurations.CountAsync());
+            Assert.Equal(0, await _context.InitialConfigurations.CountAsync());
         }
 
         [Fact]
-        public async Task SaveInitialAsync_NoTableFieldsSelected_ReturnsValidationError()
-        {
-            var config = new InitialConfiguration
-            {
+        public async Task SaveInitialAsync_NoTableFieldsSelected_ReturnsValidationError() {
+            var config = new InitialConfiguration {
                 FirstNameVisible = true,
                 FirstNameRequired = true,
 
@@ -92,15 +85,14 @@ namespace RestaurantReservationSystem.Tests.Services
 
             Assert.False(result.IsSuccess);
             Assert.Contains(result.ValidationErrors, e => e.FieldName == "TableFields");
-            Assert.Equal(0, await Context.InitialConfigurations.CountAsync());
+            Assert.Equal(0, await _context.InitialConfigurations.CountAsync());
         }
 
         [Fact]
-        public async Task GetAsync_WhenConfigurationExists_ReturnsConfiguration()
-        {
+        public async Task GetAsync_WhenConfigurationExists_ReturnsConfiguration() {
             var config = new InitialConfiguration { Id = 1, FirstNameRequired = true };
-            Context.InitialConfigurations.Add(config);
-            await Context.SaveChangesAsync();
+            _context.InitialConfigurations.Add(config);
+            await _context.SaveChangesAsync();
 
             var result = await _configurationService.GetAsync();
 
@@ -109,8 +101,7 @@ namespace RestaurantReservationSystem.Tests.Services
         }
 
         [Fact]
-        public async Task GetAsync_WhenDatabaseIsEmpty_ReturnsNull()
-        {
+        public async Task GetAsync_WhenDatabaseIsEmpty_ReturnsNull() {
             var result = await _configurationService.GetAsync();
 
             Assert.Null(result);

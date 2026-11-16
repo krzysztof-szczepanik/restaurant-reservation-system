@@ -1,34 +1,32 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using RestaurantReservationSystem.Application.Interfaces;
 using RestaurantReservationSystem.Infrastructure.Persistence;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
-namespace RestaurantReservationSystem.Application.Services
-{
-    public class ApplicationResetService : IApplicationResetService
-    {
-        private readonly AppDbContext _context;
+namespace RestaurantReservationSystem.Application.Services {
+    public class ApplicationResetService : IApplicationResetService {
 
-        public ApplicationResetService(AppDbContext context)
-        {
-            _context = context;
+        // FIELDS:
+        private readonly IDbContextFactory<AppDbContext> _contextFactory;
+
+
+        // CONSTRUCTORS:
+        public ApplicationResetService(IDbContextFactory<AppDbContext> contextFactory) {
+            _contextFactory = contextFactory;
         }
 
-        public async Task ResetAsync()
-        {
-            using var transaction = await _context.Database.BeginTransactionAsync();
 
-            try
-            {
-                await _context.Reservations.ExecuteDeleteAsync();
-                await _context.Tables.ExecuteDeleteAsync();
-                await _context.InitialConfigurations.ExecuteDeleteAsync();
+        // METHODS:
+        public async Task ResetAsync() {
+            await using var context = await _contextFactory.CreateDbContextAsync();
+            await using var transaction = await context.Database.BeginTransactionAsync();
+
+            try {
+                await context.Reservations.ExecuteDeleteAsync();
+                await context.Tables.ExecuteDeleteAsync();
+                await context.InitialConfigurations.ExecuteDeleteAsync();
+
                 await transaction.CommitAsync();
-            }
-            catch
-            {
+            } catch {
                 await transaction.RollbackAsync();
                 throw;
             }

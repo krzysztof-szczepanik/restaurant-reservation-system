@@ -4,43 +4,26 @@ using RestaurantReservationSystem.Application.OperationResults;
 using RestaurantReservationSystem.Application.Services;
 using RestaurantReservationSystem.Core.Enums;
 using RestaurantReservationSystem.Core.Models;
-using RestaurantReservationSystem.Infrastructure.Persistence;
 using RestaurantReservationSystem.Tests.Fixtures;
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using Xunit;
 
-namespace RestaurantReservationSystem.Tests.Services
-{
-    public class ReservationServiceTests : DatabaseTestBase
-    {
+namespace RestaurantReservationSystem.Tests.Services {
+    public class ReservationServiceTests : DatabaseTestBase {
+
+        // FIELDS:
         private readonly ReservationService _reservationService;
         private readonly ConfigurationService _configurationService;
-        private class TestDbContextFactory : IDbContextFactory<AppDbContext>
-        {
-            private readonly DbContextOptions<AppDbContext> _options;
-            public TestDbContextFactory(DbContextOptions<AppDbContext> options) => _options = options;
-            public AppDbContext CreateDbContext() => new AppDbContext(_options);
+
+
+        // CONSTRUCTORS:
+        public ReservationServiceTests() {
+            _configurationService = new ConfigurationService(_contextFactory);
+            _reservationService = new ReservationService(_contextFactory, _configurationService);
         }
 
-        public ReservationServiceTests()
-        {
-            _configurationService = new ConfigurationService(Context);
 
-            var options = new DbContextOptionsBuilder<AppDbContext>()
-                .UseSqlite(Context.Database.GetDbConnection())
-                .Options;
-
-            var factory = new TestDbContextFactory(options);
-
-            _reservationService = new ReservationService(Context, _configurationService, factory);
-        }
-
-        private async Task SeedInitialConfigurationAsync()
-        {
-            var config = new InitialConfiguration
-            {
+        // METHODS:
+        private async Task SeedInitialConfigurationAsync() {
+            var config = new InitialConfiguration {
                 FirstNameVisible = true,
                 FirstNameRequired = true,
                 TableNumberVisible = true,
@@ -52,16 +35,14 @@ namespace RestaurantReservationSystem.Tests.Services
         }
 
         [Fact]
-        public async Task AddAsync_ValidReservation_SavesToDatabaseAndReturnsSuccess()
-        {
+        public async Task AddAsync_ValidReservation_SavesToDatabaseAndReturnsSuccess() {
             await SeedInitialConfigurationAsync();
 
             var table = new Table { Number = 1, Seats = 4 };
-            Context.Tables.Add(table);
-            await Context.SaveChangesAsync();
+            _context.Tables.Add(table);
+            await _context.SaveChangesAsync();
 
-            var reservation = new Reservation
-            {
+            var reservation = new Reservation {
                 FirstName = "Jan",
                 Date = DateOnly.FromDateTime(DateTime.Now.AddDays(1)),
                 Time = new TimeOnly(18, 0),
@@ -72,20 +53,18 @@ namespace RestaurantReservationSystem.Tests.Services
             var result = await _reservationService.AddAsync(reservation);
 
             Assert.True(result.IsSuccess);
-            Assert.Equal(1, await Context.Reservations.CountAsync());
+            Assert.Equal(1, await _context.Reservations.CountAsync());
             Assert.Equal(ReservationStatus.Expected, result.Data!.Status);
         }
 
         [Fact]
-        public async Task AddAsync_TableAlreadyBooked_ReturnsAvailabilityError()
-        {
+        public async Task AddAsync_TableAlreadyBooked_ReturnsAvailabilityError() {
             await SeedInitialConfigurationAsync();
 
             var table = new Table { Number = 2, Seats = 4 };
-            Context.Tables.Add(table);
+            _context.Tables.Add(table);
 
-            var existingRes = new Reservation
-            {
+            var existingRes = new Reservation {
                 FirstName = "Anna",
                 Date = DateOnly.FromDateTime(DateTime.Now.AddDays(1)),
                 Time = new TimeOnly(18, 0),
@@ -93,11 +72,10 @@ namespace RestaurantReservationSystem.Tests.Services
                 Status = ReservationStatus.Expected,
                 Tables = new List<Table> { table }
             };
-            Context.Reservations.Add(existingRes);
-            await Context.SaveChangesAsync();
+            _context.Reservations.Add(existingRes);
+            await _context.SaveChangesAsync();
 
-            var conflictingRes = new Reservation
-            {
+            var conflictingRes = new Reservation {
                 FirstName = "Piotr",
                 Date = DateOnly.FromDateTime(DateTime.Now.AddDays(1)),
                 Time = new TimeOnly(18, 0),
@@ -109,21 +87,19 @@ namespace RestaurantReservationSystem.Tests.Services
 
             Assert.False(result.IsSuccess);
             Assert.Contains(result.ValidationErrors, e => e.FieldName == "Tables");
-            Assert.Equal(1, await Context.Reservations.CountAsync());
+            Assert.Equal(1, await _context.Reservations.CountAsync());
         }
 
         [Fact]
-        public async Task GetFilteredAsync_UsesDbContextFactory_AndFiltersByDate()
-        {
+        public async Task GetFilteredAsync_UsesDbContextFactory_AndFiltersByDate() {
             await SeedInitialConfigurationAsync();
 
             var table = new Table { Number = 3, Seats = 2 };
-            Context.Tables.Add(table);
+            _context.Tables.Add(table);
 
             var targetDate = DateOnly.FromDateTime(DateTime.Now.AddDays(5));
 
-            Context.Reservations.Add(new Reservation
-            {
+            _context.Reservations.Add(new Reservation {
                 FirstName = "Test1",
                 Date = targetDate,
                 Time = new TimeOnly(12, 0),
@@ -131,8 +107,7 @@ namespace RestaurantReservationSystem.Tests.Services
                 Tables = new List<Table> { table }
             });
 
-            Context.Reservations.Add(new Reservation
-            {
+            _context.Reservations.Add(new Reservation {
                 FirstName = "Test2",
                 Date = targetDate.AddDays(1),
                 Time = new TimeOnly(12, 0),
@@ -140,10 +115,9 @@ namespace RestaurantReservationSystem.Tests.Services
                 Tables = new List<Table> { table }
             });
 
-            await Context.SaveChangesAsync();
+            await _context.SaveChangesAsync();
 
-            var criteria = new ReservationFilterCriteria
-            {
+            var criteria = new ReservationFilterCriteria {
                 Date = new ValueFilter<DateOnly> { Mode = FilterValueMode.Exact, Exact = targetDate },
                 Time = new ValueFilter<TimeOnly>(),
                 Guests = new ValueFilter<int>()
@@ -156,45 +130,43 @@ namespace RestaurantReservationSystem.Tests.Services
             Assert.Equal("Test1", result.Data![0].FirstName);
         }
         [Fact]
-        public async Task ChangeStatusAsync_ValidTransition_ReturnsSuccess()
-        {
+        public async Task ChangeStatusAsync_ValidTransition_ReturnsSuccess() {
             var table = new Table { Number = 4, Seats = 2 };
-            Context.Tables.Add(table);
+            _context.Tables.Add(table);
 
-            var reservation = new Reservation
-            {
+            var reservation = new Reservation {
                 Date = DateOnly.FromDateTime(DateTime.Now),
                 Time = new TimeOnly(12, 0),
                 Guests = 2,
                 Status = ReservationStatus.Expected,
                 Tables = new List<Table> { table }
             };
-            Context.Reservations.Add(reservation);
-            await Context.SaveChangesAsync();
+            _context.Reservations.Add(reservation);
+            await _context.SaveChangesAsync();
 
             var result = await _reservationService.ChangeStatusAsync(reservation.Id, ReservationStatus.Arrived);
 
             Assert.True(result.IsSuccess);
-            var updatedReservation = await Context.Reservations.FindAsync(reservation.Id);
+            var updatedReservation = await _context.Reservations
+                .AsNoTracking()
+                .FirstOrDefaultAsync(r => r.Id == reservation.Id);
             Assert.Equal(ReservationStatus.Arrived, updatedReservation!.Status);
         }
 
         [Fact]
-        public async Task ChangeStatusAsync_InvalidTransition_ReturnsFailure()
-        {
+        public async Task ChangeStatusAsync_InvalidTransition_ReturnsFailure() {
             var table = new Table { Number = 5, Seats = 2 };
-            Context.Tables.Add(table);
+            _context.Tables.Add(table);
 
-            var reservation = new Reservation
-            {
+            var reservation = new Reservation {
                 Date = DateOnly.FromDateTime(DateTime.Now),
                 Time = new TimeOnly(12, 0),
                 Guests = 2,
                 Status = ReservationStatus.Cancelled,
                 Tables = new List<Table> { table }
             };
-            Context.Reservations.Add(reservation);
-            await Context.SaveChangesAsync();
+            _context.Reservations.Add(reservation);
+            await _context.SaveChangesAsync();
 
             var result = await _reservationService.ChangeStatusAsync(reservation.Id, ReservationStatus.Expected);
 
@@ -203,45 +175,43 @@ namespace RestaurantReservationSystem.Tests.Services
         }
 
         [Fact]
-        public async Task RemovePastReservationsAsync_RemovesOnlyPastDates()
-        {
+        public async Task RemovePastReservationsAsync_RemovesOnlyPastDates() {
             var today = DateOnly.FromDateTime(DateTime.Now);
             var pastDate = today.AddDays(-1);
             var futureDate = today.AddDays(1);
 
-            Context.Reservations.Add(new Reservation { Date = pastDate, Time = new TimeOnly(12, 0), Guests = 1 });
-            Context.Reservations.Add(new Reservation { Date = today, Time = new TimeOnly(12, 0), Guests = 1 });
-            Context.Reservations.Add(new Reservation { Date = futureDate, Time = new TimeOnly(12, 0), Guests = 1 });
-            await Context.SaveChangesAsync();
+            _context.Reservations.Add(new Reservation { Date = pastDate, Time = new TimeOnly(12, 0), Guests = 1 });
+            _context.Reservations.Add(new Reservation { Date = today, Time = new TimeOnly(12, 0), Guests = 1 });
+            _context.Reservations.Add(new Reservation { Date = futureDate, Time = new TimeOnly(12, 0), Guests = 1 });
+            await _context.SaveChangesAsync();
 
             await _reservationService.RemovePastReservationsAsync();
 
-            var remainingReservations = await Context.Reservations.ToListAsync();
+            var remainingReservations = await _context.Reservations
+                .AsNoTracking()
+                .ToListAsync();
             Assert.Equal(2, remainingReservations.Count);
             Assert.DoesNotContain(remainingReservations, r => r.Date == pastDate);
         }
         [Fact]
-        public async Task UpdateAsync_ValidReservation_UpdatesData()
-        {
+        public async Task UpdateAsync_ValidReservation_UpdatesData() {
             await SeedInitialConfigurationAsync();
             var table = new Table { Number = 6, Seats = 4 };
-            Context.Tables.Add(table);
+            _context.Tables.Add(table);
 
-            var reservation = new Reservation
-            {
+            var reservation = new Reservation {
                 FirstName = "Adam",
                 Date = DateOnly.FromDateTime(DateTime.Now.AddDays(2)),
                 Time = new TimeOnly(15, 0),
                 Guests = 2,
                 Tables = new List<Table> { table }
             };
-            Context.Reservations.Add(reservation);
-            await Context.SaveChangesAsync();
+            _context.Reservations.Add(reservation);
+            await _context.SaveChangesAsync();
 
-            Context.ChangeTracker.Clear();
+            _context.ChangeTracker.Clear();
 
-            var updatedReservation = new Reservation
-            {
+            var updatedReservation = new Reservation {
                 Id = reservation.Id,
                 FirstName = "AdamZaktualizowany",
                 Date = DateOnly.FromDateTime(DateTime.Now.AddDays(3)),
@@ -253,29 +223,29 @@ namespace RestaurantReservationSystem.Tests.Services
             var result = await _reservationService.UpdateAsync(updatedReservation);
 
             Assert.True(result.IsSuccess);
-            var dbReservation = await Context.Reservations.FindAsync(reservation.Id);
+            var dbReservation = await _context.Reservations
+                .AsNoTracking()
+                .FirstOrDefaultAsync(r => r.Id == reservation.Id);
             Assert.Equal("AdamZaktualizowany", dbReservation!.FirstName);
             Assert.Equal(3, dbReservation.Guests);
         }
 
         [Fact]
-        public async Task UpdateAsync_LockedReservationWithoutUnlockFlag_ReturnsFailure()
-        {
+        public async Task UpdateAsync_LockedReservationWithoutUnlockFlag_ReturnsFailure() {
             await SeedInitialConfigurationAsync();
             var table = new Table { Number = 7, Seats = 2 };
-            Context.Tables.Add(table);
+            _context.Tables.Add(table);
 
-            var reservation = new Reservation
-            {
+            var reservation = new Reservation {
                 Date = DateOnly.FromDateTime(DateTime.Now.AddDays(1)),
                 Time = new TimeOnly(12, 0),
                 Guests = 2,
                 Status = ReservationStatus.Cancelled,
                 Tables = new List<Table> { table }
             };
-            Context.Reservations.Add(reservation);
-            await Context.SaveChangesAsync();
-            Context.ChangeTracker.Clear();
+            _context.Reservations.Add(reservation);
+            await _context.SaveChangesAsync();
+            _context.ChangeTracker.Clear();
 
             var result = await _reservationService.UpdateAsync(reservation, unlockCancelledOrNoShow: false);
 
@@ -284,27 +254,24 @@ namespace RestaurantReservationSystem.Tests.Services
         }
 
         [Fact]
-        public async Task DeleteAsync_ExistingReservation_RemovesFromDatabase()
-        {
+        public async Task DeleteAsync_ExistingReservation_RemovesFromDatabase() {
             var reservation = new Reservation { Date = DateOnly.FromDateTime(DateTime.Now), Time = new TimeOnly(12, 0), Guests = 1 };
-            Context.Reservations.Add(reservation);
-            await Context.SaveChangesAsync();
+            _context.Reservations.Add(reservation);
+            await _context.SaveChangesAsync();
 
             var result = await _reservationService.DeleteAsync(reservation.Id);
 
             Assert.True(result.IsSuccess);
-            Assert.Equal(0, await Context.Reservations.CountAsync());
+            Assert.Equal(0, await _context.Reservations.CountAsync());
         }
 
         [Fact]
-        public async Task AddAsync_PastDate_ReturnsValidationError()
-        {
+        public async Task AddAsync_PastDate_ReturnsValidationError() {
             await SeedInitialConfigurationAsync();
             var table = new Table { Number = 8, Seats = 2 };
-            Context.Tables.Add(table);
+            _context.Tables.Add(table);
 
-            var reservation = new Reservation
-            {
+            var reservation = new Reservation {
                 FirstName = "Test",
                 Date = DateOnly.FromDateTime(DateTime.Now.AddDays(-1)),
                 Time = new TimeOnly(12, 0),
@@ -316,7 +283,7 @@ namespace RestaurantReservationSystem.Tests.Services
 
             Assert.False(result.IsSuccess);
             Assert.Contains(result.ValidationErrors, e => e.FieldName == "Date");
-            Assert.Equal(0, await Context.Reservations.CountAsync());
+            Assert.Equal(0, await _context.Reservations.CountAsync());
         }
     }
 }

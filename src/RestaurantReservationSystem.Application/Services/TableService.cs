@@ -9,24 +9,31 @@ namespace RestaurantReservationSystem.Application.Services {
     public class TableService : ITableService {
 
         // FIELDS:
-        private readonly AppDbContext _context;
+        private readonly IDbContextFactory<AppDbContext> _contextFactory;
         private readonly IConfigurationService _configurationService;
 
 
         // CONSTRUCTORS:
-        public TableService(AppDbContext context, IConfigurationService configurationService) {
-            _context = context;
+        public TableService(IDbContextFactory<AppDbContext> contextFactory, IConfigurationService configurationService) {
+            _contextFactory = contextFactory;
             _configurationService = configurationService;
         }
 
 
         // METHODS:
         public async Task<IReadOnlyList<Table>> GetAllAsync() {
-            return await _context.Tables.ToListAsync();
+            await using var context = await _contextFactory.CreateDbContextAsync();
+
+            return await context.Tables
+                .AsNoTracking()
+                .ToListAsync();
         }
 
         public async Task<Table?> GetByIdAsync(int tableId) {
-            return await _context.Tables
+            await using var context = await _contextFactory.CreateDbContextAsync();
+
+            return await context.Tables
+                .AsNoTracking()
                 .FirstOrDefaultAsync(t => t.Id == tableId);
         }
 
@@ -52,12 +59,14 @@ namespace RestaurantReservationSystem.Application.Services {
                 return OperationResult<Table>.Validation(validationErrors);
             }
 
-            if (!await IsTableUniqueAsync(table, config)) {
+            await using var context = await _contextFactory.CreateDbContextAsync();
+
+            if (!await IsTableUniqueAsync(context, table, config)) {
                 return OperationResult<Table>.Validation([ new ValidationError("TableIdentifier", "A table with the same identifier already exists.") ]);
             }
 
-            _context.Tables.Add(table);
-            await _context.SaveChangesAsync();
+            context.Tables.Add(table);
+            await context.SaveChangesAsync();
 
             return OperationResult<Table>.Success(table);
         }
@@ -65,7 +74,9 @@ namespace RestaurantReservationSystem.Application.Services {
         public async Task<OperationResult<Table>> UpdateAsync(Table table) {
             ArgumentNullException.ThrowIfNull(table);
 
-            var existingTable = await _context.Tables.FindAsync(table.Id);
+            await using var context = await _contextFactory.CreateDbContextAsync();
+
+            var existingTable = await context.Tables.FindAsync(table.Id);
 
             if (existingTable is null) {
                 return OperationResult<Table>.Failure(OperationErrorCode.TableNotFound, "Table was not found.");
@@ -85,7 +96,7 @@ namespace RestaurantReservationSystem.Application.Services {
                 return OperationResult<Table>.Validation(validationErrors);
             }
 
-            if (!await IsTableUniqueAsync(table, config)) {
+            if (!await IsTableUniqueAsync(context, table, config)) {
                 return OperationResult<Table>.Validation([ new ValidationError("TableIdentifier", "A table with the same identifier already exists.") ]);
             }
 
@@ -94,27 +105,29 @@ namespace RestaurantReservationSystem.Application.Services {
             if (config.TableZoneVisible) existingTable.Zone = table.Zone;
             existingTable.Seats = table.Seats;
 
-            await _context.SaveChangesAsync();
+            await context.SaveChangesAsync();
 
             return OperationResult<Table>.Success(existingTable);
         }
 
         public async Task<OperationResult> DeleteAsync(int tableId) {
-            var table = await _context.Tables.FindAsync(tableId);
+            await using var context = await _contextFactory.CreateDbContextAsync();
+
+            var table = await context.Tables.FindAsync(tableId);
 
             if (table is null) {
                 return OperationResult.Failure(OperationErrorCode.TableNotFound, "Table was not found.");
             }
 
-            var hasReservations = await _context.Reservations
+            var hasReservations = await context.Reservations
                 .AnyAsync(r => r.Tables.Any(t => t.Id == tableId));
 
             if (hasReservations) {
                 return OperationResult.Failure(OperationErrorCode.TableHasReservations, "Cannot delete a table associated with reservations.");
             }
 
-            _context.Tables.Remove(table);
-            await _context.SaveChangesAsync();
+            context.Tables.Remove(table);
+            await context.SaveChangesAsync();
 
             return OperationResult.Success();
         }
@@ -191,8 +204,9 @@ namespace RestaurantReservationSystem.Application.Services {
             return errors;
         }
 
-        private async Task<bool> IsTableUniqueAsync(Table table, InitialConfiguration config) {
-            var otherTables = await _context.Tables
+        private async Task<bool> IsTableUniqueAsync(AppDbContext context, Table table, InitialConfiguration config) {
+            var otherTables = await context.Tables
+                .AsNoTracking()
                 .Where(t => t.Id != table.Id)
                 .ToListAsync();
 
