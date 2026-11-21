@@ -7,62 +7,64 @@
              mc:Ignorable="d"
              d:DesignHeight="640" d:DesignWidth="992">
 
-    <Grid Background="Transparent" MouseDown="MainGrid_MouseDown">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
-        </Grid.RowDefinitions>
+	<Grid Background="Transparent" MouseDown="MainGrid_MouseDown">
+		<Grid.RowDefinitions>
+			<RowDefinition Height="Auto"/>
+			<RowDefinition Height="*"/>
+		</Grid.RowDefinitions>
 
-        <!-- HEADER -->
-        <Border Grid.Row="0" Style="{StaticResource ViewHeaderStyle}">
-            <Grid>
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
-                </Grid.RowDefinitions>
+		<!-- HEADER -->
+		<Border Grid.Row="0" Style="{StaticResource ViewHeaderStyle}">
+			<Grid>
+				<Grid.RowDefinitions>
+					<RowDefinition Height="Auto"/>
+					<RowDefinition Height="Auto"/>
+				</Grid.RowDefinitions>
 
-                <!-- TITLE AND ACTIONS -->
-                <Grid Grid.Row="0">
-                    <TextBlock Text="Reservations" Style="{StaticResource ViewTitleStyle}"/>
+				<!-- TITLE AND ACTIONS -->
+				<Grid Grid.Row="0">
+					<TextBlock Text="Reservations" Style="{StaticResource ViewTitleStyle}"/>
 
-                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
-                        <Button Content="Add" Margin="0,0,8,0" Style="{StaticResource PrimaryButtonStyle}" Click="AddReservations_Click"/>
-                        <Button Content="Edit" Margin="0,0,8,0" Style="{StaticResource SecondaryButtonStyle}" Click="EditReservations_Click"/>
-                        <Button Content="Delete" Style="{StaticResource SecondaryButtonStyle}" Click="DeleteReservations_Click"/>
-                    </StackPanel>
-                </Grid>
+					<StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+						<Button Content="Add" Margin="0,0,8,0" Style="{StaticResource PrimaryButtonStyle}" Click="AddReservations_Click"/>
+						<Button x:Name="EditButton" Content="Edit" Margin="0,0,8,0" IsEnabled="False" Style="{StaticResource SecondaryButtonStyle}" Click="EditReservations_Click"/>
+						<Button x:Name="DeleteButton" Content="Delete" IsEnabled="False" Style="{StaticResource SecondaryButtonStyle}" Click="DeleteReservations_Click"/>
+					</StackPanel>
+				</Grid>
 
-                <!-- SEARCH AND FILTER -->
-                <Grid Grid.Row="1" Margin="0,20,0,0">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="12"/>
-                        <ColumnDefinition Width="Auto"/>
-                    </Grid.ColumnDefinitions>
+				<!-- SEARCH AND FILTER -->
+				<Grid Grid.Row="1" Margin="0,20,0,0">
+					<Grid.ColumnDefinitions>
+						<ColumnDefinition Width="*"/>
+						<ColumnDefinition Width="12"/>
+						<ColumnDefinition Width="Auto"/>
+					</Grid.ColumnDefinitions>
 
-                    <!-- SEARCH -->
-                    <TextBox x:Name="SearchBox" Grid.Column="0" Style="{StaticResource SearchTextBoxStyle}"/>
+					<!-- SEARCH -->
+					<TextBox x:Name="SearchBox" Grid.Column="0" Style="{StaticResource SearchTextBoxStyle}"/>
 
-                    <!-- FILTER -->
-                    <Button x:Name="FilterButton" Grid.Column="2" Content="Filter" Tag="False" Style="{StaticResource FilterButtonStyle}" Click="Filter_Click"/>
-                </Grid>
-            </Grid>
-        </Border>
+					<!-- FILTER -->
+					<Button x:Name="FilterButton" Grid.Column="2" Content="Filter" Tag="False" Style="{StaticResource FilterButtonStyle}" Click="Filter_Click"/>
+				</Grid>
+			</Grid>
+		</Border>
 
-        <!-- CONTENT -->
-        <Border Grid.Row="1" Style="{StaticResource ViewContentStyle}">
-            <controls:DataTable x:Name="ReservationsDataGrid" EmptyMessage="No reservations yet.">
-                <controls:DataTable.Columns>
-                    <DataGridTextColumn Header="Date" Binding="{Binding Date, StringFormat={}{0:dd.MM.yyyy}}"/>
-                    <DataGridTextColumn Header="Time" Binding="{Binding Time, StringFormat={}{0:hh\:mm}}"/>
-                    <DataGridTextColumn Header="First Name" Binding="{Binding FirstName}" Visibility="Collapsed"/>
-                    <DataGridTextColumn Header="Last Name" Binding="{Binding LastName}" Visibility="Collapsed"/>
-                    <DataGridTextColumn Header="Phone Number" Binding="{Binding PhoneNumber}" Visibility="Collapsed"/>
-                    <DataGridTextColumn Header="Guests" Binding="{Binding Guests}"/>
-                    <DataGridTextColumn Header="Tables" Binding="{Binding Tables}"/>
-                    <DataGridTextColumn Header="Note" Binding="{Binding Note}"/>
-                </controls:DataTable.Columns>
-            </controls:DataTable>
-        </Border>
-    </Grid>
+		<!-- CONTENT -->
+		<Border Grid.Row="1" Style="{StaticResource ViewContentStyle}">
+			<controls:DataTable x:Name="ReservationsDataGrid"
+                                EmptyMessage="No reservations yet."
+                                SelectionChanged="ReservationsDataGrid_SelectionChanged">
+				<controls:DataTable.Columns>
+					<DataGridTextColumn Header="Date" Binding="{Binding Date, StringFormat={}{0:dd.MM.yyyy}}"/>
+					<DataGridTextColumn Header="Time" Binding="{Binding Time, StringFormat={}{0:HH\:mm}}"/>
+					<DataGridTextColumn Header="First Name" Binding="{Binding FirstName}" Visibility="Collapsed"/>
+					<DataGridTextColumn Header="Last Name" Binding="{Binding LastName}" Visibility="Collapsed"/>
+					<DataGridTextColumn Header="Phone Number" Binding="{Binding PhoneDisplay}" Visibility="Collapsed"/>
+					<DataGridTextColumn Header="Guests" Binding="{Binding Guests}"/>
+					<DataGridTextColumn Header="Tables" Binding="{Binding TablesDisplay}"/>
+					<DataGridTextColumn Header="Note" Binding="{Binding NoteDisplay}"/>
+				</controls:DataTable.Columns>
+			</controls:DataTable>
+		</Border>
+	</Grid>
 </UserControl>
