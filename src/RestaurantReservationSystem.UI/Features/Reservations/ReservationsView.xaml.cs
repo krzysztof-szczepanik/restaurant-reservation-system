@@ -26,6 +26,7 @@ namespace RestaurantReservationSystem.UI.Features.Reservations
 			public int Guests => Source.Guests;
 			public string TablesDisplay { get; init; } = string.Empty;
 			public string NoteDisplay { get; init; } = string.Empty;
+			public string? NoteTooltip => string.IsNullOrWhiteSpace(Source.Note) ? null : Source.Note;
 		}
 
 
@@ -117,6 +118,17 @@ namespace RestaurantReservationSystem.UI.Features.Reservations
 			UpdateActionButtonsState();
 		}
 
+		private static bool HasNonSearchFilters(ReservationFilterCriteria criteria)
+		{
+			bool hasDate = criteria.Date.Exact.HasValue || criteria.Date.From.HasValue || criteria.Date.To.HasValue;
+			bool hasTime = criteria.Time.Exact.HasValue || criteria.Time.From.HasValue || criteria.Time.To.HasValue;
+			bool hasGuests = criteria.Guests.Exact.HasValue || criteria.Guests.From.HasValue || criteria.Guests.To.HasValue;
+			bool hasZones = criteria.Zones.Count > 0;
+			bool hasTables = criteria.TableIds.Count > 0;
+
+			return hasDate || hasTime || hasGuests || hasZones || hasTables;
+		}
+
 		private void UpdateActionButtonsState()
 		{
 			bool hasSelection = ReservationsDataGrid.SelectedItem is ReservationRowItem;
@@ -191,6 +203,41 @@ namespace RestaurantReservationSystem.UI.Features.Reservations
 			{
 				MessageBox.Show(
 					$"Failed to load reservations.\n\n{ex.Message}",
+					"Error",
+					MessageBoxButton.OK,
+					MessageBoxImage.Error);
+			}
+		}
+
+		private async void SearchBox_TextChanged(object sender, TextChangedEventArgs e)
+		{
+			if (!IsLoaded)
+			{
+				return;
+			}
+
+			string? searchText = string.IsNullOrWhiteSpace(SearchBox.Text) ? null : SearchBox.Text;
+
+			_activeCriteria = new ReservationFilterCriteria
+			{
+				SearchText = searchText,
+				Date = _activeCriteria.Date,
+				Time = _activeCriteria.Time,
+				Guests = _activeCriteria.Guests,
+				Zones = _activeCriteria.Zones,
+				ZoneMatchMode = _activeCriteria.ZoneMatchMode,
+				TableIds = _activeCriteria.TableIds,
+				TableMatchMode = _activeCriteria.TableMatchMode
+			};
+
+			try
+			{
+				await LoadReservationsAsync();
+			}
+			catch (Exception ex)
+			{
+				MessageBox.Show(
+					$"Failed to filter reservations.\n\n{ex.Message}",
 					"Error",
 					MessageBoxButton.OK,
 					MessageBoxImage.Error);
@@ -453,12 +500,31 @@ namespace RestaurantReservationSystem.UI.Features.Reservations
 			}
 
 			var dialog = new FilterReservationsDialog();
+			dialog.ApplyConfiguration(_configuration);
+			dialog.LoadCriteria(_activeCriteria);
 
 			dialog.CancelRequested += (_, _) => mainWindow.DialogHost.Close(dialog, false);
 
-			dialog.ApplyRequested += (_, _) =>
+			dialog.ApplyRequested += async (_, _) =>
 			{
+				string? currentSearch = string.IsNullOrWhiteSpace(SearchBox.Text) ? null : SearchBox.Text;
+
+				_activeCriteria = new ReservationFilterCriteria
+				{
+					SearchText = currentSearch,
+					Date = dialog.BuiltCriteria.Date,
+					Time = dialog.BuiltCriteria.Time,
+					Guests = dialog.BuiltCriteria.Guests,
+					Zones = dialog.BuiltCriteria.Zones,
+					ZoneMatchMode = dialog.BuiltCriteria.ZoneMatchMode,
+					TableIds = dialog.BuiltCriteria.TableIds,
+					TableMatchMode = dialog.BuiltCriteria.TableMatchMode
+				};
+
+				HasActiveFilters = HasNonSearchFilters(_activeCriteria);
+
 				mainWindow.DialogHost.Close(dialog, true);
+				await LoadReservationsAsync();
 			};
 
 			mainWindow.DialogHost.Show(dialog);

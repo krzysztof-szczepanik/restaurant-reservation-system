@@ -41,7 +41,7 @@
 					</Grid.ColumnDefinitions>
 
 					<!-- SEARCH -->
-					<TextBox x:Name="SearchBox" Grid.Column="0" Style="{StaticResource SearchTextBoxStyle}"/>
+					<TextBox x:Name="SearchBox" Grid.Column="0" Style="{StaticResource SearchTextBoxStyle}" TextChanged="SearchBox_TextChanged"/>
 
 					<!-- FILTER -->
 					<Button x:Name="FilterButton" Grid.Column="2" Content="Filter" Tag="False" Style="{StaticResource FilterButtonStyle}" Click="Filter_Click"/>
@@ -61,8 +61,20 @@
 					<DataGridTextColumn Header="Last Name" Binding="{Binding LastName}" Visibility="Collapsed"/>
 					<DataGridTextColumn Header="Phone Number" Binding="{Binding PhoneDisplay}" Visibility="Collapsed"/>
 					<DataGridTextColumn Header="Guests" Binding="{Binding Guests}"/>
-					<DataGridTextColumn Header="Tables" Binding="{Binding TablesDisplay}"/>
-					<DataGridTextColumn Header="Note" Binding="{Binding NoteDisplay}"/>
+					<DataGridTextColumn Header="Tables" Binding="{Binding TablesDisplay}">
+						<DataGridTextColumn.ElementStyle>
+							<Style TargetType="TextBlock">
+								<Setter Property="ToolTip" Value="{Binding TablesDisplay}"/>
+							</Style>
+						</DataGridTextColumn.ElementStyle>
+					</DataGridTextColumn>
+					<DataGridTextColumn Header="Note" Binding="{Binding NoteDisplay}">
+						<DataGridTextColumn.ElementStyle>
+							<Style TargetType="TextBlock">
+								<Setter Property="ToolTip" Value="{Binding NoteTooltip}"/>
+							</Style>
+						</DataGridTextColumn.ElementStyle>
+					</DataGridTextColumn>
 				</controls:DataTable.Columns>
 			</controls:DataTable>
 		</Border>

@@ -87,7 +87,8 @@ namespace RestaurantReservationSystem.UI.Features.Reservations.Dialogs
 			TimeOnly time,
 			int guests,
 			IEnumerable<int> preselectedTableIds,
-			int? excludeReservationId = null)
+			int? excludeReservationId = null,
+			bool checkAvailability = true)
 		{
 			_guests = guests;
 			var preselectedSet = preselectedTableIds.ToHashSet();
@@ -95,7 +96,6 @@ namespace RestaurantReservationSystem.UI.Features.Reservations.Dialogs
 			using var scope = App.ServiceProvider.CreateScope();
 			var configurationService = scope.ServiceProvider.GetRequiredService<IConfigurationService>();
 			var tableService = scope.ServiceProvider.GetRequiredService<ITableService>();
-			var reservationService = scope.ServiceProvider.GetRequiredService<IReservationService>();
 
 			var config = await configurationService.GetAsync();
 			if (config is not null)
@@ -104,37 +104,42 @@ namespace RestaurantReservationSystem.UI.Features.Reservations.Dialogs
 			}
 
 			var allTables = await tableService.GetAllAsync();
-
-			var criteria = new ReservationFilterCriteria
-			{
-				Date = new ValueFilter<DateOnly>
-				{
-					Mode = FilterValueMode.Exact,
-					Exact = date
-				}
-			};
-
-			var reservationsResult = await reservationService.GetFilteredAsync(criteria);
 			var unavailableTableIds = new HashSet<int>();
 
-			if (reservationsResult.IsSuccess && reservationsResult.Data is not null)
+			if (checkAvailability)
 			{
-				foreach (var reservation in reservationsResult.Data)
+				var reservationService = scope.ServiceProvider.GetRequiredService<IReservationService>();
+
+				var criteria = new ReservationFilterCriteria
 				{
-					if (excludeReservationId.HasValue && reservation.Id == excludeReservationId.Value)
+					Date = new ValueFilter<DateOnly>
 					{
-						continue;
+						Mode = FilterValueMode.Exact,
+						Exact = date
 					}
+				};
 
-					bool isBlockingStatus = reservation.Status is ReservationStatus.Expected
-						or ReservationStatus.Late
-						or ReservationStatus.Arrived;
+				var reservationsResult = await reservationService.GetFilteredAsync(criteria);
 
-					if (isBlockingStatus && reservation.Time <= time)
+				if (reservationsResult.IsSuccess && reservationsResult.Data is not null)
+				{
+					foreach (var reservation in reservationsResult.Data)
 					{
-						foreach (var assignedTable in reservation.Tables)
+						if (excludeReservationId.HasValue && reservation.Id == excludeReservationId.Value)
 						{
-							unavailableTableIds.Add(assignedTable.Id);
+							continue;
+						}
+
+						bool isBlockingStatus = reservation.Status is ReservationStatus.Expected
+							or ReservationStatus.Late
+							or ReservationStatus.Arrived;
+
+						if (isBlockingStatus && reservation.Time <= time)
+						{
+							foreach (var assignedTable in reservation.Tables)
+							{
+								unavailableTableIds.Add(assignedTable.Id);
+							}
 						}
 					}
 				}
@@ -194,19 +199,26 @@ namespace RestaurantReservationSystem.UI.Features.Reservations.Dialogs
 				: identifier;
 		}
 
+		private static int ZoneSortOrder(string zoneName)
+		{
+			return zoneName.Equals("No zone", StringComparison.OrdinalIgnoreCase) ? 1 : 0;
+		}
+
 		private void RenderTables()
 		{
 			ZonesPanel.Children.Clear();
 
 			string search = SearchBox?.Text?.Trim() ?? string.Empty;
 
-			var filteredTables = _tables
+			var filteredZones = _tables
 				.Where(table =>
 					string.IsNullOrWhiteSpace(search) ||
 					GetTableLabel(table).Contains(search, StringComparison.OrdinalIgnoreCase))
-				.GroupBy(table => table.Zone);
+				.GroupBy(table => table.Zone)
+				.OrderBy(g => ZoneSortOrder(g.Key))
+				.ThenBy(g => g.Key, StringComparer.OrdinalIgnoreCase);
 
-			foreach (var zone in filteredTables)
+			foreach (var zone in filteredZones)
 			{
 				var zonePanel = new StackPanel
 				{
@@ -356,7 +368,7 @@ namespace RestaurantReservationSystem.UI.Features.Reservations.Dialogs
 				{
 					Text = "Unavailable",
 					FontSize = 12,
-					Foreground = (Brush)FindResource("SecondaryText"),
+					Foreground = new SolidColorBrush(Color.FromRgb(0xEF, 0x44, 0x44)),
 					HorizontalAlignment = HorizontalAlignment.Right,
 					VerticalAlignment = VerticalAlignment.Center
 				};
@@ -389,11 +401,18 @@ namespace RestaurantReservationSystem.UI.Features.Reservations.Dialogs
 					: Visibility.Collapsed;
 			}
 
+			bool hasConflictingSelectedTable = _tables.Any(table => table.IsSelected && !table.IsAvailable);
+
 			if (UnavailableWarning != null)
 			{
-				UnavailableWarning.Visibility = _tables.Any(table => table.IsSelected && !table.IsAvailable)
+				UnavailableWarning.Visibility = hasConflictingSelectedTable
 					? Visibility.Visible
 					: Visibility.Collapsed;
+			}
+
+			if (ConfirmButton != null)
+			{
+				ConfirmButton.IsEnabled = !hasConflictingSelectedTable;
 			}
 		}
 
@@ -413,6 +432,11 @@ namespace RestaurantReservationSystem.UI.Features.Reservations.Dialogs
 
 		private void Confirm_Click(object sender, RoutedEventArgs e)
 		{
+			if (_tables.Any(table => table.IsSelected && !table.IsAvailable))
+			{
+				return;
+			}
+
 			ConfirmRequested?.Invoke(this, EventArgs.Empty);
 		}
 

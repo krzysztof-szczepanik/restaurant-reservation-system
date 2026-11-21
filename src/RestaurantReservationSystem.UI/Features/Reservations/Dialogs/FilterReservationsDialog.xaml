@@ -3,147 +3,260 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              x:Class="RestaurantReservationSystem.UI.Features.Reservations.Dialogs.FilterReservationsDialog">
 
-    <controls:Dialog Header="Filter Reservations" Width="520" MinWidth="440">
+	<controls:Dialog Header="Filter Reservations" Width="520" MinWidth="440">
 
-        <!-- CONTENT -->
-        <controls:Dialog.DialogContent>
-            <ScrollViewer MaxHeight="440" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
-                <StackPanel>
+		<!-- CONTENT -->
+		<controls:Dialog.DialogContent>
+			<ScrollViewer MaxHeight="440" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+				<StackPanel>
 
-                    <!-- DATE -->
-                    <Grid Margin="0,0,0,4">
-                        <TextBlock Text="Date" FontSize="13" FontWeight="SemiBold" Foreground="{StaticResource PrimaryText}" VerticalAlignment="Center" />
+					<!-- DATE -->
+					<Grid Margin="0,0,0,6">
+						<TextBlock Text="Date" FontSize="13" FontWeight="SemiBold" Foreground="{StaticResource PrimaryText}" VerticalAlignment="Center" />
 
-                        <Border Background="#F1F5F9" CornerRadius="4" Padding="2" HorizontalAlignment="Right">
-                            <StackPanel Orientation="Horizontal">
-                                <Border Background="{StaticResource Surface}" CornerRadius="3" Padding="8,3">
-                                    <TextBlock Text="Exact" FontSize="11" Foreground="{StaticResource Primary}" FontWeight="SemiBold" />
-                                </Border>
-                                <Border Background="Transparent" CornerRadius="3" Padding="8,3">
-                                    <TextBlock Text="Range" FontSize="11" Foreground="{StaticResource SecondaryText}" />
-                                </Border>
-                            </StackPanel>
-                        </Border>
-                    </Grid>
+						<Border Background="#F1F5F9" CornerRadius="4" Padding="2" HorizontalAlignment="Right">
+							<StackPanel Orientation="Horizontal">
+								<Button x:Name="DateExactModeButton" Content="Exact" FontSize="11" FontWeight="SemiBold"
+								        Foreground="{StaticResource Primary}" Background="{StaticResource Surface}"
+								        BorderThickness="0" Padding="8,3" Cursor="Hand" Click="DateMode_Click" />
+								<Button x:Name="DateRangeModeButton" Content="Range" FontSize="11"
+								        Foreground="{StaticResource SecondaryText}" Background="Transparent"
+								        BorderThickness="0" Padding="8,3" Cursor="Hand" Click="DateMode_Click" />
+							</StackPanel>
+						</Border>
+					</Grid>
 
-                    <TextBlock Text="Exact" FontSize="11" Foreground="{StaticResource PrimaryText}" Margin="0,0,0,4" />
+					<StackPanel x:Name="DateExactPanel" Margin="0,0,0,16">
+						<TextBlock Text="Exact" FontSize="11" Foreground="{StaticResource PrimaryText}" Margin="0,0,0,4" />
+						<Grid Height="36">
+							<TextBox x:Name="FDateExactBox" VerticalContentAlignment="Center" Padding="12,0,36,0"
+							         Foreground="{StaticResource PrimaryText}" Style="{StaticResource ReservationFormTextBoxStyle}" />
+							<TextBlock Text="dd.MM.yyyy" Foreground="{StaticResource SecondaryText}" VerticalAlignment="Center"
+							           Margin="13,0,0,0" IsHitTestVisible="False" FontSize="12">
+								<TextBlock.Style>
+									<Style TargetType="TextBlock">
+										<Setter Property="Visibility" Value="Collapsed"/>
+										<Style.Triggers>
+											<MultiDataTrigger>
+												<MultiDataTrigger.Conditions>
+													<Condition Binding="{Binding Text, ElementName=FDateExactBox}" Value=""/>
+													<Condition Binding="{Binding IsKeyboardFocusWithin, ElementName=FDateExactBox}" Value="False"/>
+												</MultiDataTrigger.Conditions>
+												<Setter Property="Visibility" Value="Visible"/>
+											</MultiDataTrigger>
+										</Style.Triggers>
+									</Style>
+								</TextBlock.Style>
+							</TextBlock>
+						</Grid>
+						<TextBlock x:Name="DateExactErrorText" FontSize="11" Foreground="#EF4444" Margin="0,4,0,0" Visibility="Collapsed" />
+					</StackPanel>
 
-                    <Grid Height="36" Margin="0,0,0,16">
-                        <TextBox x:Name="FDateBox" Text="23.10.2026" VerticalContentAlignment="Center" Padding="12,0,36,0" Foreground="{StaticResource PrimaryText}" Style="{StaticResource ReservationFormTextBoxStyle}" />
-                        <Path Data="M19 4h-1V2h-2v2H8V2H6v2H5C3.89 4 3.01 4.9 3.01 6L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V10h14v10zM7 6h2v2H7V6zm4 0h2v2h-2V6zm4 0h2v2h-2V6z" Fill="White" Stroke="{StaticResource SecondaryText}" StrokeThickness="1" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round" Width="16" Height="16" Stretch="Uniform" HorizontalAlignment="Right" Margin="0,0,12,0" IsHitTestVisible="False" />
-                    </Grid>
-
-
-                    <!-- TIME -->
-                    <Grid Margin="0,0,0,4">
-                        <TextBlock Text="Time" FontSize="13" FontWeight="SemiBold" Foreground="{StaticResource PrimaryText}" VerticalAlignment="Center" />
-
-                        <Border Background="#F1F5F9" CornerRadius="4" Padding="2" HorizontalAlignment="Right">
-                            <StackPanel Orientation="Horizontal">
-                                <Border Background="{StaticResource Surface}" CornerRadius="3" Padding="8,3">
-                                    <TextBlock Text="Exact" FontSize="11" Foreground="{StaticResource Primary}" FontWeight="SemiBold" />
-                                </Border>
-                                <Border Background="Transparent" CornerRadius="3" Padding="8,3">
-                                    <TextBlock Text="Range" FontSize="11" Foreground="{StaticResource SecondaryText}" />
-                                </Border>
-                            </StackPanel>
-                        </Border>
-                    </Grid>
-
-                    <TextBlock Text="Exact" FontSize="11" Foreground="{StaticResource PrimaryText}" Margin="0,0,0,4" />
-
-                    <Grid Height="36" Margin="0,0,0,16">
-                        <TextBox Text="18:30" VerticalContentAlignment="Center" Padding="12,0,36,0" Foreground="{StaticResource PrimaryText}" Style="{StaticResource ReservationFormTextBoxStyle}" />
-                        <Path Data="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z" Fill="White" Stroke="{StaticResource SecondaryText}" StrokeThickness="1" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round" Width="16" Height="16" Stretch="Uniform" HorizontalAlignment="Right" Margin="0,0,12,0" IsHitTestVisible="False" />
-                    </Grid>
-
-
-                    <!-- GUESTS -->
-                    <Grid Margin="0,0,0,4">
-                        <TextBlock Text="Guests" FontSize="13" FontWeight="SemiBold" Foreground="{StaticResource PrimaryText}" VerticalAlignment="Center" />
-
-                        <Border Background="#F1F5F9" CornerRadius="4" Padding="2" HorizontalAlignment="Right">
-                            <StackPanel Orientation="Horizontal">
-                                <Border Background="{StaticResource Surface}" CornerRadius="3" Padding="8,3">
-                                    <TextBlock Text="Exact" FontSize="11" Foreground="{StaticResource Primary}" FontWeight="SemiBold" />
-                                </Border>
-                                <Border Background="Transparent" CornerRadius="3" Padding="8,3">
-                                    <TextBlock Text="Range" FontSize="11" Foreground="{StaticResource SecondaryText}" />
-                                </Border>
-                            </StackPanel>
-                        </Border>
-                    </Grid>
-
-                    <TextBlock Text="Exact" FontSize="11" Foreground="{StaticResource PrimaryText}" Margin="0,0,0,4" />
-                    <TextBox Text="6" Height="36" VerticalContentAlignment="Center" Padding="12,0" Foreground="{StaticResource PrimaryText}" Margin="0,0,0,16" Style="{StaticResource ReservationFormTextBoxStyle}" />
+					<StackPanel x:Name="DateRangePanel" Margin="0,0,0,16" Visibility="Collapsed">
+						<Grid>
+							<Grid.ColumnDefinitions>
+								<ColumnDefinition Width="*"/>
+								<ColumnDefinition Width="12"/>
+								<ColumnDefinition Width="*"/>
+							</Grid.ColumnDefinitions>
+							<StackPanel Grid.Column="0">
+								<TextBlock Text="From" FontSize="11" Foreground="{StaticResource PrimaryText}" Margin="0,0,0,4" />
+								<TextBox x:Name="FDateFromBox" Height="36" VerticalContentAlignment="Center" Padding="12,0"
+								         Foreground="{StaticResource PrimaryText}" Style="{StaticResource ReservationFormTextBoxStyle}" />
+							</StackPanel>
+							<StackPanel Grid.Column="2">
+								<TextBlock Text="To" FontSize="11" Foreground="{StaticResource PrimaryText}" Margin="0,0,0,4" />
+								<TextBox x:Name="FDateToBox" Height="36" VerticalContentAlignment="Center" Padding="12,0"
+								         Foreground="{StaticResource PrimaryText}" Style="{StaticResource ReservationFormTextBoxStyle}" />
+							</StackPanel>
+						</Grid>
+						<TextBlock x:Name="DateRangeErrorText" FontSize="11" Foreground="#EF4444" Margin="0,4,0,0" Visibility="Collapsed" />
+					</StackPanel>
 
 
-                    <!-- ZONE -->
-                    <Grid Margin="0,0,0,8">
-                        <TextBlock Text="Zone" FontSize="13" FontWeight="SemiBold" Foreground="{StaticResource PrimaryText}" VerticalAlignment="Center" />
+					<!-- TIME -->
+					<Grid Margin="0,0,0,6">
+						<TextBlock Text="Time" FontSize="13" FontWeight="SemiBold" Foreground="{StaticResource PrimaryText}" VerticalAlignment="Center" />
 
-                        <Border Background="#F1F5F9" CornerRadius="4" Padding="2" HorizontalAlignment="Right">
-                            <StackPanel Orientation="Horizontal">
-                                <Border Background="{StaticResource Surface}" CornerRadius="3" Padding="10,3">
-                                    <TextBlock Text="OR" FontSize="11" Foreground="{StaticResource Primary}" FontWeight="SemiBold" />
-                                </Border>
-                                <Border Background="Transparent" CornerRadius="3" Padding="10,3">
-                                    <TextBlock Text="AND" FontSize="11" Foreground="{StaticResource SecondaryText}" />
-                                </Border>
-                            </StackPanel>
-                        </Border>
-                    </Grid>
+						<Border Background="#F1F5F9" CornerRadius="4" Padding="2" HorizontalAlignment="Right">
+							<StackPanel Orientation="Horizontal">
+								<Button x:Name="TimeExactModeButton" Content="Exact" FontSize="11" FontWeight="SemiBold"
+								        Foreground="{StaticResource Primary}" Background="{StaticResource Surface}"
+								        BorderThickness="0" Padding="8,3" Cursor="Hand" Click="TimeMode_Click" />
+								<Button x:Name="TimeRangeModeButton" Content="Range" FontSize="11"
+								        Foreground="{StaticResource SecondaryText}" Background="Transparent"
+								        BorderThickness="0" Padding="8,3" Cursor="Hand" Click="TimeMode_Click" />
+							</StackPanel>
+						</Border>
+					</Grid>
 
-                    <Grid Height="52" Margin="0,0,0,16">
-                        <Border Background="#F8FAFC" BorderBrush="{StaticResource Border}" BorderThickness="1" CornerRadius="4" Padding="12,0">
-                            <TextBlock Text="Selected zones: 1" VerticalAlignment="Center" Foreground="{StaticResource PrimaryText}" FontSize="13" FontWeight="SemiBold" />
-                        </Border>
+					<StackPanel x:Name="TimeExactPanel" Margin="0,0,0,16">
+						<TextBlock Text="Exact" FontSize="11" Foreground="{StaticResource PrimaryText}" Margin="0,0,0,4" />
+						<Grid Height="36">
+							<TextBox x:Name="FTimeExactBox" VerticalContentAlignment="Center" Padding="12,0,36,0"
+							         Foreground="{StaticResource PrimaryText}" Style="{StaticResource ReservationFormTextBoxStyle}" />
+							<TextBlock Text="HH:mm" Foreground="{StaticResource SecondaryText}" VerticalAlignment="Center"
+							           Margin="13,0,0,0" IsHitTestVisible="False" FontSize="12">
+								<TextBlock.Style>
+									<Style TargetType="TextBlock">
+										<Setter Property="Visibility" Value="Collapsed"/>
+										<Style.Triggers>
+											<MultiDataTrigger>
+												<MultiDataTrigger.Conditions>
+													<Condition Binding="{Binding Text, ElementName=FTimeExactBox}" Value=""/>
+													<Condition Binding="{Binding IsKeyboardFocusWithin, ElementName=FTimeExactBox}" Value="False"/>
+												</MultiDataTrigger.Conditions>
+												<Setter Property="Visibility" Value="Visible"/>
+											</MultiDataTrigger>
+										</Style.Triggers>
+									</Style>
+								</TextBlock.Style>
+							</TextBlock>
+						</Grid>
+						<TextBlock x:Name="TimeExactErrorText" FontSize="11" Foreground="#EF4444" Margin="0,4,0,0" Visibility="Collapsed" />
+					</StackPanel>
 
-                        <Button Content="Select Zones" HorizontalAlignment="Right" VerticalAlignment="Center" Height="36" Margin="0,0,6,0" Style="{StaticResource SecondaryButtonStyle}" Click="SelectZones_Click" />
-                    </Grid>
+					<StackPanel x:Name="TimeRangePanel" Margin="0,0,0,16" Visibility="Collapsed">
+						<Grid>
+							<Grid.ColumnDefinitions>
+								<ColumnDefinition Width="*"/>
+								<ColumnDefinition Width="12"/>
+								<ColumnDefinition Width="*"/>
+							</Grid.ColumnDefinitions>
+							<StackPanel Grid.Column="0">
+								<TextBlock Text="From" FontSize="11" Foreground="{StaticResource PrimaryText}" Margin="0,0,0,4" />
+								<TextBox x:Name="FTimeFromBox" Height="36" VerticalContentAlignment="Center" Padding="12,0"
+								         Foreground="{StaticResource PrimaryText}" Style="{StaticResource ReservationFormTextBoxStyle}" />
+							</StackPanel>
+							<StackPanel Grid.Column="2">
+								<TextBlock Text="To" FontSize="11" Foreground="{StaticResource PrimaryText}" Margin="0,0,0,4" />
+								<TextBox x:Name="FTimeToBox" Height="36" VerticalContentAlignment="Center" Padding="12,0"
+								         Foreground="{StaticResource PrimaryText}" Style="{StaticResource ReservationFormTextBoxStyle}" />
+							</StackPanel>
+						</Grid>
+						<TextBlock x:Name="TimeRangeErrorText" FontSize="11" Foreground="#EF4444" Margin="0,4,0,0" Visibility="Collapsed" />
+					</StackPanel>
 
 
-                    <!-- TABLES -->
-                    <Grid Margin="0,0,0,8">
-                        <TextBlock Text="Tables" FontSize="13" FontWeight="SemiBold" Foreground="{StaticResource PrimaryText}" VerticalAlignment="Center" />
+					<!-- GUESTS -->
+					<Grid Margin="0,0,0,6">
+						<TextBlock Text="Guests" FontSize="13" FontWeight="SemiBold" Foreground="{StaticResource PrimaryText}" VerticalAlignment="Center" />
 
-                        <Border Background="#F1F5F9" CornerRadius="4" Padding="2" HorizontalAlignment="Right">
-                            <StackPanel Orientation="Horizontal">
-                                <Border Background="{StaticResource Surface}" CornerRadius="3" Padding="10,3">
-                                    <TextBlock Text="OR" FontSize="11" Foreground="{StaticResource Primary}" FontWeight="SemiBold" />
-                                </Border>
-                                <Border Background="Transparent" CornerRadius="3" Padding="10,3">
-                                    <TextBlock Text="AND" FontSize="11" Foreground="{StaticResource SecondaryText}" />
-                                </Border>
-                            </StackPanel>
-                        </Border>
-                    </Grid>
+						<Border Background="#F1F5F9" CornerRadius="4" Padding="2" HorizontalAlignment="Right">
+							<StackPanel Orientation="Horizontal">
+								<Button x:Name="GuestsExactModeButton" Content="Exact" FontSize="11" FontWeight="SemiBold"
+								        Foreground="{StaticResource Primary}" Background="{StaticResource Surface}"
+								        BorderThickness="0" Padding="8,3" Cursor="Hand" Click="GuestsMode_Click" />
+								<Button x:Name="GuestsRangeModeButton" Content="Range" FontSize="11"
+								        Foreground="{StaticResource SecondaryText}" Background="Transparent"
+								        BorderThickness="0" Padding="8,3" Cursor="Hand" Click="GuestsMode_Click" />
+							</StackPanel>
+						</Border>
+					</Grid>
 
-                    <Grid Height="52">
-                        <Border Background="#F8FAFC" BorderBrush="{StaticResource Border}" BorderThickness="1" CornerRadius="4" Padding="12,0">
-                            <TextBlock Text="Selected tables: 1" VerticalAlignment="Center" Foreground="{StaticResource PrimaryText}" FontSize="13" FontWeight="SemiBold" />
-                        </Border>
+					<StackPanel x:Name="GuestsExactPanel" Margin="0,0,0,16">
+						<TextBlock Text="Exact" FontSize="11" Foreground="{StaticResource PrimaryText}" Margin="0,0,0,4" />
+						<TextBox x:Name="FGuestsExactBox" Height="36" VerticalContentAlignment="Center" Padding="12,0"
+						         Foreground="{StaticResource PrimaryText}" Style="{StaticResource ReservationFormTextBoxStyle}" />
+						<TextBlock x:Name="GuestsExactErrorText" FontSize="11" Foreground="#EF4444" Margin="0,4,0,0" Visibility="Collapsed" />
+					</StackPanel>
 
-                        <Button Content="Select Tables" HorizontalAlignment="Right" VerticalAlignment="Center" Height="36" Margin="0,0,6,0" Style="{StaticResource SecondaryButtonStyle}" Click="SelectTables_Click" />
-                    </Grid>
+					<StackPanel x:Name="GuestsRangePanel" Margin="0,0,0,16" Visibility="Collapsed">
+						<Grid>
+							<Grid.ColumnDefinitions>
+								<ColumnDefinition Width="*"/>
+								<ColumnDefinition Width="12"/>
+								<ColumnDefinition Width="*"/>
+							</Grid.ColumnDefinitions>
+							<StackPanel Grid.Column="0">
+								<TextBlock Text="From" FontSize="11" Foreground="{StaticResource PrimaryText}" Margin="0,0,0,4" />
+								<TextBox x:Name="FGuestsFromBox" Height="36" VerticalContentAlignment="Center" Padding="12,0"
+								         Foreground="{StaticResource PrimaryText}" Style="{StaticResource ReservationFormTextBoxStyle}" />
+							</StackPanel>
+							<StackPanel Grid.Column="2">
+								<TextBlock Text="To" FontSize="11" Foreground="{StaticResource PrimaryText}" Margin="0,0,0,4" />
+								<TextBox x:Name="FGuestsToBox" Height="36" VerticalContentAlignment="Center" Padding="12,0"
+								         Foreground="{StaticResource PrimaryText}" Style="{StaticResource ReservationFormTextBoxStyle}" />
+							</StackPanel>
+						</Grid>
+						<TextBlock x:Name="GuestsRangeErrorText" FontSize="11" Foreground="#EF4444" Margin="0,4,0,0" Visibility="Collapsed" />
+					</StackPanel>
 
-                </StackPanel>
-            </ScrollViewer>
-        </controls:Dialog.DialogContent>
+
+					<!-- ZONE -->
+					<StackPanel x:Name="ZoneFilterSection" Margin="0,0,0,16">
+						<Grid Margin="0,0,0,8">
+							<TextBlock Text="Zone" FontSize="13" FontWeight="SemiBold" Foreground="{StaticResource PrimaryText}" VerticalAlignment="Center" />
+
+							<Border Background="#F1F5F9" CornerRadius="4" Padding="2" HorizontalAlignment="Right">
+								<StackPanel Orientation="Horizontal">
+									<Button x:Name="ZoneOrButton" Content="OR" FontSize="11" FontWeight="SemiBold"
+									        Foreground="{StaticResource Primary}" Background="{StaticResource Surface}"
+									        BorderThickness="0" Padding="10,3" Cursor="Hand" Click="ZoneMatchMode_Click" />
+									<Button x:Name="ZoneAndButton" Content="AND" FontSize="11"
+									        Foreground="{StaticResource SecondaryText}" Background="Transparent"
+									        BorderThickness="0" Padding="10,3" Cursor="Hand" Click="ZoneMatchMode_Click" />
+								</StackPanel>
+							</Border>
+						</Grid>
+
+						<Grid Height="52">
+							<Border Background="#F8FAFC" BorderBrush="{StaticResource Border}" BorderThickness="1" CornerRadius="4" Padding="12,0">
+								<TextBlock x:Name="SelectedZonesText" Text="Selected zones: 0" VerticalAlignment="Center"
+								           Foreground="{StaticResource PrimaryText}" FontSize="13" FontWeight="SemiBold" />
+							</Border>
+
+							<Button Content="Select Zones" HorizontalAlignment="Right" VerticalAlignment="Center" Height="36"
+							        Margin="0,0,6,0" Style="{StaticResource SecondaryButtonStyle}" Click="SelectZones_Click" />
+						</Grid>
+					</StackPanel>
 
 
-        <!-- FOOTER LEFT -->
-        <controls:Dialog.FooterLeft>
-            <Button Content="Reset" Height="36" HorizontalAlignment="Left" Click="Clean_Click" Style="{StaticResource SecondaryButtonStyle}" />
-        </controls:Dialog.FooterLeft>
+					<!-- TABLES -->
+					<StackPanel>
+						<Grid Margin="0,0,0,8">
+							<TextBlock Text="Tables" FontSize="13" FontWeight="SemiBold" Foreground="{StaticResource PrimaryText}" VerticalAlignment="Center" />
 
-        <!-- FOOTER RIGHT -->
-        <controls:Dialog.FooterRight>
-            <StackPanel Orientation="Horizontal">
-                <Button Content="Cancel" Height="36" Margin="0,0,8,0" Style="{StaticResource SecondaryButtonStyle}" Click="Cancel_Click" />
-                <Button Content="Apply" Height="36" Click="Apply_Click" Style="{StaticResource PrimaryButtonStyle}" />
-            </StackPanel>
-        </controls:Dialog.FooterRight>
+							<Border Background="#F1F5F9" CornerRadius="4" Padding="2" HorizontalAlignment="Right">
+								<StackPanel Orientation="Horizontal">
+									<Button x:Name="TablesOrButton" Content="OR" FontSize="11" FontWeight="SemiBold"
+									        Foreground="{StaticResource Primary}" Background="{StaticResource Surface}"
+									        BorderThickness="0" Padding="10,3" Cursor="Hand" Click="TablesMatchMode_Click" />
+									<Button x:Name="TablesAndButton" Content="AND" FontSize="11"
+									        Foreground="{StaticResource SecondaryText}" Background="Transparent"
+									        BorderThickness="0" Padding="10,3" Cursor="Hand" Click="TablesMatchMode_Click" />
+								</StackPanel>
+							</Border>
+						</Grid>
 
-    </controls:Dialog>
+						<Grid Height="52">
+							<Border Background="#F8FAFC" BorderBrush="{StaticResource Border}" BorderThickness="1" CornerRadius="4" Padding="12,0">
+								<TextBlock x:Name="SelectedTablesText" Text="Selected tables: 0" VerticalAlignment="Center"
+								           Foreground="{StaticResource PrimaryText}" FontSize="13" FontWeight="SemiBold" />
+							</Border>
+
+							<Button Content="Select Tables" HorizontalAlignment="Right" VerticalAlignment="Center" Height="36"
+							        Margin="0,0,6,0" Style="{StaticResource SecondaryButtonStyle}" Click="SelectTables_Click" />
+						</Grid>
+					</StackPanel>
+
+				</StackPanel>
+			</ScrollViewer>
+		</controls:Dialog.DialogContent>
+
+
+		<!-- FOOTER LEFT -->
+		<controls:Dialog.FooterLeft>
+			<Button Content="Reset" Height="36" HorizontalAlignment="Left" Click="Reset_Click" Style="{StaticResource SecondaryButtonStyle}" />
+		</controls:Dialog.FooterLeft>
+
+		<!-- FOOTER RIGHT -->
+		<controls:Dialog.FooterRight>
+			<StackPanel Orientation="Horizontal">
+				<Button Content="Cancel" Height="36" Margin="0,0,8,0" Style="{StaticResource SecondaryButtonStyle}" Click="Cancel_Click" />
+				<Button Content="Apply" Height="36" Click="Apply_Click" Style="{StaticResource PrimaryButtonStyle}" />
+			</StackPanel>
+		</controls:Dialog.FooterRight>
+
+	</controls:Dialog>
 </UserControl>
