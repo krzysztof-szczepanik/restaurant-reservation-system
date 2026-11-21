@@ -43,6 +43,7 @@ namespace RestaurantReservationSystem.UI.Features.Reservations.Dialogs
 				})
 				.ToList();
 
+
 		// CONSTRUCTORS:
 		public SelectTablesDialog()
 		{
