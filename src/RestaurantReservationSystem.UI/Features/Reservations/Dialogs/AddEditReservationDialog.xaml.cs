@@ -501,10 +501,15 @@ namespace RestaurantReservationSystem.UI.Features.Reservations.Dialogs
 			SaveRequested?.Invoke(this, EventArgs.Empty);
 		}
 
-		private void SelectTables_Click(object sender, RoutedEventArgs e)
+		private async void SelectTables_Click(object sender, RoutedEventArgs e)
 		{
 			var mainWindow = Window.GetWindow(this) as MainWindow;
 			if (mainWindow == null) { return; }
+
+			if (!TryParseDate(DateBox.Text, out var parsedDate) || !TryParseTime(TimeBox.Text, out var parsedTime))
+			{
+				return;
+			}
 
 			var tablesDialog = new SelectTablesDialog();
 
@@ -530,6 +535,14 @@ namespace RestaurantReservationSystem.UI.Features.Reservations.Dialogs
 			};
 
 			mainWindow.DialogHost.Show(tablesDialog);
+
+			await tablesDialog.LoadTablesAsync(
+				parsedDate,
+				parsedTime,
+				guests,
+				_selectedTables.Select(t => t.Id),
+				_editingReservationId
+			);
 		}
 
 		private void Note_Click(object sender, RoutedEventArgs e)
