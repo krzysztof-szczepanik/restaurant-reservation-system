@@ -21,6 +21,7 @@ namespace RestaurantReservationSystem.UI.Features.Reservations.Dialogs
 		// FIELDS:
 		private readonly List<TableItem> _tables = new();
 		private readonly HashSet<string> _collapsedZones = new();
+		private readonly bool _isFilterMode;
 
 		private InitialConfiguration _configuration = new();
 		private int _guests;
@@ -51,9 +52,16 @@ namespace RestaurantReservationSystem.UI.Features.Reservations.Dialogs
 
 
 		// CONSTRUCTORS:
-		public SelectTablesDialog()
+		public SelectTablesDialog(bool isFilterMode = false)
 		{
+			_isFilterMode = isFilterMode;
 			InitializeComponent();
+
+			if (_isFilterMode)
+			{
+				ReservationDetailsGrid.Visibility = Visibility.Collapsed;
+				CapacityWarningContainer.Visibility = Visibility.Collapsed;
+			}
 
 			RenderTables();
 			UpdateSummary();
@@ -243,15 +251,15 @@ namespace RestaurantReservationSystem.UI.Features.Reservations.Dialogs
 				var arrow = new Path
 				{
 					Data = Geometry.Parse(_collapsedZones.Contains(zone.Key)
-						? "M1 1 L5 5 L9 1"
-						: "M1 5 L5 1 L9 5"),
+						? "M1 5 L5 1 L9 5"
+						: "M1 1 L5 5 L9 1"),
 					Stroke = (Brush)FindResource("SecondaryText"),
 					StrokeThickness = 2,
 					StrokeStartLineCap = PenLineCap.Round,
 					StrokeEndLineCap = PenLineCap.Round,
 					StrokeLineJoin = PenLineJoin.Round,
 					Width = 10,
-					Height = 6,
+					Height = 8,
 					Stretch = Stretch.Uniform,
 					VerticalAlignment = VerticalAlignment.Center,
 					Margin = new Thickness(0, 0, 8, 0)
@@ -306,17 +314,24 @@ namespace RestaurantReservationSystem.UI.Features.Reservations.Dialogs
 		{
 			if (!table.IsAvailable && !table.IsSelected)
 			{
-				var unavailableRow = new Grid
+				var unavailableBorder = new Border
 				{
-					Margin = new Thickness(0, 0, 0, 8)
+					Background = Brushes.Transparent,
+					CornerRadius = new CornerRadius(6),
+					Padding = new Thickness(8, 6, 8, 6),
+					Margin = new Thickness(0, 0, 0, 4)
 				};
 
-				var tableName = new TextBlock
+				var unavailableRow = new Grid();
+
+				var disabledCheckBox = new CheckBox
 				{
-					Text = GetTableLabel(table),
+					Content = GetTableLabel(table),
+					IsChecked = false,
+					IsEnabled = false,
 					FontSize = 13,
 					Foreground = (Brush)FindResource("SecondaryText"),
-					VerticalAlignment = VerticalAlignment.Center
+					VerticalContentAlignment = VerticalAlignment.Center
 				};
 
 				var unavailableText = new TextBlock
@@ -328,16 +343,28 @@ namespace RestaurantReservationSystem.UI.Features.Reservations.Dialogs
 					VerticalAlignment = VerticalAlignment.Center
 				};
 
-				unavailableRow.Children.Add(tableName);
+				unavailableRow.Children.Add(disabledCheckBox);
 				unavailableRow.Children.Add(unavailableText);
+				unavailableBorder.Child = unavailableRow;
 
-				return unavailableRow;
+				return unavailableBorder;
 			}
 
-			var rowGrid = new Grid
+			var selectedBg = new SolidColorBrush(Color.FromRgb(0xEF, 0xF6, 0xFF));
+			var conflictBg = new SolidColorBrush(Color.FromRgb(0xFE, 0xF2, 0xF2));
+
+			var rowBorder = new Border
 			{
-				Margin = new Thickness(0, 0, 0, 8)
+				Background = !table.IsAvailable && table.IsSelected
+					? conflictBg
+					: (table.IsSelected ? selectedBg : Brushes.Transparent),
+				CornerRadius = new CornerRadius(6),
+				Padding = new Thickness(8, 6, 8, 6),
+				Margin = new Thickness(0, 0, 0, 4),
+				Cursor = System.Windows.Input.Cursors.Hand
 			};
+
+			var rowGrid = new Grid();
 
 			var checkBox = new CheckBox
 			{
@@ -351,13 +378,29 @@ namespace RestaurantReservationSystem.UI.Features.Reservations.Dialogs
 			checkBox.Checked += (_, _) =>
 			{
 				table.IsSelected = true;
+				rowBorder.Background = table.IsAvailable ? selectedBg : conflictBg;
 				UpdateSummary();
 			};
 
 			checkBox.Unchecked += (_, _) =>
 			{
 				table.IsSelected = false;
+				rowBorder.Background = Brushes.Transparent;
+				if (!table.IsAvailable)
+				{
+					RenderTables();
+				}
 				UpdateSummary();
+			};
+
+			rowBorder.MouseLeftButtonDown += (_, e) =>
+			{
+				if (e.OriginalSource is CheckBox)
+				{
+					return;
+				}
+				checkBox.IsChecked = !(checkBox.IsChecked ?? false);
+				e.Handled = true;
 			};
 
 			rowGrid.Children.Add(checkBox);
@@ -376,7 +419,8 @@ namespace RestaurantReservationSystem.UI.Features.Reservations.Dialogs
 				rowGrid.Children.Add(unavailableBadge);
 			}
 
-			return rowGrid;
+			rowBorder.Child = rowGrid;
+			return rowBorder;
 		}
 
 		private string GetTableLabel(TableItem table)
@@ -391,10 +435,11 @@ namespace RestaurantReservationSystem.UI.Features.Reservations.Dialogs
 		{
 			if (SelectionSummaryText == null) { return; }
 
-			SelectionSummaryText.Text =
-				$"Selected tables: {SelectedTablesCount} | Total seats: {TotalSeats}";
+			SelectionSummaryText.Text = _isFilterMode
+				? $"Selected tables: {SelectedTablesCount}"
+				: $"Selected tables: {SelectedTablesCount} | Total seats: {TotalSeats}";
 
-			if (CapacityWarning != null)
+			if (!_isFilterMode && CapacityWarning != null)
 			{
 				CapacityWarning.Visibility = _guests > TotalSeats
 					? Visibility.Visible

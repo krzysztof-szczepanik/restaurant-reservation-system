@@ -7,6 +7,7 @@ using RestaurantReservationSystem.UI.Features.Reservations.Dialogs;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Media;
 
 namespace RestaurantReservationSystem.UI.Features.Reservations
 {
@@ -25,6 +26,7 @@ namespace RestaurantReservationSystem.UI.Features.Reservations
 			public string PhoneDisplay { get; init; } = string.Empty;
 			public int Guests => Source.Guests;
 			public string TablesDisplay { get; init; } = string.Empty;
+			public string? TablesTooltip { get; init; }
 			public string NoteDisplay { get; init; } = string.Empty;
 			public string? NoteTooltip => string.IsNullOrWhiteSpace(Source.Note) ? null : Source.Note;
 		}
@@ -93,12 +95,18 @@ namespace RestaurantReservationSystem.UI.Features.Reservations
 				return;
 			}
 
+			bool hasSearchOrFilters = !string.IsNullOrWhiteSpace(_activeCriteria.SearchText) || HasNonSearchFilters(_activeCriteria);
+			ReservationsDataGrid.EmptyMessage = hasSearchOrFilters
+				? "No matching reservations."
+				: "No reservations yet.";
+
 			var rows = result.Data
 				.Select(r => new ReservationRowItem
 				{
 					Source = r,
 					PhoneDisplay = FormatPhoneNumber(r.PhoneNumber),
 					TablesDisplay = FormatTables(r.Tables),
+					TablesTooltip = FormatTablesTooltip(r.Tables),
 					NoteDisplay = FormatSingleLineNote(r.Note)
 				})
 				.ToList();
@@ -162,6 +170,38 @@ namespace RestaurantReservationSystem.UI.Features.Reservations
 			return string.Join(", ", ordered);
 		}
 
+		private string? FormatTablesTooltip(IEnumerable<Table> tables)
+		{
+			var list = tables.ToList();
+			if (list.Count == 0)
+			{
+				return null;
+			}
+
+			var grouped = list
+				.GroupBy(t => !_configuration.TableZoneVisible || string.IsNullOrWhiteSpace(t.Zone) ? "No Zone" : t.Zone.Trim())
+				.OrderBy(g => g.Key.Equals("No Zone", StringComparison.OrdinalIgnoreCase) ? 1 : 0)
+				.ThenBy(g => g.Key, StringComparer.OrdinalIgnoreCase);
+
+			var lines = new List<string>();
+			foreach (var group in grouped)
+			{
+				if (lines.Count > 0)
+				{
+					lines.Add(string.Empty);
+				}
+
+				lines.Add($"{group.Key}:");
+				foreach (var table in group.OrderBy(t => t.Number ?? int.MaxValue).ThenBy(t => t.Label ?? string.Empty, StringComparer.OrdinalIgnoreCase))
+				{
+					string idText = FormatTableIdentifier(table);
+					lines.Add($"- {idText}");
+				}
+			}
+
+			return string.Join(Environment.NewLine, lines);
+		}
+
 		private static string FormatPhoneNumber(string? phone)
 		{
 			if (string.IsNullOrWhiteSpace(phone))
@@ -186,6 +226,20 @@ namespace RestaurantReservationSystem.UI.Features.Reservations
 			}
 
 			return note.Replace("\r\n", " ").Replace("\n", " ").Trim();
+		}
+
+		private static T? FindVisualParent<T>(DependencyObject child) where T : DependencyObject
+		{
+			DependencyObject? current = child;
+			while (current is not null)
+			{
+				if (current is T match)
+				{
+					return match;
+				}
+				current = VisualTreeHelper.GetParent(current);
+			}
+			return null;
 		}
 
 
@@ -247,6 +301,20 @@ namespace RestaurantReservationSystem.UI.Features.Reservations
 		private void ReservationsDataGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
 		{
 			UpdateActionButtonsState();
+		}
+
+		private void ReservationsDataGrid_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+		{
+			if (e.OriginalSource is DependencyObject dep)
+			{
+				var row = FindVisualParent<DataGridRow>(dep);
+				if (row is not null && row.IsSelected)
+				{
+					e.Handled = true;
+					ReservationsDataGrid.SelectedItem = null;
+					UpdateActionButtonsState();
+				}
+			}
 		}
 
 		private void MainGrid_MouseDown(object sender, MouseButtonEventArgs e)
@@ -399,7 +467,9 @@ namespace RestaurantReservationSystem.UI.Features.Reservations
 					return;
 				}
 
-				updatedReservation.Status = reservation.Status;
+				updatedReservation.Status = unlockCancelledOrNoShow
+					? ReservationStatus.Expected
+					: reservation.Status;
 
 				try
 				{

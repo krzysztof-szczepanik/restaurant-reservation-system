@@ -147,7 +147,7 @@ namespace RestaurantReservationSystem.UI.Features.Reservations.Dialogs
 
 		private void UpdateNoteButton()
 		{
-			NoteButton.Content = string.IsNullOrWhiteSpace(_note)
+			AddNoteButton.Content = string.IsNullOrWhiteSpace(_note)
 				? "Add Note"
 				: "Edit Note";
 		}
@@ -545,7 +545,7 @@ namespace RestaurantReservationSystem.UI.Features.Reservations.Dialogs
 			);
 		}
 
-		private void Note_Click(object sender, RoutedEventArgs e)
+		private void AddNote_Click(object sender, RoutedEventArgs e)
 		{
 			var mainWindow = Window.GetWindow(this) as MainWindow;
 			if (mainWindow == null) { return; }

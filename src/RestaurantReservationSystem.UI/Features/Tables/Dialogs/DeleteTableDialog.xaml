@@ -3,23 +3,33 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:controls="clr-namespace:RestaurantReservationSystem.UI.Controls">
 
-    <controls:Dialog Header="Delete Table" Width="480">
+	<controls:Dialog Header="Delete Table" Width="480">
 
-        <!-- CONTENT -->
-        <controls:Dialog.DialogContent>
-            <StackPanel>
-                <TextBlock Text="Are you sure you want to delete this table?" FontSize="14" FontWeight="SemiBold" Foreground="{StaticResource PrimaryText}" TextWrapping="Wrap" Margin="0,0,0,8"/>
-                <TextBlock Text="This action will permanently delete the selected table. This cannot be undone." FontSize="13" Foreground="{StaticResource SecondaryText}" TextWrapping="Wrap"/>
-            </StackPanel>
-        </controls:Dialog.DialogContent>
+		<!-- CONTENT -->
+		<controls:Dialog.DialogContent>
+			<StackPanel>
+				<TextBlock Text="Are you sure you want to delete this table?" FontSize="14" FontWeight="SemiBold" Foreground="{StaticResource PrimaryText}" TextWrapping="Wrap" Margin="0,0,0,12"/>
+				<TextBlock Text="This cannot be undone." FontSize="13" Foreground="{StaticResource SecondaryText}" TextWrapping="Wrap"/>
+			</StackPanel>
+		</controls:Dialog.DialogContent>
 
-        <!-- FOOTER RIGHT -->
-        <controls:Dialog.FooterRight>
-            <StackPanel Orientation="Horizontal">
-                <Button Content="Cancel" Margin="0,0,8,0" Style="{StaticResource SecondaryButtonStyle}" Click="Cancel_Click"/>
-                <Button Content="Delete" Style="{StaticResource DangerButtonStyle}" Click="Delete_Click"/>
-            </StackPanel>
-        </controls:Dialog.FooterRight>
+		<!-- FOOTER RIGHT -->
+		<controls:Dialog.FooterRight>
+			<StackPanel Orientation="Horizontal">
+				<Button Content="Cancel"
+                        Height="36"
+                        Margin="0,0,8,0"
+                        Background="#FFFFFF"
+                        Foreground="{DynamicResource PrimaryText}"
+                        BorderBrush="{DynamicResource Border}"
+                        Style="{StaticResource SecondaryButtonStyle}"
+                        Click="Cancel_Click"/>
+				<Button Content="Delete"
+                        Height="36"
+                        Style="{StaticResource DangerButtonStyle}"
+                        Click="Delete_Click"/>
+			</StackPanel>
+		</controls:Dialog.FooterRight>
 
-    </controls:Dialog>
+	</controls:Dialog>
 </UserControl>

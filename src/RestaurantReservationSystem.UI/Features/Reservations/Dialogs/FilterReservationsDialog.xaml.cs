@@ -5,6 +5,7 @@ using RestaurantReservationSystem.Core.Models;
 using System.Globalization;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 using System.Windows.Media;
 
 namespace RestaurantReservationSystem.UI.Features.Reservations.Dialogs
@@ -84,12 +85,38 @@ namespace RestaurantReservationSystem.UI.Features.Reservations.Dialogs
 
 		private void ClearValidationErrors()
 		{
+			ResetBoxBorder(FDateExactBox);
+			ResetBoxBorder(FDateFromBox);
+			ResetBoxBorder(FDateToBox);
 			HideError(DateExactErrorText);
-			HideError(DateRangeErrorText);
+			HideError(DateFromErrorText);
+			HideError(DateToErrorText);
+
+			ResetBoxBorder(FTimeExactBox);
+			ResetBoxBorder(FTimeFromBox);
+			ResetBoxBorder(FTimeToBox);
 			HideError(TimeExactErrorText);
-			HideError(TimeRangeErrorText);
+			HideError(TimeFromErrorText);
+			HideError(TimeToErrorText);
+
+			ResetBoxBorder(FGuestsExactBox);
+			ResetBoxBorder(FGuestsFromBox);
+			ResetBoxBorder(FGuestsToBox);
 			HideError(GuestsExactErrorText);
-			HideError(GuestsRangeErrorText);
+			HideError(GuestsFromErrorText);
+			HideError(GuestsToErrorText);
+
+			HideError(GeneralFilterErrorText);
+		}
+
+		private void ResetBoxBorder(TextBox box)
+		{
+			box.BorderBrush = (Brush)FindResource("Border");
+		}
+
+		private void SetErrorBorder(TextBox box)
+		{
+			box.BorderBrush = new SolidColorBrush(Color.FromRgb(0xEF, 0x44, 0x44));
 		}
 
 		private static void ShowError(TextBlock target, string message)
@@ -120,12 +147,14 @@ namespace RestaurantReservationSystem.UI.Features.Reservations.Dialogs
 			{
 				if (!TryParseNullableDate(FDateExactBox.Text, out dateExact, out var err))
 				{
+					SetErrorBorder(FDateExactBox);
 					ShowError(DateExactErrorText, err!);
 					isValid = false;
 				}
 				else if (dateExact.HasValue && dateExact.Value < today)
 				{
-					ShowError(DateExactErrorText, "Date cannot be earlier than today.");
+					SetErrorBorder(FDateExactBox);
+					ShowError(DateExactErrorText, "Date cannot be in the past.");
 					isValid = false;
 				}
 			}
@@ -134,19 +163,37 @@ namespace RestaurantReservationSystem.UI.Features.Reservations.Dialogs
 				bool fromOk = TryParseNullableDate(FDateFromBox.Text, out dateFrom, out var fromErr);
 				bool toOk = TryParseNullableDate(FDateToBox.Text, out dateTo, out var toErr);
 
-				if (!fromOk || !toOk)
+				if (!fromOk)
 				{
-					ShowError(DateRangeErrorText, fromErr ?? toErr!);
+					SetErrorBorder(FDateFromBox);
+					ShowError(DateFromErrorText, fromErr!);
 					isValid = false;
 				}
-				else if ((dateFrom.HasValue && dateFrom.Value < today) || (dateTo.HasValue && dateTo.Value < today))
+				else if (dateFrom.HasValue && dateFrom.Value < today)
 				{
-					ShowError(DateRangeErrorText, "Dates cannot be earlier than today.");
+					SetErrorBorder(FDateFromBox);
+					ShowError(DateFromErrorText, "Date cannot be in the past.");
 					isValid = false;
 				}
-				else if (dateFrom.HasValue && dateTo.HasValue && dateFrom.Value > dateTo.Value)
+
+				if (!toOk)
 				{
-					ShowError(DateRangeErrorText, "Start date cannot be after end date.");
+					SetErrorBorder(FDateToBox);
+					ShowError(DateToErrorText, toErr!);
+					isValid = false;
+				}
+				else if (dateTo.HasValue && dateTo.Value < today)
+				{
+					SetErrorBorder(FDateToBox);
+					ShowError(DateToErrorText, "Date cannot be in the past.");
+					isValid = false;
+				}
+
+				if (fromOk && toOk && dateFrom.HasValue && dateTo.HasValue && dateFrom.Value > dateTo.Value)
+				{
+					SetErrorBorder(FDateFromBox);
+					SetErrorBorder(FDateToBox);
+					ShowError(DateFromErrorText, "Start date cannot be after end date.");
 					isValid = false;
 				}
 			}
@@ -159,6 +206,7 @@ namespace RestaurantReservationSystem.UI.Features.Reservations.Dialogs
 			{
 				if (!TryParseNullableTime(FTimeExactBox.Text, out timeExact, out var err))
 				{
+					SetErrorBorder(FTimeExactBox);
 					ShowError(TimeExactErrorText, err!);
 					isValid = false;
 				}
@@ -168,14 +216,25 @@ namespace RestaurantReservationSystem.UI.Features.Reservations.Dialogs
 				bool fromOk = TryParseNullableTime(FTimeFromBox.Text, out timeFrom, out var fromErr);
 				bool toOk = TryParseNullableTime(FTimeToBox.Text, out timeTo, out var toErr);
 
-				if (!fromOk || !toOk)
+				if (!fromOk)
 				{
-					ShowError(TimeRangeErrorText, fromErr ?? toErr!);
+					SetErrorBorder(FTimeFromBox);
+					ShowError(TimeFromErrorText, fromErr!);
 					isValid = false;
 				}
-				else if (timeFrom.HasValue && timeTo.HasValue && timeFrom.Value > timeTo.Value)
+
+				if (!toOk)
 				{
-					ShowError(TimeRangeErrorText, "Start time cannot be after end time.");
+					SetErrorBorder(FTimeToBox);
+					ShowError(TimeToErrorText, toErr!);
+					isValid = false;
+				}
+
+				if (fromOk && toOk && timeFrom.HasValue && timeTo.HasValue && timeFrom.Value > timeTo.Value)
+				{
+					SetErrorBorder(FTimeFromBox);
+					SetErrorBorder(FTimeToBox);
+					ShowError(TimeFromErrorText, "Start time cannot be after end time.");
 					isValid = false;
 				}
 			}
@@ -188,6 +247,7 @@ namespace RestaurantReservationSystem.UI.Features.Reservations.Dialogs
 			{
 				if (!TryParseNullablePositiveInt(FGuestsExactBox.Text, out guestsExact, out var err))
 				{
+					SetErrorBorder(FGuestsExactBox);
 					ShowError(GuestsExactErrorText, err!);
 					isValid = false;
 				}
@@ -197,14 +257,25 @@ namespace RestaurantReservationSystem.UI.Features.Reservations.Dialogs
 				bool fromOk = TryParseNullablePositiveInt(FGuestsFromBox.Text, out guestsFrom, out var fromErr);
 				bool toOk = TryParseNullablePositiveInt(FGuestsToBox.Text, out guestsTo, out var toErr);
 
-				if (!fromOk || !toOk)
+				if (!fromOk)
 				{
-					ShowError(GuestsRangeErrorText, fromErr ?? toErr!);
+					SetErrorBorder(FGuestsFromBox);
+					ShowError(GuestsFromErrorText, fromErr!);
 					isValid = false;
 				}
-				else if (guestsFrom.HasValue && guestsTo.HasValue && guestsFrom.Value > guestsTo.Value)
+
+				if (!toOk)
 				{
-					ShowError(GuestsRangeErrorText, "Minimum guests cannot exceed maximum guests.");
+					SetErrorBorder(FGuestsToBox);
+					ShowError(GuestsToErrorText, toErr!);
+					isValid = false;
+				}
+
+				if (fromOk && toOk && guestsFrom.HasValue && guestsTo.HasValue && guestsFrom.Value > guestsTo.Value)
+				{
+					SetErrorBorder(FGuestsFromBox);
+					SetErrorBorder(FGuestsToBox);
+					ShowError(GuestsFromErrorText, "Minimum guests cannot exceed maximum guests.");
 					isValid = false;
 				}
 			}
@@ -259,7 +330,7 @@ namespace RestaurantReservationSystem.UI.Features.Reservations.Dialogs
 
 			if (!DateOnly.TryParseExact(trimmed, "dd.MM.yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None, out var parsed))
 			{
-				error = "Enter a valid date (dd.MM.yyyy).";
+				error = "Enter a valid date.";
 				return false;
 			}
 
@@ -279,7 +350,7 @@ namespace RestaurantReservationSystem.UI.Features.Reservations.Dialogs
 
 			if (!TimeOnly.TryParseExact(trimmed, "HH:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out var parsed))
 			{
-				error = "Enter a valid time (HH:mm).";
+				error = "Enter a valid time.";
 				return false;
 			}
 
@@ -348,6 +419,57 @@ namespace RestaurantReservationSystem.UI.Features.Reservations.Dialogs
 
 
 		// EVENT HANDLERS:
+		private void UserControl_PreviewKeyDown(object sender, KeyEventArgs e)
+		{
+			if (e.Key == Key.Enter && ApplyButton.IsEnabled)
+			{
+				e.Handled = true;
+				Apply_Click(ApplyButton, new RoutedEventArgs());
+			}
+		}
+
+		private void FilterField_TextChanged(object sender, TextChangedEventArgs e)
+		{
+			HideError(GeneralFilterErrorText);
+
+			if (sender == FDateExactBox)
+			{
+				ResetBoxBorder(FDateExactBox);
+				HideError(DateExactErrorText);
+			}
+			else if (sender == FDateFromBox || sender == FDateToBox)
+			{
+				ResetBoxBorder(FDateFromBox);
+				ResetBoxBorder(FDateToBox);
+				HideError(DateFromErrorText);
+				HideError(DateToErrorText);
+			}
+			else if (sender == FTimeExactBox)
+			{
+				ResetBoxBorder(FTimeExactBox);
+				HideError(TimeExactErrorText);
+			}
+			else if (sender == FTimeFromBox || sender == FTimeToBox)
+			{
+				ResetBoxBorder(FTimeFromBox);
+				ResetBoxBorder(FTimeToBox);
+				HideError(TimeFromErrorText);
+				HideError(TimeToErrorText);
+			}
+			else if (sender == FGuestsExactBox)
+			{
+				ResetBoxBorder(FGuestsExactBox);
+				HideError(GuestsExactErrorText);
+			}
+			else if (sender == FGuestsFromBox || sender == FGuestsToBox)
+			{
+				ResetBoxBorder(FGuestsFromBox);
+				ResetBoxBorder(FGuestsToBox);
+				HideError(GuestsFromErrorText);
+				HideError(GuestsToErrorText);
+			}
+		}
+
 		private void DateMode_Click(object sender, RoutedEventArgs e)
 		{
 			_dateMode = sender == DateRangeModeButton ? FilterValueMode.Range : FilterValueMode.Exact;
@@ -430,7 +552,7 @@ namespace RestaurantReservationSystem.UI.Features.Reservations.Dialogs
 						? string.Join("\n", validation.ValidationErrors.Select(err => err.Message))
 						: (validation.Message ?? "Invalid filter criteria.");
 
-					ShowError(DateExactErrorText, message);
+					ShowError(GeneralFilterErrorText, message);
 					return;
 				}
 			}
@@ -471,41 +593,7 @@ namespace RestaurantReservationSystem.UI.Features.Reservations.Dialogs
 			var mainWindow = Window.GetWindow(this) as MainWindow;
 			if (mainWindow == null) { return; }
 
-			DateOnly date = DateOnly.FromDateTime(DateTime.Now);
-			if (_dateMode == FilterValueMode.Exact &&
-				DateOnly.TryParseExact(FDateExactBox.Text.Trim(), "dd.MM.yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None, out var parsedExactDate))
-			{
-				date = parsedExactDate;
-			}
-			else if (_dateMode == FilterValueMode.Range &&
-					 DateOnly.TryParseExact(FDateFromBox.Text.Trim(), "dd.MM.yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None, out var parsedFromDate))
-			{
-				date = parsedFromDate;
-			}
-
-			TimeOnly time = new(12, 0);
-			if (_timeMode == FilterValueMode.Exact &&
-				TimeOnly.TryParseExact(FTimeExactBox.Text.Trim(), "HH:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out var parsedExactTime))
-			{
-				time = parsedExactTime;
-			}
-			else if (_timeMode == FilterValueMode.Range &&
-					 TimeOnly.TryParseExact(FTimeFromBox.Text.Trim(), "HH:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out var parsedFromTime))
-			{
-				time = parsedFromTime;
-			}
-
-			int guests = 0;
-			if (_guestsMode == FilterValueMode.Exact && int.TryParse(FGuestsExactBox.Text.Trim(), out var gExact))
-			{
-				guests = gExact;
-			}
-
-			var selectTablesDialog = new SelectTablesDialog();
-			selectTablesDialog.SetReservationDetails(
-				date.ToString("dd.MM.yyyy", CultureInfo.InvariantCulture),
-				time.ToString("HH:mm", CultureInfo.InvariantCulture),
-				guests);
+			var selectTablesDialog = new SelectTablesDialog(isFilterMode: true);
 
 			selectTablesDialog.CancelRequested += (_, _) => mainWindow.DialogHost.Close(selectTablesDialog, false);
 			selectTablesDialog.ConfirmRequested += (_, _) =>
@@ -515,7 +603,13 @@ namespace RestaurantReservationSystem.UI.Features.Reservations.Dialogs
 				mainWindow.DialogHost.Close(selectTablesDialog, true);
 			};
 
-			await selectTablesDialog.LoadTablesAsync(date, time, guests, _selectedTableIds, checkAvailability: false);
+			await selectTablesDialog.LoadTablesAsync(
+				DateOnly.FromDateTime(DateTime.Now),
+				new TimeOnly(12, 0),
+				guests: 0,
+				_selectedTableIds,
+				checkAvailability: false);
+
 			mainWindow.DialogHost.Show(selectTablesDialog);
 		}
 	}

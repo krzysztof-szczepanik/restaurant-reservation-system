@@ -49,10 +49,9 @@ namespace RestaurantReservationSystem.UI.Features.Reservations.Dialogs
 			var config = await configurationService.GetAsync();
 			bool zoneVisible = config?.TableZoneVisible ?? true;
 
-			var tables = await tableService.GetAllAsync();
+			var tables = (await tableService.GetAllAsync())?.ToList() ?? [];
 
 			var distinctZones = new List<ZoneItem>();
-			bool includeNoZone = false;
 
 			if (zoneVisible)
 			{
@@ -67,19 +66,10 @@ namespace RestaurantReservationSystem.UI.Features.Reservations.Dialogs
 				{
 					distinctZones.Add(new ZoneItem(z, isNoZone: false, isSelected: preselected.Contains(z)));
 				}
-
-				includeNoZone = tables.Any(t => string.IsNullOrWhiteSpace(t.Zone) || t.Zone.Trim().Equals("No zone", StringComparison.OrdinalIgnoreCase))
-					|| preselected.Contains("No zone");
-			}
-			else
-			{
-				includeNoZone = true;
 			}
 
-			if (includeNoZone)
-			{
-				distinctZones.Add(new ZoneItem("No zone", isNoZone: true, isSelected: preselected.Contains("No zone")));
-			}
+			// "No zone" zawsze dostępne na końcu listy (również gdy nie ma jeszcze stolików w bazie)
+			distinctZones.Add(new ZoneItem("No zone", isNoZone: true, isSelected: preselected.Contains("No zone")));
 
 			_zones.Clear();
 			_zones.AddRange(distinctZones);
@@ -100,14 +90,17 @@ namespace RestaurantReservationSystem.UI.Features.Reservations.Dialogs
 				.Where(z => string.IsNullOrWhiteSpace(filter) || z.Name.Contains(filter, StringComparison.OrdinalIgnoreCase))
 				.ToList();
 
+			var selectedBg = new SolidColorBrush(Color.FromRgb(0xEF, 0xF6, 0xFF));
+
 			foreach (var zone in visibleZones)
 			{
 				var border = new Border
 				{
-					Background = zone.IsSelected ? new SolidColorBrush(Color.FromRgb(0xEF, 0xF6, 0xFF)) : Brushes.Transparent,
-					CornerRadius = new CornerRadius(4),
-					Padding = new Thickness(8, 8, 8, 8),
-					Margin = new Thickness(0, 0, 0, 4)
+					Background = zone.IsSelected ? selectedBg : Brushes.Transparent,
+					CornerRadius = new CornerRadius(6),
+					Padding = new Thickness(12, 10, 12, 10),
+					Margin = new Thickness(0, 0, 0, 6),
+					Cursor = System.Windows.Input.Cursors.Hand
 				};
 
 				var checkBox = new CheckBox
@@ -115,14 +108,14 @@ namespace RestaurantReservationSystem.UI.Features.Reservations.Dialogs
 					Content = zone.Name,
 					IsChecked = zone.IsSelected,
 					Foreground = (Brush)FindResource("PrimaryText"),
-					FontSize = 13,
+					FontSize = 14,
 					VerticalContentAlignment = VerticalAlignment.Center
 				};
 
 				checkBox.Checked += (_, _) =>
 				{
 					zone.IsSelected = true;
-					border.Background = new SolidColorBrush(Color.FromRgb(0xEF, 0xF6, 0xFF));
+					border.Background = selectedBg;
 					UpdateSummary();
 				};
 
@@ -131,6 +124,16 @@ namespace RestaurantReservationSystem.UI.Features.Reservations.Dialogs
 					zone.IsSelected = false;
 					border.Background = Brushes.Transparent;
 					UpdateSummary();
+				};
+
+				border.MouseLeftButtonDown += (_, e) =>
+				{
+					if (e.OriginalSource is CheckBox)
+					{
+						return;
+					}
+					checkBox.IsChecked = !(checkBox.IsChecked ?? false);
+					e.Handled = true;
 				};
 
 				border.Child = checkBox;

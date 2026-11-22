@@ -28,7 +28,7 @@
                 </RadioButton>
 
                 <!-- RESERVATIONS -->
-                <RadioButton GroupName="SidebarNavigation" Style="{StaticResource SidebarButtonStyle}" Margin="0,0,0,8" Checked="Reservations_Checked">
+				<RadioButton x:Name="ReservationsNavigationButton" GroupName="SidebarNavigation" Style="{StaticResource SidebarButtonStyle}" Margin="0,0,0,8" Checked="Reservations_Checked">
                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                         <Path Style="{StaticResource SidebarIconStyle}" Data="M4 6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6z M16 2v4 M8 2v4 M4 10h16 M7 14h5 M15 14h1 M7 18h1 M11 18h5"/>
                         <TextBlock Text="Reservations" VerticalAlignment="Center"/>

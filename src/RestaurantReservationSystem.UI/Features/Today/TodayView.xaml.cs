@@ -9,6 +9,7 @@ using System.Globalization;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
+using System.Windows.Threading;
 
 namespace RestaurantReservationSystem.UI.Features.Today
 {
@@ -22,6 +23,8 @@ namespace RestaurantReservationSystem.UI.Features.Today
 			public ReservationStatus? TargetStatus { get; init; }
 			public bool IsUnlockAction { get; init; }
 			public bool ShowSeparatorBefore { get; init; }
+			public string Background { get; init; } = "Transparent";
+			public string Foreground { get; init; } = "#0F172A";
 
 			public override bool Equals(object? obj) =>
 				obj is StatusOptionItem other &&
@@ -36,18 +39,18 @@ namespace RestaurantReservationSystem.UI.Features.Today
 		{
 			private static readonly IReadOnlyList<StatusOptionItem> ActiveStatusOptions =
 			[
-				new StatusOptionItem { Label = "Expected", TargetStatus = ReservationStatus.Expected },
-				new StatusOptionItem { Label = "Late", TargetStatus = ReservationStatus.Late },
-				new StatusOptionItem { Label = "Arrived", TargetStatus = ReservationStatus.Arrived },
-				new StatusOptionItem { Label = "Cancelled", TargetStatus = ReservationStatus.Cancelled },
-				new StatusOptionItem { Label = "No-show", TargetStatus = ReservationStatus.NoShow }
+				new StatusOptionItem { Label = "Expected", TargetStatus = ReservationStatus.Expected, Background = "#EFF6FF", Foreground = "#2563EB" },
+				new StatusOptionItem { Label = "Late", TargetStatus = ReservationStatus.Late, Background = "#FFFBEB", Foreground = "#B45309" },
+				new StatusOptionItem { Label = "Arrived", TargetStatus = ReservationStatus.Arrived, Background = "#F0FDF4", Foreground = "#15803D" },
+				new StatusOptionItem { Label = "Cancelled", TargetStatus = ReservationStatus.Cancelled, Background = "#F1F5F9", Foreground = "#64748B" },
+				new StatusOptionItem { Label = "No-show", TargetStatus = ReservationStatus.NoShow, Background = "#FEF2F2", Foreground = "#B91C1C" }
 			];
 
 			private static readonly IReadOnlyList<StatusOptionItem> InactiveStatusOptions =
 			[
-				new StatusOptionItem { Label = "Cancelled", TargetStatus = ReservationStatus.Cancelled },
-				new StatusOptionItem { Label = "No-show", TargetStatus = ReservationStatus.NoShow },
-				new StatusOptionItem { Label = "Unlock", TargetStatus = null, IsUnlockAction = true, ShowSeparatorBefore = true }
+				new StatusOptionItem { Label = "Cancelled", TargetStatus = ReservationStatus.Cancelled, Background = "#F1F5F9", Foreground = "#64748B" },
+				new StatusOptionItem { Label = "No-show", TargetStatus = ReservationStatus.NoShow, Background = "#FEF2F2", Foreground = "#B91C1C" },
+				new StatusOptionItem { Label = "Unlock", TargetStatus = null, IsUnlockAction = true, ShowSeparatorBefore = true, Background = "Transparent", Foreground = "#0F172A" }
 			];
 
 			public required Reservation Source { get; init; }
@@ -69,23 +72,26 @@ namespace RestaurantReservationSystem.UI.Features.Today
 					? InactiveStatusOptions
 					: ActiveStatusOptions;
 
-			public StatusOptionItem? SelectedOption =>
-				StatusOptions.FirstOrDefault(o => !o.IsUnlockAction && o.TargetStatus == Status);
+			public StatusOptionItem? SelectedOption
+			{
+				get => StatusOptions.FirstOrDefault(o => !o.IsUnlockAction && o.TargetStatus == Status);
+				set { }
+			}
 
 			public string StatusBackground => Status switch
 			{
 				ReservationStatus.Expected => "#EFF6FF",
-				ReservationStatus.Late => "#FEFCE8",
+				ReservationStatus.Late => "#FFFBEB",
 				ReservationStatus.Arrived => "#F0FDF4",
-				ReservationStatus.Cancelled => "#F8FAFC",
+				ReservationStatus.Cancelled => "#F1F5F9",
 				ReservationStatus.NoShow => "#FEF2F2",
-				_ => "#F8FAFC"
+				_ => "#F1F5F9"
 			};
 
 			public string StatusBorder => Status switch
 			{
 				ReservationStatus.Expected => "#BFDBFE",
-				ReservationStatus.Late => "#FEF08A",
+				ReservationStatus.Late => "#FDE68A",
 				ReservationStatus.Arrived => "#BBF7D0",
 				ReservationStatus.Cancelled => "#E2E8F0",
 				ReservationStatus.NoShow => "#FECACA",
@@ -94,11 +100,11 @@ namespace RestaurantReservationSystem.UI.Features.Today
 
 			public string StatusForeground => Status switch
 			{
-				ReservationStatus.Expected => "#1D4ED8",
-				ReservationStatus.Late => "#A16207",
+				ReservationStatus.Expected => "#2563EB",
+				ReservationStatus.Late => "#B45309",
 				ReservationStatus.Arrived => "#15803D",
 				ReservationStatus.Cancelled => "#64748B",
-				ReservationStatus.NoShow => "#DC2626",
+				ReservationStatus.NoShow => "#B91C1C",
 				_ => "#64748B"
 			};
 		}
@@ -113,6 +119,7 @@ namespace RestaurantReservationSystem.UI.Features.Today
 		private DateOnly _currentDate = DateOnly.FromDateTime(DateTime.Now);
 		private bool _isHandlingStatusChange;
 		private int? _selectedReservationId;
+		private readonly DispatcherTimer _dayChangeTimer = new();
 
 
 		// CONSTRUCTORS:
@@ -123,7 +130,12 @@ namespace RestaurantReservationSystem.UI.Features.Today
 			DataContext = this;
 			UpdateHeaderDate();
 
+			_dayChangeTimer.Interval = TimeSpan.FromSeconds(10);
+			_dayChangeTimer.Tick += DayChangeTimer_Tick;
+
 			Loaded += TodayView_Loaded;
+			Loaded += (_, _) => _dayChangeTimer.Start();
+			Unloaded += (_, _) => _dayChangeTimer.Stop();
 		}
 
 
@@ -195,7 +207,8 @@ namespace RestaurantReservationSystem.UI.Features.Today
 					Source = r,
 					PhoneDisplay = FormatPhoneNumber(r.PhoneNumber),
 					TablesDisplay = FormatTables(r.Tables),
-					TablesTooltip = FormatTablesTooltip(r.Tables)
+					TablesTooltip = FormatTablesTooltip(r.Tables),
+					NoteDisplay = FormatNotePreview(r.Note)
 				})
 				.ToList();
 
@@ -288,6 +301,16 @@ namespace RestaurantReservationSystem.UI.Features.Today
 			return string.Join(Environment.NewLine, lines);
 		}
 
+		private static string FormatNotePreview(string? note)
+		{
+			if (string.IsNullOrWhiteSpace(note))
+			{
+				return string.Empty;
+			}
+
+			return note.Replace("\r\n", " ").Replace('\n', ' ').Replace('\r', ' ').Trim();
+		}
+
 		private static string FormatPhoneNumber(string? phone)
 		{
 			if (string.IsNullOrWhiteSpace(phone))
@@ -311,20 +334,7 @@ namespace RestaurantReservationSystem.UI.Features.Today
 				using var scope = App.ServiceProvider.CreateScope();
 				var reservationService = scope.ServiceProvider.GetRequiredService<IReservationService>();
 
-				var reservation = await reservationService.GetByIdAsync(reservationId);
-				if (reservation is null)
-				{
-					MessageBox.Show(
-						"The selected reservation no longer exists.",
-						"Not Found",
-						MessageBoxButton.OK,
-						MessageBoxImage.Warning);
-					await LoadTodayReservationsAsync();
-					return false;
-				}
-
-				reservation.Status = newStatus;
-				var result = await reservationService.UpdateAsync(reservation, unlockCancelledOrNoShow: false);
+				var result = await reservationService.ChangeStatusAsync(reservationId, newStatus);
 				if (!result.IsSuccess)
 				{
 					MessageBox.Show(
@@ -381,11 +391,7 @@ namespace RestaurantReservationSystem.UI.Features.Today
 					return;
 				}
 
-				// Switch to Reservations view if available on MainWindow before opening Edit dialog
-				if (mainWindow.FindName("ReservationsNavButton") is Button navBtn)
-				{
-					navBtn.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
-				}
+				mainWindow.NavigateToReservations();
 
 				var editDialog = new AddEditReservationDialog(isEditMode: true);
 				editDialog.ApplyConfiguration(_configuration);
@@ -424,7 +430,7 @@ namespace RestaurantReservationSystem.UI.Features.Today
 					}
 
 					mainWindow.DialogHost.Close(editDialog, true);
-					await LoadTodayReservationsAsync(updatedReservation.Id);
+					mainWindow.NavigateToReservations();
 				};
 
 				mainWindow.DialogHost.Show(editDialog);
@@ -451,6 +457,17 @@ namespace RestaurantReservationSystem.UI.Features.Today
 					"Error",
 					MessageBoxButton.OK,
 					MessageBoxImage.Error);
+			}
+		}
+
+		private async void DayChangeTimer_Tick(object? sender, EventArgs e)
+		{
+			var systemToday = DateOnly.FromDateTime(DateTime.Now);
+			if (systemToday != _currentDate)
+			{
+				_selectedReservationId = null;
+				ReservationsTable.SelectedItem = null;
+				await LoadTodayReservationsAsync();
 			}
 		}
 

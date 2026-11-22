@@ -47,6 +47,22 @@
 			</Setter>
 		</Style>
 
+		<!-- SELECT TABLES BUTTON STYLE -->
+		<Style x:Key="SelectTablesActionButtonStyle" TargetType="Button" BasedOn="{StaticResource SecondaryButtonStyle}">
+			<Setter Property="Foreground" Value="#334155"/>
+			<Setter Property="BorderBrush" Value="#CBD5E1"/>
+			<Setter Property="Background" Value="#FFFFFF"/>
+			<Setter Property="Opacity" Value="1"/>
+			<Style.Triggers>
+				<Trigger Property="IsEnabled" Value="False">
+					<Setter Property="Foreground" Value="#8A99AD"/>
+					<Setter Property="BorderBrush" Value="#DCE3EC"/>
+					<Setter Property="Background" Value="#F8FAFC"/>
+					<Setter Property="Opacity" Value="1"/>
+				</Trigger>
+			</Style.Triggers>
+		</Style>
+
 		<!-- VALIDATION ERROR TEXT -->
 		<Style x:Key="FieldErrorTextStyle" TargetType="TextBlock">
 			<Setter Property="Foreground" Value="{DynamicResource Danger}"/>
@@ -149,17 +165,53 @@
 
 					<StackPanel x:Name="FirstNamePanel" Grid.Column="0">
 						<TextBlock x:Name="FirstNameLabel" Text="First Name" FontSize="13" Foreground="{StaticResource PrimaryText}" Margin="0,0,0,4" />
-						<TextBox x:Name="FirstNameBox" Height="36" VerticalContentAlignment="Center" Padding="12,0"
-                                 Style="{StaticResource ReservationFormTextBoxStyle}"
-                                 TextChanged="FirstNameBox_TextChanged" />
+						<Grid>
+							<TextBox x:Name="FirstNameBox" Height="36" VerticalContentAlignment="Center" Padding="12,0"
+                                     Style="{StaticResource ReservationFormTextBoxStyle}"
+                                     TextChanged="FirstNameBox_TextChanged" />
+							<TextBlock Text="First name" Foreground="{StaticResource SecondaryText}" VerticalAlignment="Center" Margin="13,0,0,0" IsHitTestVisible="False" FontSize="13">
+								<TextBlock.Style>
+									<Style TargetType="TextBlock">
+										<Setter Property="Visibility" Value="Collapsed"/>
+										<Style.Triggers>
+											<MultiDataTrigger>
+												<MultiDataTrigger.Conditions>
+													<Condition Binding="{Binding Text, ElementName=FirstNameBox}" Value=""/>
+													<Condition Binding="{Binding IsKeyboardFocusWithin, ElementName=FirstNameBox}" Value="False"/>
+												</MultiDataTrigger.Conditions>
+												<Setter Property="Visibility" Value="Visible"/>
+											</MultiDataTrigger>
+										</Style.Triggers>
+									</Style>
+								</TextBlock.Style>
+							</TextBlock>
+						</Grid>
 						<TextBlock x:Name="FirstNameErrorText" Style="{StaticResource FieldErrorTextStyle}" />
 					</StackPanel>
 
 					<StackPanel x:Name="LastNamePanel" Grid.Column="2">
 						<TextBlock x:Name="LastNameLabel" Text="Last Name" FontSize="13" Foreground="{StaticResource PrimaryText}" Margin="0,0,0,4" />
-						<TextBox x:Name="LastNameBox" Height="36" VerticalContentAlignment="Center" Padding="12,0"
-                                 Style="{StaticResource ReservationFormTextBoxStyle}"
-                                 TextChanged="LastNameBox_TextChanged" />
+						<Grid>
+							<TextBox x:Name="LastNameBox" Height="36" VerticalContentAlignment="Center" Padding="12,0"
+                                     Style="{StaticResource ReservationFormTextBoxStyle}"
+                                     TextChanged="LastNameBox_TextChanged" />
+							<TextBlock Text="Last name" Foreground="{StaticResource SecondaryText}" VerticalAlignment="Center" Margin="13,0,0,0" IsHitTestVisible="False" FontSize="13">
+								<TextBlock.Style>
+									<Style TargetType="TextBlock">
+										<Setter Property="Visibility" Value="Collapsed"/>
+										<Style.Triggers>
+											<MultiDataTrigger>
+												<MultiDataTrigger.Conditions>
+													<Condition Binding="{Binding Text, ElementName=LastNameBox}" Value=""/>
+													<Condition Binding="{Binding IsKeyboardFocusWithin, ElementName=LastNameBox}" Value="False"/>
+												</MultiDataTrigger.Conditions>
+												<Setter Property="Visibility" Value="Visible"/>
+											</MultiDataTrigger>
+										</Style.Triggers>
+									</Style>
+								</TextBlock.Style>
+							</TextBlock>
+						</Grid>
 						<TextBlock x:Name="LastNameErrorText" Style="{StaticResource FieldErrorTextStyle}" />
 					</StackPanel>
 				</Grid>
@@ -176,9 +228,27 @@
 					<!-- PHONE NUMBER -->
 					<StackPanel x:Name="PhonePanel" Grid.Column="0">
 						<TextBlock x:Name="PhoneLabel" Text="Phone Number" FontSize="13" Foreground="{StaticResource PrimaryText}" Margin="0,0,0,4" />
-						<TextBox x:Name="PhoneBox" Height="36" VerticalContentAlignment="Center" Padding="12,0"
-                                 Style="{StaticResource ReservationFormTextBoxStyle}"
-                                 TextChanged="PhoneBox_TextChanged" />
+						<Grid>
+							<TextBox x:Name="PhoneBox" Height="36" VerticalContentAlignment="Center" Padding="12,0"
+                                     Style="{StaticResource ReservationFormTextBoxStyle}"
+                                     TextChanged="PhoneBox_TextChanged" />
+							<TextBlock Text="123 456 789" Foreground="{StaticResource SecondaryText}" VerticalAlignment="Center" Margin="13,0,0,0" IsHitTestVisible="False" FontSize="13">
+								<TextBlock.Style>
+									<Style TargetType="TextBlock">
+										<Setter Property="Visibility" Value="Collapsed"/>
+										<Style.Triggers>
+											<MultiDataTrigger>
+												<MultiDataTrigger.Conditions>
+													<Condition Binding="{Binding Text, ElementName=PhoneBox}" Value=""/>
+													<Condition Binding="{Binding IsKeyboardFocusWithin, ElementName=PhoneBox}" Value="False"/>
+												</MultiDataTrigger.Conditions>
+												<Setter Property="Visibility" Value="Visible"/>
+											</MultiDataTrigger>
+										</Style.Triggers>
+									</Style>
+								</TextBlock.Style>
+							</TextBlock>
+						</Grid>
 						<TextBlock x:Name="PhoneErrorText" Style="{StaticResource FieldErrorTextStyle}" />
 					</StackPanel>
 
@@ -195,6 +265,23 @@
 
 								<TextBox x:Name="GuestsBox" Text="" Style="{StaticResource SpinnerTextBoxStyle}"
                                          TextChanged="GuestsBox_TextChanged" />
+
+								<TextBlock Text="Guests" Foreground="{StaticResource SecondaryText}" VerticalAlignment="Center" Margin="13,0,0,0" IsHitTestVisible="False" FontSize="13">
+									<TextBlock.Style>
+										<Style TargetType="TextBlock">
+											<Setter Property="Visibility" Value="Collapsed"/>
+											<Style.Triggers>
+												<MultiDataTrigger>
+													<MultiDataTrigger.Conditions>
+														<Condition Binding="{Binding Text, ElementName=GuestsBox}" Value=""/>
+														<Condition Binding="{Binding IsKeyboardFocusWithin, ElementName=GuestsBox}" Value="False"/>
+													</MultiDataTrigger.Conditions>
+													<Setter Property="Visibility" Value="Visible"/>
+												</MultiDataTrigger>
+											</Style.Triggers>
+										</Style>
+									</TextBlock.Style>
+								</TextBlock>
 
 								<Border Grid.Column="1" BorderBrush="{DynamicResource Border}" BorderThickness="1,0,0,0">
 									<Grid>
@@ -234,7 +321,7 @@
 							</Grid.ColumnDefinitions>
 
 							<TextBlock x:Name="SelectedTablesText" Grid.Column="0" Text="Selected tables: 0 | Total seats: 0" VerticalAlignment="Center" Foreground="{StaticResource PrimaryText}" FontWeight="SemiBold" FontSize="13" />
-							<Button x:Name="SelectTablesButton" Grid.Column="1" Content="Select Tables" Height="34" IsEnabled="False" Style="{StaticResource SecondaryButtonStyle}" Click="SelectTables_Click" />
+							<Button x:Name="SelectTablesButton" Grid.Column="1" Content="Select Tables" Height="34" IsEnabled="False" Style="{StaticResource SelectTablesActionButtonStyle}" Click="SelectTables_Click" />
 						</Grid>
 					</Border>
 
@@ -256,7 +343,17 @@
 							</Grid.ColumnDefinitions>
 
 							<TextBlock x:Name="NoteText" Grid.Column="0" Text="No note added." VerticalAlignment="Center" Foreground="{StaticResource SecondaryText}" FontSize="13" TextTrimming="CharacterEllipsis" Margin="0,0,8,0" />
-							<Button x:Name="NoteButton" Grid.Column="1" Content="Add Note" Height="34" Style="{StaticResource SecondaryButtonStyle}" Click="Note_Click" />
+							<Button x:Name="AddNoteButton"
+							        Grid.Column="1"
+							        Content="Add Note"
+							        Height="36"
+							        HorizontalAlignment="Right"
+							        VerticalAlignment="Center"
+							        Background="{DynamicResource Surface}"
+							        Foreground="{DynamicResource PrimaryText}"
+							        BorderBrush="{DynamicResource Border}"
+							        Style="{StaticResource SecondaryButtonStyle}"
+							        Click="AddNote_Click" />
 						</Grid>
 					</Border>
 				</StackPanel>
@@ -268,7 +365,14 @@
 		<!-- FOOTER -->
 		<controls:Dialog.FooterRight>
 			<StackPanel Orientation="Horizontal">
-				<Button Content="Cancel" Height="36" Margin="0,0,8,0" Click="Cancel_Click" Style="{StaticResource SecondaryButtonStyle}" />
+				<Button Content="Cancel"
+				        Height="36"
+				        Margin="0,0,8,0"
+				        Background="#FFFFFF"
+				        Foreground="{StaticResource PrimaryText}"
+				        BorderBrush="{StaticResource Border}"
+				        Click="Cancel_Click"
+				        Style="{StaticResource SecondaryButtonStyle}" />
 				<Button x:Name="SaveButton" Content="Add" Height="36" Click="Save_Click" Style="{StaticResource PrimaryButtonStyle}" />
 			</StackPanel>
 		</controls:Dialog.FooterRight>

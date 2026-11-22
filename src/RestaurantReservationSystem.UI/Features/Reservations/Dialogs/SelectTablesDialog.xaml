@@ -3,6 +3,19 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              x:Class="RestaurantReservationSystem.UI.Features.Reservations.Dialogs.SelectTablesDialog">
 
+	<UserControl.Resources>
+		<Style x:Key="SelectTablesConfirmButtonStyle" TargetType="Button" BasedOn="{StaticResource PrimaryButtonStyle}">
+			<Style.Triggers>
+				<Trigger Property="IsEnabled" Value="False">
+					<Setter Property="Foreground" Value="#8A99AD"/>
+					<Setter Property="BorderBrush" Value="#DCE3EC"/>
+					<Setter Property="Background" Value="#F8FAFC"/>
+					<Setter Property="Opacity" Value="1"/>
+				</Trigger>
+			</Style.Triggers>
+		</Style>
+	</UserControl.Resources>
+
 	<controls:Dialog Header="Select Tables" Width="520">
 
 		<!-- CONTENT -->
@@ -10,7 +23,7 @@
 			<StackPanel>
 
 				<!-- RESERVATION DETAILS -->
-				<Grid Margin="0,0,0,14">
+				<Grid x:Name="ReservationDetailsGrid" Margin="0,0,0,14">
 					<TextBlock x:Name="ReservationDateText" FontWeight="SemiBold" FontSize="13" Foreground="{StaticResource PrimaryText}" HorizontalAlignment="Left" VerticalAlignment="Center" />
 					<TextBlock x:Name="GuestsText" FontSize="13" Foreground="{StaticResource SecondaryText}" HorizontalAlignment="Right" VerticalAlignment="Center" />
 				</Grid>
@@ -20,7 +33,7 @@
 				<Grid Margin="0,0,0,16">
 					<TextBox x:Name="SearchBox" Height="36" VerticalContentAlignment="Center" Padding="12,0" Style="{StaticResource ReservationFormTextBoxStyle}" TextChanged="SearchBox_TextChanged" />
 
-					<TextBlock Text="Search tables" Foreground="{StaticResource SecondaryText}" VerticalAlignment="Center" Margin="24,0,0,0" IsHitTestVisible="False" FontSize="13">
+					<TextBlock Text="Search tables" Foreground="{StaticResource SecondaryText}" VerticalAlignment="Center" Margin="13,0,0,0" IsHitTestVisible="False" FontSize="13">
 						<TextBlock.Style>
 							<Style TargetType="TextBlock">
 								<Setter Property="Visibility" Value="Collapsed"/>
@@ -54,7 +67,7 @@
 				<TextBlock x:Name="SelectionSummaryText" Text="Selected tables: 0 | Total seats: 0" FontSize="13" FontWeight="SemiBold" Foreground="{StaticResource PrimaryText}" Margin="0,0,0,2" />
 
 				<!-- CAPACITY WARNING -->
-				<Grid Height="34">
+				<Grid x:Name="CapacityWarningContainer" Height="34">
 					<TextBlock x:Name="CapacityWarning" Text="The number of guests exceeds the total seating capacity of the selected tables." FontSize="12" Foreground="#D97706" TextWrapping="Wrap" VerticalAlignment="Center" Visibility="Hidden" />
 				</Grid>
 
@@ -65,8 +78,19 @@
 		<!-- FOOTER -->
 		<controls:Dialog.FooterRight>
 			<StackPanel Orientation="Horizontal">
-				<Button Content="Cancel" Height="36" Margin="0,0,8,0" Click="Cancel_Click" Style="{StaticResource SecondaryButtonStyle}" />
-				<Button x:Name="ConfirmButton" Content="Confirm" Height="36" Click="Confirm_Click" Style="{StaticResource PrimaryButtonStyle}" />
+				<Button Content="Cancel"
+				        Height="36"
+				        Margin="0,0,8,0"
+				        Background="#FFFFFF"
+				        Foreground="{StaticResource PrimaryText}"
+				        BorderBrush="{StaticResource Border}"
+				        Click="Cancel_Click"
+				        Style="{StaticResource SecondaryButtonStyle}" />
+				<Button x:Name="ConfirmButton"
+				        Content="Confirm"
+				        Height="36"
+				        Click="Confirm_Click"
+				        Style="{StaticResource SelectTablesConfirmButtonStyle}" />
 			</StackPanel>
 		</controls:Dialog.FooterRight>
 

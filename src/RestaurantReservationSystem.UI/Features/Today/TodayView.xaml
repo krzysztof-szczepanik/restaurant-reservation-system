@@ -2,11 +2,129 @@
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:controls="clr-namespace:RestaurantReservationSystem.UI.Controls"
-             xmlns:enums="clr-namespace:RestaurantReservationSystem.Core.Enums;assembly=RestaurantReservationSystem.Core"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              mc:Ignorable="d"
              d:DesignHeight="640" d:DesignWidth="992">
+
+	<UserControl.Resources>
+		<BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+
+		<!-- STATUS COMBOBOX STYLE -->
+		<Style x:Key="StatusComboBoxStyle" TargetType="ComboBox">
+			<Setter Property="Width" Value="116"/>
+			<Setter Property="Height" Value="30"/>
+			<Setter Property="HorizontalAlignment" Value="Left"/>
+			<Setter Property="FontSize" Value="12"/>
+			<Setter Property="FontWeight" Value="SemiBold"/>
+			<Setter Property="Cursor" Value="Hand"/>
+			<Setter Property="SnapsToDevicePixels" Value="True"/>
+			<Setter Property="ItemContainerStyle">
+				<Setter.Value>
+					<Style TargetType="ComboBoxItem">
+						<Setter Property="Padding" Value="0"/>
+						<Setter Property="Margin" Value="0"/>
+						<Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+						<Setter Property="Background" Value="Transparent"/>
+						<Setter Property="Template">
+							<Setter.Value>
+								<ControlTemplate TargetType="ComboBoxItem">
+									<Border x:Name="ItemWrapper"
+									        Background="Transparent"
+									        CornerRadius="4"
+									        Padding="{TemplateBinding Padding}">
+										<ContentPresenter HorizontalAlignment="Stretch"/>
+									</Border>
+									<ControlTemplate.Triggers>
+										<Trigger Property="IsHighlighted" Value="True">
+											<Setter TargetName="ItemWrapper" Property="Background" Value="#F1F5F9"/>
+										</Trigger>
+										<Trigger Property="IsMouseOver" Value="True">
+											<Setter TargetName="ItemWrapper" Property="Background" Value="#F1F5F9"/>
+										</Trigger>
+									</ControlTemplate.Triggers>
+								</ControlTemplate>
+							</Setter.Value>
+						</Setter>
+					</Style>
+				</Setter.Value>
+			</Setter>
+			<Setter Property="Template">
+				<Setter.Value>
+					<ControlTemplate TargetType="ComboBox">
+						<Grid>
+							<Border x:Name="BadgeBorder"
+							        Background="{TemplateBinding Background}"
+							        BorderBrush="{TemplateBinding BorderBrush}"
+							        BorderThickness="1"
+							        CornerRadius="6"
+							        Padding="10,0,8,0">
+								<Grid>
+									<Grid.ColumnDefinitions>
+										<ColumnDefinition Width="*"/>
+										<ColumnDefinition Width="Auto"/>
+									</Grid.ColumnDefinitions>
+
+									<TextBlock Grid.Column="0"
+									           Text="{Binding SelectedItem.Label, RelativeSource={RelativeSource TemplatedParent}}"
+									           Foreground="{TemplateBinding Foreground}"
+									           FontSize="12"
+									           FontWeight="SemiBold"
+									           VerticalAlignment="Center"
+									           HorizontalAlignment="Left"/>
+
+									<Path Grid.Column="1"
+									      Data="M 0 0 L 4 4 L 8 0"
+									      Stroke="{TemplateBinding Foreground}"
+									      StrokeThickness="1.5"
+									      StrokeStartLineCap="Round"
+									      StrokeEndLineCap="Round"
+									      StrokeLineJoin="Round"
+									      VerticalAlignment="Center"
+									      Margin="6,1,0,0"/>
+								</Grid>
+							</Border>
+
+							<ToggleButton Background="Transparent"
+							              BorderThickness="0"
+							              Focusable="False"
+							              IsChecked="{Binding IsDropDownOpen, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}"
+							              ClickMode="Press">
+								<ToggleButton.Template>
+									<ControlTemplate TargetType="ToggleButton">
+										<Border Background="Transparent"/>
+									</ControlTemplate>
+								</ToggleButton.Template>
+							</ToggleButton>
+
+							<Popup x:Name="PART_Popup"
+							       Placement="Bottom"
+							       PlacementTarget="{Binding ElementName=BadgeBorder}"
+							       VerticalOffset="4"
+							       IsOpen="{TemplateBinding IsDropDownOpen}"
+							       AllowsTransparency="True"
+							       Focusable="False"
+							       PopupAnimation="Fade">
+								<Border Background="#FFFFFF"
+								        BorderBrush="#E2E8F0"
+								        BorderThickness="1"
+								        CornerRadius="8"
+								        Padding="4"
+								        MinWidth="{Binding ActualWidth, ElementName=BadgeBorder}">
+									<Border.Effect>
+										<DropShadowEffect BlurRadius="12" ShadowDepth="3" Opacity="0.12" Color="#0F172A"/>
+									</Border.Effect>
+									<ScrollViewer VerticalScrollBarVisibility="Auto" MaxHeight="240">
+										<ItemsPresenter/>
+									</ScrollViewer>
+								</Border>
+							</Popup>
+						</Grid>
+					</ControlTemplate>
+				</Setter.Value>
+			</Setter>
+		</Style>
+	</UserControl.Resources>
 
 	<Grid>
 		<Grid.RowDefinitions>
@@ -33,23 +151,27 @@
 			                    SelectionChanged="ReservationsTable_SelectionChanged">
 
 				<controls:DataTable.Columns>
-					<DataGridTextColumn Header="Date" Binding="{Binding DateDisplay}"/>
-					<DataGridTextColumn Header="Time" Binding="{Binding TimeDisplay}"/>
-					<DataGridTextColumn Header="First Name" Binding="{Binding FirstName}" Visibility="Collapsed"/>
-					<DataGridTextColumn Header="Last Name" Binding="{Binding LastName}" Visibility="Collapsed"/>
-					<DataGridTextColumn Header="Phone Number" Binding="{Binding PhoneDisplay}" Visibility="Collapsed"/>
-					<DataGridTextColumn Header="Guests" Binding="{Binding Guests}"/>
-					<DataGridTextColumn Header="Tables" Binding="{Binding TablesDisplay}">
+					<DataGridTextColumn Header="Date" Binding="{Binding DateDisplay}" Width="1.1*"/>
+					<DataGridTextColumn Header="Time" Binding="{Binding TimeDisplay}" Width="0.8*"/>
+					<DataGridTextColumn Header="First Name" Binding="{Binding FirstName}" Width="1.1*" Visibility="Collapsed"/>
+					<DataGridTextColumn Header="Last Name" Binding="{Binding LastName}" Width="1.1*" Visibility="Collapsed"/>
+					<DataGridTextColumn Header="Phone Number" Binding="{Binding PhoneDisplay}" Width="1.2*" Visibility="Collapsed"/>
+					<DataGridTextColumn Header="Guests" Binding="{Binding Guests}" Width="0.8*"/>
+					<DataGridTextColumn Header="Tables" Binding="{Binding TablesDisplay}" Width="1.6*">
 						<DataGridTextColumn.ElementStyle>
 							<Style TargetType="TextBlock">
+								<Setter Property="Background" Value="Transparent"/>
 								<Setter Property="ToolTip" Value="{Binding TablesTooltip}"/>
+								<Setter Property="TextTrimming" Value="CharacterEllipsis"/>
 							</Style>
 						</DataGridTextColumn.ElementStyle>
 					</DataGridTextColumn>
-					<DataGridTextColumn Header="Note" Binding="{Binding NoteDisplay}">
+					<DataGridTextColumn Header="Note" Binding="{Binding NoteDisplay}" Width="2*">
 						<DataGridTextColumn.ElementStyle>
 							<Style TargetType="TextBlock">
+								<Setter Property="Background" Value="Transparent"/>
 								<Setter Property="ToolTip" Value="{Binding NoteTooltip}"/>
+								<Setter Property="TextTrimming" Value="CharacterEllipsis"/>
 							</Style>
 						</DataGridTextColumn.ElementStyle>
 					</DataGridTextColumn>
@@ -57,21 +179,73 @@
 					<DataGridTemplateColumn Header="Status" Width="140">
 						<DataGridTemplateColumn.CellTemplate>
 							<DataTemplate>
-								<ComboBox Width="116" Height="30" HorizontalAlignment="Left"
+								<ComboBox Style="{StaticResource StatusComboBoxStyle}"
 								          ItemsSource="{Binding StatusOptions}"
-								          SelectedItem="{Binding SelectedOption, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+								          SelectedItem="{Binding SelectedOption, Mode=OneWay}"
 								          SelectionChanged="StatusComboBox_SelectionChanged"
 								          Background="{Binding StatusBackground}"
 								          BorderBrush="{Binding StatusBorder}"
-								          Foreground="{Binding StatusForeground}"
-								          FontSize="12" FontWeight="SemiBold"
-								          VerticalContentAlignment="Center" Padding="8,0">
+								          Foreground="{Binding StatusForeground}">
 									<ComboBox.ItemTemplate>
 										<DataTemplate>
 											<StackPanel>
-												<Separator Margin="0,2,0,4" Visibility="{Binding ShowSeparatorBefore, Converter={StaticResource BooleanToVisibilityConverter}}" />
-												<TextBlock Text="{Binding Label}" FontSize="12"
-												           FontWeight="{Binding IsUnlockAction, Converter={StaticResource BooleanToBoldConverter}}" />
+												<Separator Margin="2,3,2,4"
+												           Background="#E2E8F0"
+												           Visibility="{Binding ShowSeparatorBefore, Converter={StaticResource BooleanToVisibilityConverter}}" />
+												<Border Background="{Binding Background}"
+												        CornerRadius="4"
+												        Padding="8,5">
+													<Grid>
+														<Grid.ColumnDefinitions>
+															<ColumnDefinition Width="*"/>
+															<ColumnDefinition Width="Auto"/>
+														</Grid.ColumnDefinitions>
+
+														<StackPanel Grid.Column="0"
+														            Orientation="Horizontal"
+														            HorizontalAlignment="Left"
+														            VerticalAlignment="Center">
+															<Path Data="M7 10V7a5 5 0 0 1 9.33,-2.5 M5 10h14a2 2 0 0 1 2 2v8a2 2 0 0 1 -2 2H5a2 2 0 0 1 -2 -2v-8a2 2 0 0 1 2 -2z M12 15a1 1 0 1 0 0 2a1 1 0 1 0 0 -2z"
+															      Width="14" Height="14"
+															      Stretch="Uniform"
+															      Stroke="{Binding Foreground}"
+															      StrokeThickness="1.5"
+															      StrokeStartLineCap="Round"
+															      StrokeEndLineCap="Round"
+															      StrokeLineJoin="Round"
+															      VerticalAlignment="Center"
+															      Margin="0,0,6,0"
+															      Visibility="{Binding IsUnlockAction, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+
+															<TextBlock Text="{Binding Label}"
+															           Foreground="{Binding Foreground}"
+															           FontSize="12"
+															           VerticalAlignment="Center">
+																<TextBlock.Style>
+																	<Style TargetType="TextBlock">
+																		<Setter Property="FontWeight" Value="SemiBold"/>
+																		<Style.Triggers>
+																			<DataTrigger Binding="{Binding IsUnlockAction}" Value="True">
+																				<Setter Property="FontWeight" Value="Normal"/>
+																			</DataTrigger>
+																		</Style.Triggers>
+																	</Style>
+																</TextBlock.Style>
+															</TextBlock>
+														</StackPanel>
+
+														<Path Grid.Column="1"
+														      Data="M 0 4 L 3 7 L 8 1"
+														      Stroke="{Binding Foreground}"
+														      StrokeThickness="1.6"
+														      StrokeStartLineCap="Round"
+														      StrokeEndLineCap="Round"
+														      StrokeLineJoin="Round"
+														      VerticalAlignment="Center"
+														      Margin="8,0,0,0"
+														      Visibility="{Binding IsSelected, RelativeSource={RelativeSource AncestorType=ComboBoxItem}, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+													</Grid>
+												</Border>
 											</StackPanel>
 										</DataTemplate>
 									</ComboBox.ItemTemplate>
