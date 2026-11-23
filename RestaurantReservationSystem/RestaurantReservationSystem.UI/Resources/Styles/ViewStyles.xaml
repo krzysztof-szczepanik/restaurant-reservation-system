@@ -1,0 +1,39 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!-- VIEW HEADER -->
+    <Style x:Key="ViewHeaderStyle" TargetType="Border">
+        <Setter Property="Background" Value="{DynamicResource Surface}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource Border}"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="CornerRadius" Value="8"/>
+        <Setter Property="Padding" Value="24,20"/>
+        <Setter Property="MinHeight" Value="78"/>
+        <Setter Property="Margin" Value="0,0,0,16"/>
+    </Style>
+
+
+    <!-- VIEW CONTENT -->
+    <Style x:Key="ViewContentStyle" TargetType="Border">
+        <Setter Property="Background" Value="{DynamicResource Surface}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource Border}"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="CornerRadius" Value="8"/>
+    </Style>
+
+
+    <!-- VIEW CONTENT PADDED -->
+    <Style x:Key="ViewContentPaddedStyle" TargetType="Border" BasedOn="{StaticResource ViewContentStyle}">
+        <Setter Property="Padding" Value="24"/>
+    </Style>
+
+
+    <!-- VIEW TITLE -->
+    <Style x:Key="ViewTitleStyle" TargetType="TextBlock">
+        <Setter Property="FontSize" Value="22"/>
+        <Setter Property="FontWeight" Value="SemiBold"/>
+        <Setter Property="Foreground" Value="{DynamicResource PrimaryText}"/>
+        <Setter Property="VerticalAlignment" Value="Center"/>
+    </Style>
+
+</ResourceDictionary>

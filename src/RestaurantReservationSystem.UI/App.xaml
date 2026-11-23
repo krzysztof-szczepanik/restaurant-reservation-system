@@ -3,29 +3,54 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              StartupUri="MainWindow.xaml">
 
-    <Application.Resources>
-        <ResourceDictionary>
-            <ResourceDictionary.MergedDictionaries>
+	<Application.Resources>
+		<ResourceDictionary>
+			<ResourceDictionary.MergedDictionaries>
 
-                <!-- COLORS -->
-                <ResourceDictionary Source="/Resources/Colors.xaml"/>
+				<!-- COLORS -->
+				<ResourceDictionary Source="/Resources/Colors.xaml"/>
 
-                <!-- TYPOGRAPHY -->
-                <ResourceDictionary Source="/Resources/Typography.xaml"/>
+				<!-- TYPOGRAPHY -->
+				<ResourceDictionary Source="/Resources/Typography.xaml"/>
 
-                <!-- CONTROL STYLES -->
-                <ResourceDictionary Source="/Resources/Styles/ButtonStyles.xaml"/>
-                <ResourceDictionary Source="/Resources/Styles/CheckBoxStyles.xaml"/>
-                <ResourceDictionary Source="/Resources/Styles/SearchBarStyles.xaml"/>
-                <ResourceDictionary Source="/Resources/Styles/ScrollBarStyles.xaml"/>
-                <ResourceDictionary Source="/Resources/Styles/DialogStyles.xaml"/>
-                <ResourceDictionary Source="/Resources/Styles/SidebarStyles.xaml"/>
+				<!-- CONTROL STYLES -->
+				<ResourceDictionary Source="/Resources/Styles/ButtonStyles.xaml"/>
+				<ResourceDictionary Source="/Resources/Styles/CheckBoxStyles.xaml"/>
+				<ResourceDictionary Source="/Resources/Styles/SearchBarStyles.xaml"/>
+				<ResourceDictionary Source="/Resources/Styles/ScrollBarStyles.xaml"/>
+				<ResourceDictionary Source="/Resources/Styles/DialogStyles.xaml"/>
+				<ResourceDictionary Source="/Resources/Styles/SidebarStyles.xaml"/>
 
-                <!-- VIEW STYLES -->
-                <ResourceDictionary Source="/Resources/Styles/ViewStyles.xaml"/>
+				<!-- VIEW STYLES -->
+				<ResourceDictionary Source="/Resources/Styles/ViewStyles.xaml"/>
 
-            </ResourceDictionary.MergedDictionaries>
-        </ResourceDictionary>
-    </Application.Resources>
+			</ResourceDictionary.MergedDictionaries>
+
+			<!-- TOOLTIP STYLE -->
+			<Style TargetType="ToolTip">
+				<Setter Property="Background" Value="#FFFFFF"/>
+				<Setter Property="Foreground" Value="#0F172A"/>
+				<Setter Property="BorderBrush" Value="#E2E8F0"/>
+				<Setter Property="BorderThickness" Value="1"/>
+				<Setter Property="FontSize" Value="12"/>
+				<Setter Property="Padding" Value="10,8"/>
+				<Setter Property="HasDropShadow" Value="True"/>
+				<Setter Property="Template">
+					<Setter.Value>
+						<ControlTemplate TargetType="ToolTip">
+							<Border Background="{TemplateBinding Background}"
+                                    BorderBrush="{TemplateBinding BorderBrush}"
+                                    BorderThickness="{TemplateBinding BorderThickness}"
+                                    CornerRadius="6"
+                                    Padding="{TemplateBinding Padding}">
+								<ContentPresenter/>
+							</Border>
+						</ControlTemplate>
+					</Setter.Value>
+				</Setter>
+			</Style>
+
+		</ResourceDictionary>
+	</Application.Resources>
 
 </Application>

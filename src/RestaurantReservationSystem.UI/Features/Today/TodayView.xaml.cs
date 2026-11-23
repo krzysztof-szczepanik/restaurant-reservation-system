@@ -1,122 +1,589 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
+using RestaurantReservationSystem.Application.DTOs;
 using RestaurantReservationSystem.Application.Interfaces;
+using RestaurantReservationSystem.Core.Enums;
+using RestaurantReservationSystem.Core.Models;
+using RestaurantReservationSystem.UI.Features.Reservations.Dialogs;
 using System.Collections.ObjectModel;
+using System.Globalization;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Media;
+using System.Windows.Threading;
 
-namespace RestaurantReservationSystem.UI.Features.Today {
-    public partial class TodayView : UserControl {
+namespace RestaurantReservationSystem.UI.Features.Today
+{
+	public partial class TodayView : UserControl
+	{
 
-        // PROPERTIES:
-        // !!!!!!!!!! TEST DATA !!!!!!!!!!
-        public ObservableCollection<TodayReservationRow> TodayReservations { get; } = new() {
-            new("20.10.2026", "18:30", "Anna", "Kowalska", "501 234 567", 6, "Main Hall: Table 2...", "Birthday dinner...", "Expected"),
-            new("20.10.2026", "20:00", "Ewa", "Wisniewska", "507 890 123", 5, "Main Hall: Table 7", "Nut allergy.", "Expected"),
-            new("20.10.2026", "18:30", "James", "Wilson", "602 345 678", 4, "Terrace: Table 3", "", "Late"),
-            new("20.10.2026", "12:15", "Marta", "Nowak", "703 456 789", 8, "Main Hall: Table 1, 2", "High chair requested.", "Arrived"),
-            new("20.10.2026", "18:30", "Oliver", "Brown", "504 567 890", 2, "Terrace: Table 4", "Window seat.", "Arrived"),
-            new("20.10.2026", "18:30", "Sophie", "Martin", "685 678 901", 4, "Table 5", "", "Cancelled"),
-            new("20.10.2026", "18:30", "Piotr", "Zielinski", "606 789 012", 3, "Main Hall: Table 6", "", "No-show")
-        };
+		// VIEW MODELS:
+		public sealed class StatusOptionItem
+		{
+			public required string Label { get; init; }
+			public ReservationStatus? TargetStatus { get; init; }
+			public bool IsUnlockAction { get; init; }
+			public bool ShowSeparatorBefore { get; init; }
+			public string Background { get; init; } = "Transparent";
+			public string Foreground { get; init; } = "#0F172A";
 
+			public override bool Equals(object? obj) =>
+				obj is StatusOptionItem other &&
+				Label == other.Label &&
+				TargetStatus == other.TargetStatus &&
+				IsUnlockAction == other.IsUnlockAction;
 
-        // CONSTRUCTORS:
-        public TodayView() {
-            InitializeComponent();
+			public override int GetHashCode() => HashCode.Combine(Label, TargetStatus, IsUnlockAction);
+		}
 
-            DataContext = this;
-            Loaded += TodayView_Loaded;
-        }
+		public sealed class TodayReservationRow
+		{
+			private static readonly IReadOnlyList<StatusOptionItem> ActiveStatusOptions =
+			[
+				new StatusOptionItem { Label = "Expected", TargetStatus = ReservationStatus.Expected, Background = "#EFF6FF", Foreground = "#2563EB" },
+				new StatusOptionItem { Label = "Late", TargetStatus = ReservationStatus.Late, Background = "#FFFBEB", Foreground = "#B45309" },
+				new StatusOptionItem { Label = "Arrived", TargetStatus = ReservationStatus.Arrived, Background = "#F0FDF4", Foreground = "#15803D" },
+				new StatusOptionItem { Label = "Cancelled", TargetStatus = ReservationStatus.Cancelled, Background = "#F1F5F9", Foreground = "#64748B" },
+				new StatusOptionItem { Label = "No-show", TargetStatus = ReservationStatus.NoShow, Background = "#FEF2F2", Foreground = "#B91C1C" }
+			];
 
+			private static readonly IReadOnlyList<StatusOptionItem> InactiveStatusOptions =
+			[
+				new StatusOptionItem { Label = "Cancelled", TargetStatus = ReservationStatus.Cancelled, Background = "#F1F5F9", Foreground = "#64748B" },
+				new StatusOptionItem { Label = "No-show", TargetStatus = ReservationStatus.NoShow, Background = "#FEF2F2", Foreground = "#B91C1C" },
+				new StatusOptionItem { Label = "Unlock", TargetStatus = null, IsUnlockAction = true, ShowSeparatorBefore = true, Background = "Transparent", Foreground = "#0F172A" }
+			];
 
-        // METHODS:
-        private async Task LoadConfigurationAsync() {
-            using var scope = App.ServiceProvider.CreateScope();
+			public required Reservation Source { get; init; }
+			public int Id => Source.Id;
+			public string DateDisplay => Source.Date.ToString("dd.MM.yyyy", CultureInfo.InvariantCulture);
+			public string TimeDisplay => Source.Time.ToString("HH:mm", CultureInfo.InvariantCulture);
+			public string? FirstName => Source.FirstName;
+			public string? LastName => Source.LastName;
+			public string PhoneDisplay { get; init; } = string.Empty;
+			public int Guests => Source.Guests;
+			public string TablesDisplay { get; init; } = string.Empty;
+			public string? TablesTooltip { get; init; }
+			public string NoteDisplay { get; init; } = string.Empty;
+			public string? NoteTooltip => string.IsNullOrWhiteSpace(Source.Note) ? null : Source.Note;
+			public ReservationStatus Status => Source.Status;
 
-            var configurationService = scope.ServiceProvider.GetRequiredService<IConfigurationService>();
-            var configuration = await configurationService.GetAsync();
+			public IReadOnlyList<StatusOptionItem> StatusOptions =>
+				Status is ReservationStatus.Cancelled or ReservationStatus.NoShow
+					? InactiveStatusOptions
+					: ActiveStatusOptions;
 
-            if (configuration is null) {
-                throw new InvalidOperationException("Initial configuration does not exist.");
-            }
+			public StatusOptionItem? SelectedOption
+			{
+				get => StatusOptions.FirstOrDefault(o => !o.IsUnlockAction && o.TargetStatus == Status);
+				set { }
+			}
 
-            ReservationsTable.Columns[2].Visibility = configuration.FirstNameVisible ? Visibility.Visible : Visibility.Collapsed;
-            ReservationsTable.Columns[3].Visibility = configuration.LastNameVisible ? Visibility.Visible : Visibility.Collapsed;
-            ReservationsTable.Columns[4].Visibility = configuration.PhoneNumberVisible ? Visibility.Visible : Visibility.Collapsed;
-        }
+			public string StatusBackground => Status switch
+			{
+				ReservationStatus.Expected => "#EFF6FF",
+				ReservationStatus.Late => "#FFFBEB",
+				ReservationStatus.Arrived => "#F0FDF4",
+				ReservationStatus.Cancelled => "#F1F5F9",
+				ReservationStatus.NoShow => "#FEF2F2",
+				_ => "#F1F5F9"
+			};
 
+			public string StatusBorder => Status switch
+			{
+				ReservationStatus.Expected => "#BFDBFE",
+				ReservationStatus.Late => "#FDE68A",
+				ReservationStatus.Arrived => "#BBF7D0",
+				ReservationStatus.Cancelled => "#E2E8F0",
+				ReservationStatus.NoShow => "#FECACA",
+				_ => "#E2E8F0"
+			};
 
-        // EVENT HANDLERS:
-        private async void TodayView_Loaded(object sender, RoutedEventArgs e) {
-            Loaded -= TodayView_Loaded;
-
-            try {
-                await LoadConfigurationAsync();
-            } catch (Exception ex) {
-                MessageBox.Show(
-                    $"Failed to load reservation configuration.\n\n{ex.Message}",
-                    "Configuration Error",
-                    MessageBoxButton.OK,
-                    MessageBoxImage.Error);
-            }
-        }
-    }
-
-
-    // !!!!!!!!!! TEST STRUCT !!!!!!!!!!
-    public class TodayReservationRow {
-
-        // PROPERTIES:
-        public string Date { get; }
-        public string Time { get; }
-        public string FirstName { get; }
-        public string LastName { get; }
-        public string PhoneNumber { get; }
-        public int Guests { get; }
-        public string Tables { get; }
-        public string Note { get; }
-        public string Status { get; }
-
-        public string StatusBackground => Status switch {
-            "Expected" => "#EFF6FF",
-            "Late" => "#FEFCE8",
-            "Arrived" => "#F0FDF4",
-            "Cancelled" => "#F8FAFC",
-            "No-show" => "#FEF2F2",
-            _ => "#F8FAFC"
-        };
-
-        public string StatusBorder => Status switch {
-            "Expected" => "#BFDBFE",
-            "Late" => "#FEF08A",
-            "Arrived" => "#BBF7D0",
-            "Cancelled" => "#E2E8F0",
-            "No-show" => "#FECACA",
-            _ => "#E2E8F0"
-        };
-
-        public string StatusForeground => Status switch {
-            "Expected" => "#1D4ED8",
-            "Late" => "#A16207",
-            "Arrived" => "#15803D",
-            "Cancelled" => "#64748B",
-            "No-show" => "#DC2626",
-            _ => "#64748B"
-        };
+			public string StatusForeground => Status switch
+			{
+				ReservationStatus.Expected => "#2563EB",
+				ReservationStatus.Late => "#B45309",
+				ReservationStatus.Arrived => "#15803D",
+				ReservationStatus.Cancelled => "#64748B",
+				ReservationStatus.NoShow => "#B91C1C",
+				_ => "#64748B"
+			};
+		}
 
 
-        // CONSTRUCTORS:
-        public TodayReservationRow(string date, string time, string firstName, string lastName, string phoneNumber, int guests, string tables, string note, string status) {
+		// PROPERTIES:
+		public ObservableCollection<TodayReservationRow> TodayReservations { get; } = new();
 
-            Date = date;
-            Time = time;
-            FirstName = firstName;
-            LastName = lastName;
-            PhoneNumber = phoneNumber;
-            Guests = guests;
-            Tables = tables;
-            Note = note;
-            Status = status;
-        }
-    }
+
+		// FIELDS:
+		private InitialConfiguration _configuration = new();
+		private DateOnly _currentDate = DateOnly.FromDateTime(DateTime.Now);
+		private bool _isHandlingStatusChange;
+		private int? _selectedReservationId;
+		private readonly DispatcherTimer _dayChangeTimer = new();
+
+
+		// CONSTRUCTORS:
+		public TodayView()
+		{
+			InitializeComponent();
+
+			DataContext = this;
+			UpdateHeaderDate();
+
+			_dayChangeTimer.Interval = TimeSpan.FromSeconds(10);
+			_dayChangeTimer.Tick += DayChangeTimer_Tick;
+
+			Loaded += TodayView_Loaded;
+			Loaded += (_, _) => _dayChangeTimer.Start();
+			Unloaded += (_, _) => _dayChangeTimer.Stop();
+		}
+
+
+		// METHODS:
+		private MainWindow? GetMainWindow()
+		{
+			return Window.GetWindow(this) as MainWindow;
+		}
+
+		private void UpdateHeaderDate()
+		{
+			_currentDate = DateOnly.FromDateTime(DateTime.Now);
+			TodayDateText.Text = _currentDate.ToString("dd.MM.yyyy", CultureInfo.InvariantCulture);
+		}
+
+		private async Task LoadConfigurationAsync()
+		{
+			using var scope = App.ServiceProvider.CreateScope();
+
+			var configurationService = scope.ServiceProvider.GetRequiredService<IConfigurationService>();
+			var configuration = await configurationService.GetAsync();
+
+			if (configuration is null)
+			{
+				throw new InvalidOperationException("Initial configuration does not exist.");
+			}
+
+			_configuration = configuration;
+
+			ReservationsTable.Columns[2].Visibility = configuration.FirstNameVisible ? Visibility.Visible : Visibility.Collapsed;
+			ReservationsTable.Columns[3].Visibility = configuration.LastNameVisible ? Visibility.Visible : Visibility.Collapsed;
+			ReservationsTable.Columns[4].Visibility = configuration.PhoneNumberVisible ? Visibility.Visible : Visibility.Collapsed;
+		}
+
+		private async Task LoadTodayReservationsAsync(int? selectReservationId = null)
+		{
+			UpdateHeaderDate();
+
+			using var scope = App.ServiceProvider.CreateScope();
+			var reservationService = scope.ServiceProvider.GetRequiredService<IReservationService>();
+
+			var criteria = new ReservationFilterCriteria
+			{
+				Date = new ValueFilter<DateOnly>
+				{
+					Mode = FilterValueMode.Exact,
+					Exact = _currentDate
+				}
+			};
+
+			var result = await reservationService.GetFilteredAsync(criteria);
+			if (!result.IsSuccess || result.Data is null)
+			{
+				MessageBox.Show(
+					result.Message ?? "Failed to load today's reservations.",
+					"Error",
+					MessageBoxButton.OK,
+					MessageBoxImage.Error);
+				return;
+			}
+
+			var sorted = result.Data
+				.Where(r => r.Date == _currentDate)
+				.OrderBy(r => GetStatusSortOrder(r.Status))
+				.ThenBy(r => r.Time)
+				.ThenBy(r => r.Id)
+				.Select(r => new TodayReservationRow
+				{
+					Source = r,
+					PhoneDisplay = FormatPhoneNumber(r.PhoneNumber),
+					TablesDisplay = FormatTables(r.Tables),
+					TablesTooltip = FormatTablesTooltip(r.Tables),
+					NoteDisplay = FormatNotePreview(r.Note)
+				})
+				.ToList();
+
+			_isHandlingStatusChange = true;
+			try
+			{
+				TodayReservations.Clear();
+				foreach (var row in sorted)
+				{
+					TodayReservations.Add(row);
+				}
+
+				int? targetId = selectReservationId ?? _selectedReservationId;
+				if (targetId.HasValue)
+				{
+					var targetRow = TodayReservations.FirstOrDefault(r => r.Id == targetId.Value);
+					if (targetRow is not null)
+					{
+						ReservationsTable.SelectedItem = targetRow;
+						ReservationsTable.ScrollIntoView(targetRow);
+					}
+				}
+			}
+			finally
+			{
+				_isHandlingStatusChange = false;
+			}
+		}
+
+		private static int GetStatusSortOrder(ReservationStatus status) => status switch
+		{
+			ReservationStatus.Expected => 0,
+			ReservationStatus.Late => 1,
+			ReservationStatus.Arrived => 2,
+			ReservationStatus.Cancelled => 3,
+			ReservationStatus.NoShow => 4,
+			_ => 5
+		};
+
+		private string FormatTableIdentifier(Table table)
+		{
+			string numberPart = _configuration.TableNumberVisible && table.Number.HasValue
+				? table.Number.Value.ToString()
+				: string.Empty;
+
+			string labelPart = _configuration.TableLabelVisible && !string.IsNullOrWhiteSpace(table.Label)
+				? table.Label!
+				: string.Empty;
+
+			return _configuration.TableIdentifierOrder == TableIdentifierOrder.LabelThenNumber
+				? $"{labelPart}{numberPart}"
+				: $"{numberPart}{labelPart}";
+		}
+
+		private string FormatTables(IEnumerable<Table> tables)
+		{
+			var ordered = tables
+				.OrderBy(t => t.Number ?? int.MaxValue)
+				.ThenBy(t => t.Label ?? string.Empty, StringComparer.OrdinalIgnoreCase)
+				.Select(FormatTableIdentifier)
+				.Where(s => !string.IsNullOrEmpty(s));
+
+			return string.Join(", ", ordered);
+		}
+
+		private string? FormatTablesTooltip(IEnumerable<Table> tables)
+		{
+			var list = tables.ToList();
+			if (list.Count == 0)
+			{
+				return null;
+			}
+
+			var grouped = list
+				.GroupBy(t => !_configuration.TableZoneVisible || string.IsNullOrWhiteSpace(t.Zone) ? "No Zone" : t.Zone.Trim())
+				.OrderBy(g => g.Key.Equals("No Zone", StringComparison.OrdinalIgnoreCase) ? 1 : 0)
+				.ThenBy(g => g.Key, StringComparer.OrdinalIgnoreCase);
+
+			var lines = new List<string>();
+			foreach (var group in grouped)
+			{
+				lines.Add($"{group.Key}:");
+				foreach (var table in group.OrderBy(t => t.Number ?? int.MaxValue).ThenBy(t => t.Label ?? string.Empty, StringComparer.OrdinalIgnoreCase))
+				{
+					string idText = FormatTableIdentifier(table);
+					lines.Add($"- {idText} ({table.Seats} seats)");
+				}
+			}
+
+			return string.Join(Environment.NewLine, lines);
+		}
+
+		private static string FormatNotePreview(string? note)
+		{
+			if (string.IsNullOrWhiteSpace(note))
+			{
+				return string.Empty;
+			}
+
+			return note.Replace("\r\n", " ").Replace('\n', ' ').Replace('\r', ' ').Trim();
+		}
+
+		private static string FormatPhoneNumber(string? phone)
+		{
+			if (string.IsNullOrWhiteSpace(phone))
+			{
+				return string.Empty;
+			}
+
+			string digits = phone.Replace(" ", string.Empty);
+			if (digits.Length != 9)
+			{
+				return phone;
+			}
+
+			return $"{digits[..3]} {digits[3..6]} {digits[6..9]}";
+		}
+
+		private async Task<bool> PersistStatusChangeAsync(int reservationId, ReservationStatus newStatus)
+		{
+			try
+			{
+				using var scope = App.ServiceProvider.CreateScope();
+				var reservationService = scope.ServiceProvider.GetRequiredService<IReservationService>();
+
+				var result = await reservationService.ChangeStatusAsync(reservationId, newStatus);
+				if (!result.IsSuccess)
+				{
+					MessageBox.Show(
+						result.Message ?? "Failed to update reservation status.",
+						"Error",
+						MessageBoxButton.OK,
+						MessageBoxImage.Error);
+					return false;
+				}
+
+				await LoadTodayReservationsAsync(reservationId);
+				return true;
+			}
+			catch (Exception ex)
+			{
+				MessageBox.Show(
+					$"Failed to update reservation status.\n\n{ex.Message}",
+					"Error",
+					MessageBoxButton.OK,
+					MessageBoxImage.Error);
+				return false;
+			}
+		}
+
+		private void OpenUnlockDialog(TodayReservationRow row)
+		{
+			var mainWindow = GetMainWindow();
+			if (mainWindow is null)
+			{
+				return;
+			}
+
+			var unlockDialog = new UnlockReservationDialog();
+
+			unlockDialog.CancelRequested += (_, _) =>
+			{
+				mainWindow.DialogHost.Close(unlockDialog, false);
+			};
+
+			unlockDialog.ConfirmRequested += async (_, _) =>
+			{
+				mainWindow.DialogHost.Close(unlockDialog, true);
+
+				Reservation? freshReservation;
+				using (var scope = App.ServiceProvider.CreateScope())
+				{
+					var reservationService = scope.ServiceProvider.GetRequiredService<IReservationService>();
+					freshReservation = await reservationService.GetByIdAsync(row.Id);
+				}
+
+				if (freshReservation is null)
+				{
+					await LoadTodayReservationsAsync();
+					return;
+				}
+
+				mainWindow.NavigateToReservations();
+
+				var editDialog = new AddEditReservationDialog(isEditMode: true);
+				editDialog.ApplyConfiguration(_configuration);
+				editDialog.LoadReservation(freshReservation);
+
+				editDialog.CancelRequested += (_, _) => mainWindow.DialogHost.Close(editDialog, false);
+
+				editDialog.SaveRequested += async (_, _) =>
+				{
+					if (!editDialog.ValidateForm(out var updatedReservation) || updatedReservation is null)
+					{
+						return;
+					}
+
+					updatedReservation.Status = ReservationStatus.Expected;
+
+					using var scope = App.ServiceProvider.CreateScope();
+					var reservationService = scope.ServiceProvider.GetRequiredService<IReservationService>();
+
+					var updateResult = await reservationService.UpdateAsync(updatedReservation, unlockCancelledOrNoShow: true);
+					if (!updateResult.IsSuccess)
+					{
+						if (updateResult.ValidationErrors.Count > 0)
+						{
+							editDialog.ApplyValidationErrors(updateResult.ValidationErrors);
+						}
+						else
+						{
+							MessageBox.Show(
+								updateResult.Message ?? "Failed to unlock and save reservation.",
+								"Error",
+								MessageBoxButton.OK,
+								MessageBoxImage.Error);
+						}
+						return;
+					}
+
+					mainWindow.DialogHost.Close(editDialog, true);
+					mainWindow.NavigateToReservations();
+				};
+
+				mainWindow.DialogHost.Show(editDialog);
+			};
+
+			mainWindow.DialogHost.Show(unlockDialog);
+		}
+
+
+		// EVENT HANDLERS:
+		private async void TodayView_Loaded(object sender, RoutedEventArgs e)
+		{
+			Loaded -= TodayView_Loaded;
+
+			try
+			{
+				await LoadConfigurationAsync();
+				await LoadTodayReservationsAsync();
+			}
+			catch (Exception ex)
+			{
+				MessageBox.Show(
+					$"Failed to load today's reservations.\n\n{ex.Message}",
+					"Error",
+					MessageBoxButton.OK,
+					MessageBoxImage.Error);
+			}
+		}
+
+		private async void DayChangeTimer_Tick(object? sender, EventArgs e)
+		{
+			var systemToday = DateOnly.FromDateTime(DateTime.Now);
+			if (systemToday != _currentDate)
+			{
+				_selectedReservationId = null;
+				ReservationsTable.SelectedItem = null;
+				await LoadTodayReservationsAsync();
+			}
+		}
+
+		private void ReservationsTable_SelectionChanged(object sender, SelectionChangedEventArgs e)
+		{
+			if (_isHandlingStatusChange)
+			{
+				return;
+			}
+
+			_selectedReservationId = (ReservationsTable.SelectedItem as TodayReservationRow)?.Id;
+		}
+
+		private void ReservationsTable_PreviewMouseLeftButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
+		{
+			if (e.OriginalSource is DependencyObject dep)
+			{
+				var row = FindVisualParent<DataGridRow>(dep);
+				if (row is not null && row.IsSelected && FindVisualParent<ComboBox>(dep) is null)
+				{
+					e.Handled = true;
+					ReservationsTable.SelectedItem = null;
+					_selectedReservationId = null;
+				}
+			}
+		}
+
+		private static T? FindVisualParent<T>(DependencyObject child) where T : DependencyObject
+		{
+			DependencyObject? current = child;
+			while (current is not null)
+			{
+				if (current is T match)
+				{
+					return match;
+				}
+				current = VisualTreeHelper.GetParent(current);
+			}
+			return null;
+		}
+
+		private async void StatusComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+		{
+			if (_isHandlingStatusChange)
+			{
+				return;
+			}
+
+			if (sender is not ComboBox comboBox || comboBox.DataContext is not TodayReservationRow row)
+			{
+				return;
+			}
+
+			if (comboBox.SelectedItem is not StatusOptionItem chosenOption)
+			{
+				return;
+			}
+
+			if (chosenOption.IsUnlockAction)
+			{
+				_isHandlingStatusChange = true;
+				comboBox.SelectedItem = row.SelectedOption;
+				_isHandlingStatusChange = false;
+
+				OpenUnlockDialog(row);
+				return;
+			}
+
+			if (!chosenOption.TargetStatus.HasValue || chosenOption.TargetStatus.Value == row.Status)
+			{
+				return;
+			}
+
+			ReservationStatus previousStatus = row.Status;
+			ReservationStatus newStatus = chosenOption.TargetStatus.Value;
+
+			bool isCurrentActive = previousStatus is ReservationStatus.Expected or ReservationStatus.Late or ReservationStatus.Arrived;
+			bool isTargetInactive = newStatus is ReservationStatus.Cancelled or ReservationStatus.NoShow;
+
+			if (isCurrentActive && isTargetInactive)
+			{
+				var mainWindow = GetMainWindow();
+				if (mainWindow is null)
+				{
+					return;
+				}
+
+				var confirmDialog = new ChangeStatusDialog();
+				confirmDialog.SetTargetStatus(newStatus);
+
+				_isHandlingStatusChange = true;
+				comboBox.SelectedItem = row.SelectedOption;
+				_isHandlingStatusChange = false;
+
+				confirmDialog.CancelRequested += (_, _) =>
+				{
+					mainWindow.DialogHost.Close(confirmDialog, false);
+				};
+
+				confirmDialog.ConfirmRequested += async (_, _) =>
+				{
+					mainWindow.DialogHost.Close(confirmDialog, true);
+					await PersistStatusChangeAsync(row.Id, newStatus);
+				};
+
+				mainWindow.DialogHost.Show(confirmDialog);
+				return;
+			}
+
+			bool saved = await PersistStatusChangeAsync(row.Id, newStatus);
+			if (!saved)
+			{
+				_isHandlingStatusChange = true;
+				comboBox.SelectedItem = row.SelectedOption;
+				_isHandlingStatusChange = false;
+			}
+		}
+	}
 }

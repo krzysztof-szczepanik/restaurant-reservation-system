@@ -6,26 +6,31 @@
              mc:Ignorable="d"
              d:DesignHeight="640" d:DesignWidth="992">
 
-    <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
-        </Grid.RowDefinitions>
+	<Grid>
+		<Grid.RowDefinitions>
+			<RowDefinition Height="Auto"/>
+			<RowDefinition Height="*"/>
+		</Grid.RowDefinitions>
 
-        <!-- HEADER -->
-        <Border Grid.Row="0" Style="{StaticResource ViewHeaderStyle}">
-            <TextBlock Text="Settings" Style="{StaticResource ViewTitleStyle}"/>
-        </Border>
+		<!-- HEADER -->
+		<Border Grid.Row="0" Style="{StaticResource ViewHeaderStyle}">
+			<TextBlock Text="Settings" Style="{StaticResource ViewTitleStyle}"/>
+		</Border>
 
-        <!-- CONTENT -->
-        <Border Grid.Row="1" Style="{StaticResource ViewContentPaddedStyle}">
-            <StackPanel>
-                <TextBlock Text="RESET APPLICATION" FontSize="13" FontWeight="SemiBold" Foreground="{StaticResource PrimaryText}" Margin="0,0,0,12"/>
-                <TextBlock Text="Resetting the application permanently deletes all reservations, tables, and the initial configuration." FontSize="14" Foreground="{StaticResource SecondaryText}" TextWrapping="Wrap" Margin="0,0,0,8"/>
-                <TextBlock Text="After the reset, the application will return to Initial Setup." FontSize="14" Foreground="{StaticResource SecondaryText}" TextWrapping="Wrap" Margin="0,0,0,24"/>
+		<!-- CONTENT -->
+		<Border Grid.Row="1" Style="{StaticResource ViewContentPaddedStyle}">
+			<StackPanel>
+				<TextBlock Text="RESET APPLICATION" FontSize="13" FontWeight="SemiBold" Foreground="{StaticResource PrimaryText}" Margin="0,0,0,12"/>
+				<TextBlock Text="Resetting the application permanently deletes all reservations, tables, and the initial configuration." FontSize="14" Foreground="{StaticResource SecondaryText}" TextWrapping="Wrap" Margin="0,0,0,6"/>
+				<TextBlock Text="After the reset, the application will return to Initial Setup." FontSize="14" Foreground="{StaticResource SecondaryText}" TextWrapping="Wrap" Margin="0,0,0,20"/>
 
-                <Button Content="Reset Application" HorizontalAlignment="Right" Style="{StaticResource OutlineDangerButtonStyle}" Click="Reset_Click"/>
-            </StackPanel>
-        </Border>
-    </Grid>
+				<Button Content="Reset Application"
+                        Height="36"
+                        Padding="16,0"
+                        HorizontalAlignment="Right"
+                        Style="{StaticResource OutlineDangerButtonStyle}"
+                        Click="Reset_Click"/>
+			</StackPanel>
+		</Border>
+	</Grid>
 </UserControl>

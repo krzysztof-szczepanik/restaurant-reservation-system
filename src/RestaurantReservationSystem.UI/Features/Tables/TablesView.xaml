@@ -7,35 +7,54 @@
              mc:Ignorable="d"
              d:DesignHeight="640" d:DesignWidth="992">
 
-    <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
-        </Grid.RowDefinitions>
+	<UserControl.Resources>
+		<Style x:Key="TablesActionButtonStyle" TargetType="Button" BasedOn="{StaticResource SecondaryButtonStyle}">
+			<Setter Property="Foreground" Value="#334155"/>
+			<Setter Property="BorderBrush" Value="#CBD5E1"/>
+			<Setter Property="Background" Value="#FFFFFF"/>
+			<Setter Property="Opacity" Value="1"/>
+			<Style.Triggers>
+				<Trigger Property="IsEnabled" Value="False">
+					<Setter Property="Foreground" Value="#8A99AD"/>
+					<Setter Property="BorderBrush" Value="#DCE3EC"/>
+					<Setter Property="Background" Value="#F8FAFC"/>
+					<Setter Property="Opacity" Value="1"/>
+				</Trigger>
+			</Style.Triggers>
+		</Style>
+	</UserControl.Resources>
 
-        <!-- HEADER -->
-        <Border Grid.Row="0" Style="{StaticResource ViewHeaderStyle}">
-            <Grid>
-                <TextBlock Text="Tables" Style="{StaticResource ViewTitleStyle}"/>
+	<Grid Background="Transparent">
+		<Grid.RowDefinitions>
+			<RowDefinition Height="Auto"/>
+			<RowDefinition Height="*"/>
+		</Grid.RowDefinitions>
 
-                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
-                    <Button Content="Add" Margin="0,0,8,0" Style="{StaticResource PrimaryButtonStyle}" Click="Add_Click"/>
-                    <Button Content="Edit" Margin="0,0,8,0" Style="{StaticResource SecondaryButtonStyle}" Click="Edit_Click"/>
-                    <Button Content="Delete" Style="{StaticResource SecondaryButtonStyle}" Click="DeleteTab_Click"/>
-                </StackPanel>
-            </Grid>
-        </Border>
+		<!-- HEADER -->
+		<Border Grid.Row="0" Style="{StaticResource ViewHeaderStyle}">
+			<Grid>
+				<TextBlock Text="Tables" Style="{StaticResource ViewTitleStyle}"/>
 
-        <!-- CONTENT -->
-        <Border Grid.Row="1" Style="{StaticResource ViewContentStyle}">
-            <controls:DataTable x:Name="TablesDataGrid" EmptyMessage="No tables yet.">
-                <controls:DataTable.Columns>
-                    <DataGridTextColumn Header="Number" Binding="{Binding Number}" Visibility="Collapsed"/>
-                    <DataGridTextColumn Header="Label" Binding="{Binding Label}" Visibility="Collapsed"/>
-                    <DataGridTextColumn Header="Zone" Binding="{Binding Zone}" Visibility="Collapsed"/>
-                    <DataGridTextColumn Header="Seats" Binding="{Binding Seats}"/>
-                </controls:DataTable.Columns>
-            </controls:DataTable>
-        </Border>
-    </Grid>
+				<StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+					<Button Content="Add" Margin="0,0,8,0" Style="{StaticResource PrimaryButtonStyle}" Click="Add_Click"/>
+					<Button x:Name="EditButton" Content="Edit" Margin="0,0,8,0" IsEnabled="False" Style="{StaticResource TablesActionButtonStyle}" Click="Edit_Click"/>
+					<Button x:Name="DeleteButton" Content="Delete" IsEnabled="False" Style="{StaticResource TablesActionButtonStyle}" Click="DeleteTab_Click"/>
+				</StackPanel>
+			</Grid>
+		</Border>
+
+		<!-- CONTENT -->
+		<Border Grid.Row="1" Style="{StaticResource ViewContentStyle}">
+			<controls:DataTable x:Name="TablesDataGrid"
+			                    EmptyMessage="No tables yet."
+			                    SelectionChanged="TablesDataGrid_SelectionChanged">
+				<controls:DataTable.Columns>
+					<DataGridTextColumn Header="Number" Binding="{Binding NumberDisplay}" Width="*" Visibility="Collapsed"/>
+					<DataGridTextColumn Header="Label" Binding="{Binding LabelDisplay}" Width="*" Visibility="Collapsed"/>
+					<DataGridTextColumn Header="Zone" Binding="{Binding ZoneDisplay}" Width="*" Visibility="Collapsed"/>
+					<DataGridTextColumn Header="Seats" Binding="{Binding Seats}" Width="*"/>
+				</controls:DataTable.Columns>
+			</controls:DataTable>
+		</Border>
+	</Grid>
 </UserControl>

@@ -1,152 +1,603 @@
 using Microsoft.Extensions.DependencyInjection;
+using RestaurantReservationSystem.Application.DTOs;
 using RestaurantReservationSystem.Application.Interfaces;
+using RestaurantReservationSystem.Core.Enums;
+using RestaurantReservationSystem.Core.Models;
 using RestaurantReservationSystem.UI.Features.Reservations.Dialogs;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Media;
 
-namespace RestaurantReservationSystem.UI.Features.Reservations {
-    public partial class ReservationsView : UserControl {
+namespace RestaurantReservationSystem.UI.Features.Reservations
+{
+	public partial class ReservationsView : UserControl
+	{
 
-        // PROPERTIES:
-        public bool HasActiveFilters {
-            get => FilterButton.Tag is true;
-            set => FilterButton.Tag = value;
-        }
+		// VIEW MODEL ROW:
+		private sealed class ReservationRowItem
+		{
+			public required Reservation Source { get; init; }
+			public int Id => Source.Id;
+			public DateOnly Date => Source.Date;
+			public TimeOnly Time => Source.Time;
+			public string? FirstName => Source.FirstName;
+			public string? LastName => Source.LastName;
+			public string PhoneDisplay { get; init; } = string.Empty;
+			public int Guests => Source.Guests;
+			public string TablesDisplay { get; init; } = string.Empty;
+			public string? TablesTooltip { get; init; }
+			public string NoteDisplay { get; init; } = string.Empty;
+			public string? NoteTooltip => string.IsNullOrWhiteSpace(Source.Note) ? null : Source.Note;
+		}
 
 
-        // CONSTRUCTORS:
-        public ReservationsView() {
-            InitializeComponent();
-
-            Loaded += ReservationsView_Loaded;
-        }
+		// FIELDS:
+		private InitialConfiguration _configuration = new();
+		private ReservationFilterCriteria _activeCriteria = new();
 
 
-        // METHODS:
-        private MainWindow? GetMainWindow() {
-            return Window.GetWindow(this) as MainWindow;
-        }
+		// PROPERTIES:
+		public bool HasActiveFilters
+		{
+			get => FilterButton.Tag is true;
+			set => FilterButton.Tag = value;
+		}
 
-        private async Task LoadConfigurationAsync() {
-            using var scope = App.ServiceProvider.CreateScope();
 
-            var configurationService = scope.ServiceProvider.GetRequiredService<IConfigurationService>();
-            var configuration = await configurationService.GetAsync();
+		// CONSTRUCTORS:
+		public ReservationsView()
+		{
+			InitializeComponent();
 
-            if (configuration is null) {
-                throw new InvalidOperationException("Initial configuration does not exist.");
-            }
+			Loaded += ReservationsView_Loaded;
+		}
 
-            ReservationsDataGrid.Columns[2].Visibility = configuration.FirstNameVisible ? Visibility.Visible : Visibility.Collapsed;
-            ReservationsDataGrid.Columns[3].Visibility = configuration.LastNameVisible ? Visibility.Visible : Visibility.Collapsed;
-            ReservationsDataGrid.Columns[4].Visibility = configuration.PhoneNumberVisible ? Visibility.Visible : Visibility.Collapsed;
-        }
 
-        
-        // EVENT HANDLERS:
-        private async void ReservationsView_Loaded(object sender, RoutedEventArgs e) {
-            Loaded -= ReservationsView_Loaded;
+		// METHODS:
+		private MainWindow? GetMainWindow()
+		{
+			return Window.GetWindow(this) as MainWindow;
+		}
 
-            try {
-                await LoadConfigurationAsync();
-            } catch (Exception ex) {
-                MessageBox.Show(
-                    $"Failed to load reservation configuration.\n\n{ex.Message}",
-                    "Configuration Error",
-                    MessageBoxButton.OK,
-                    MessageBoxImage.Error);
-            }
-        }
+		private async Task LoadConfigurationAsync()
+		{
+			using var scope = App.ServiceProvider.CreateScope();
 
-        private void MainGrid_MouseDown(object sender, MouseButtonEventArgs e) {
-            if (!SearchBox.IsKeyboardFocusWithin) {
-                return;
-            }
+			var configurationService = scope.ServiceProvider.GetRequiredService<IConfigurationService>();
+			var configuration = await configurationService.GetAsync();
 
-            FocusManager.SetFocusedElement(FocusManager.GetFocusScope(SearchBox), null);
-            Keyboard.ClearFocus();
-        }
+			if (configuration is null)
+			{
+				throw new InvalidOperationException("Initial configuration does not exist.");
+			}
 
-        private void AddReservations_Click(object sender, RoutedEventArgs e) {
-            var mainWindow = GetMainWindow();
+			_configuration = configuration;
 
-            if (mainWindow is null) {
-                return;
-            }
+			ReservationsDataGrid.Columns[2].Visibility = configuration.FirstNameVisible ? Visibility.Visible : Visibility.Collapsed;
+			ReservationsDataGrid.Columns[3].Visibility = configuration.LastNameVisible ? Visibility.Visible : Visibility.Collapsed;
+			ReservationsDataGrid.Columns[4].Visibility = configuration.PhoneNumberVisible ? Visibility.Visible : Visibility.Collapsed;
+		}
 
-            var dialog = new AddEditReservationDialog();
+		private async Task LoadReservationsAsync(int? selectReservationId = null)
+		{
+			using var scope = App.ServiceProvider.CreateScope();
+			var reservationService = scope.ServiceProvider.GetRequiredService<IReservationService>();
 
-            dialog.CancelRequested += (_, _) => mainWindow.DialogHost.Close(dialog, false);
+			var result = await reservationService.GetFilteredAsync(_activeCriteria);
+			if (!result.IsSuccess || result.Data is null)
+			{
+				MessageBox.Show(
+					result.Message ?? "Failed to load reservations.",
+					"Error",
+					MessageBoxButton.OK,
+					MessageBoxImage.Error);
+				return;
+			}
 
-            dialog.SaveRequested += (_, _) => {
-                // TODO: Add reservation.
-                mainWindow.DialogHost.Close(dialog, true);
-            };
+			bool hasSearchOrFilters = !string.IsNullOrWhiteSpace(_activeCriteria.SearchText) || HasNonSearchFilters(_activeCriteria);
+			ReservationsDataGrid.EmptyMessage = hasSearchOrFilters
+				? "No matching reservations."
+				: "No reservations yet.";
 
-            mainWindow.DialogHost.Show(dialog);
-        }
+			var rows = result.Data
+				.Select(r => new ReservationRowItem
+				{
+					Source = r,
+					PhoneDisplay = FormatPhoneNumber(r.PhoneNumber),
+					TablesDisplay = FormatTables(r.Tables),
+					TablesTooltip = FormatTablesTooltip(r.Tables),
+					NoteDisplay = FormatSingleLineNote(r.Note)
+				})
+				.ToList();
 
-        private void EditReservations_Click(object sender, RoutedEventArgs e) {
-            var mainWindow = GetMainWindow();
+			ReservationsDataGrid.ItemsSource = rows;
 
-            if (mainWindow is null) {
-                return;
-            }
+			if (selectReservationId.HasValue)
+			{
+				var targetRow = rows.FirstOrDefault(r => r.Id == selectReservationId.Value);
+				if (targetRow is not null)
+				{
+					ReservationsDataGrid.SelectedItem = targetRow;
+					ReservationsDataGrid.ScrollIntoView(targetRow);
+				}
+			}
 
-            var dialog = new AddEditReservationDialog(isEditMode: true);
+			UpdateActionButtonsState();
+		}
 
-            // TODO: Load selected reservation data.
-            // dialog.SetReservationData(date, time, firstName, lastName, phoneNumber, guests);
-            // dialog.SetTablesSummary(selectedTables, totalSeats);
-            // dialog.SetNote(note);
+		private static bool HasNonSearchFilters(ReservationFilterCriteria criteria)
+		{
+			bool hasDate = criteria.Date.Exact.HasValue || criteria.Date.From.HasValue || criteria.Date.To.HasValue;
+			bool hasTime = criteria.Time.Exact.HasValue || criteria.Time.From.HasValue || criteria.Time.To.HasValue;
+			bool hasGuests = criteria.Guests.Exact.HasValue || criteria.Guests.From.HasValue || criteria.Guests.To.HasValue;
+			bool hasZones = criteria.Zones.Count > 0;
+			bool hasTables = criteria.TableIds.Count > 0;
 
-            dialog.CancelRequested += (_, _) => mainWindow.DialogHost.Close(dialog, false);
+			return hasDate || hasTime || hasGuests || hasZones || hasTables;
+		}
 
-            dialog.SaveRequested += (_, _) => {
-                // TODO: Update reservation.
-                mainWindow.DialogHost.Close(dialog, true);
-            };
+		private void UpdateActionButtonsState()
+		{
+			bool hasSelection = ReservationsDataGrid.SelectedItem is ReservationRowItem;
+			EditButton.IsEnabled = hasSelection;
+			DeleteButton.IsEnabled = hasSelection;
+		}
 
-            mainWindow.DialogHost.Show(dialog);
-        }
+		private string FormatTableIdentifier(Table table)
+		{
+			string numberPart = _configuration.TableNumberVisible && table.Number.HasValue
+				? table.Number.Value.ToString()
+				: string.Empty;
 
-        private void DeleteReservations_Click(object sender, RoutedEventArgs e) {
-            var mainWindow = GetMainWindow();
+			string labelPart = _configuration.TableLabelVisible && !string.IsNullOrWhiteSpace(table.Label)
+				? table.Label
+				: string.Empty;
 
-            if (mainWindow is null) {
-                return;
-            }
+			return _configuration.TableIdentifierOrder == TableIdentifierOrder.LabelThenNumber
+				? $"{labelPart}{numberPart}"
+				: $"{numberPart}{labelPart}";
+		}
 
-            var dialog = new DeleteReservationsDialog();
+		private string FormatTables(IEnumerable<Table> tables)
+		{
+			var ordered = tables
+				.OrderBy(t => t.Number ?? int.MaxValue)
+				.ThenBy(t => t.Label ?? string.Empty, StringComparer.OrdinalIgnoreCase)
+				.Select(FormatTableIdentifier)
+				.Where(s => !string.IsNullOrEmpty(s));
 
-            dialog.CancelRequested += (_, _) => mainWindow.DialogHost.Close(dialog, false);
+			return string.Join(", ", ordered);
+		}
 
-            dialog.DeleteRequested += (_, _) => {
-                // TODO: Delete reservation.
-                mainWindow.DialogHost.Close(dialog, true);
-            };
+		private string? FormatTablesTooltip(IEnumerable<Table> tables)
+		{
+			var list = tables.ToList();
+			if (list.Count == 0)
+			{
+				return null;
+			}
 
-            mainWindow.DialogHost.Show(dialog);
-        }
+			var grouped = list
+				.GroupBy(t => !_configuration.TableZoneVisible || string.IsNullOrWhiteSpace(t.Zone) ? "No Zone" : t.Zone.Trim())
+				.OrderBy(g => g.Key.Equals("No Zone", StringComparison.OrdinalIgnoreCase) ? 1 : 0)
+				.ThenBy(g => g.Key, StringComparer.OrdinalIgnoreCase);
 
-        private void Filter_Click(object sender, RoutedEventArgs e) {
-            var mainWindow = GetMainWindow();
+			var lines = new List<string>();
+			foreach (var group in grouped)
+			{
+				if (lines.Count > 0)
+				{
+					lines.Add(string.Empty);
+				}
 
-            if (mainWindow is null) {
-                return;
-            }
+				lines.Add($"{group.Key}:");
+				foreach (var table in group.OrderBy(t => t.Number ?? int.MaxValue).ThenBy(t => t.Label ?? string.Empty, StringComparer.OrdinalIgnoreCase))
+				{
+					string idText = FormatTableIdentifier(table);
+					lines.Add($"- {idText}");
+				}
+			}
 
-            var dialog = new FilterReservationsDialog();
+			return string.Join(Environment.NewLine, lines);
+		}
 
-            dialog.CancelRequested += (_, _) => mainWindow.DialogHost.Close(dialog, false);
+		private static string FormatPhoneNumber(string? phone)
+		{
+			if (string.IsNullOrWhiteSpace(phone))
+			{
+				return string.Empty;
+			}
 
-            dialog.ApplyRequested += (_, _) => {
-                // TODO: Read filters and update HasActiveFilters.
-                mainWindow.DialogHost.Close(dialog, true);
-            };
+			string digits = phone.Replace(" ", string.Empty);
+			if (digits.Length != 9)
+			{
+				return phone;
+			}
 
-            mainWindow.DialogHost.Show(dialog);
-        }
-    }
+			return $"{digits[..3]} {digits[3..6]} {digits[6..9]}";
+		}
+
+		private static string FormatSingleLineNote(string? note)
+		{
+			if (string.IsNullOrWhiteSpace(note))
+			{
+				return string.Empty;
+			}
+
+			return note.Replace("\r\n", " ").Replace("\n", " ").Trim();
+		}
+
+		private static T? FindVisualParent<T>(DependencyObject child) where T : DependencyObject
+		{
+			DependencyObject? current = child;
+			while (current is not null)
+			{
+				if (current is T match)
+				{
+					return match;
+				}
+				current = VisualTreeHelper.GetParent(current);
+			}
+			return null;
+		}
+
+
+		// EVENT HANDLERS:
+		private async void ReservationsView_Loaded(object sender, RoutedEventArgs e)
+		{
+			Loaded -= ReservationsView_Loaded;
+
+			try
+			{
+				await LoadConfigurationAsync();
+				await LoadReservationsAsync();
+			}
+			catch (Exception ex)
+			{
+				MessageBox.Show(
+					$"Failed to load reservations.\n\n{ex.Message}",
+					"Error",
+					MessageBoxButton.OK,
+					MessageBoxImage.Error);
+			}
+		}
+
+		private async void SearchBox_TextChanged(object sender, TextChangedEventArgs e)
+		{
+			if (!IsLoaded)
+			{
+				return;
+			}
+
+			string? searchText = string.IsNullOrWhiteSpace(SearchBox.Text) ? null : SearchBox.Text;
+
+			_activeCriteria = new ReservationFilterCriteria
+			{
+				SearchText = searchText,
+				Date = _activeCriteria.Date,
+				Time = _activeCriteria.Time,
+				Guests = _activeCriteria.Guests,
+				Zones = _activeCriteria.Zones,
+				ZoneMatchMode = _activeCriteria.ZoneMatchMode,
+				TableIds = _activeCriteria.TableIds,
+				TableMatchMode = _activeCriteria.TableMatchMode
+			};
+
+			try
+			{
+				await LoadReservationsAsync();
+			}
+			catch (Exception ex)
+			{
+				MessageBox.Show(
+					$"Failed to filter reservations.\n\n{ex.Message}",
+					"Error",
+					MessageBoxButton.OK,
+					MessageBoxImage.Error);
+			}
+		}
+
+		private void ReservationsDataGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
+		{
+			UpdateActionButtonsState();
+		}
+
+		private void ReservationsDataGrid_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+		{
+			if (e.OriginalSource is DependencyObject dep)
+			{
+				var row = FindVisualParent<DataGridRow>(dep);
+				if (row is not null && row.IsSelected)
+				{
+					e.Handled = true;
+					ReservationsDataGrid.SelectedItem = null;
+					UpdateActionButtonsState();
+				}
+			}
+		}
+
+		private void MainGrid_MouseDown(object sender, MouseButtonEventArgs e)
+		{
+			if (!SearchBox.IsKeyboardFocusWithin)
+			{
+				return;
+			}
+
+			FocusManager.SetFocusedElement(FocusManager.GetFocusScope(SearchBox), null);
+			Keyboard.ClearFocus();
+		}
+
+		private void AddReservations_Click(object sender, RoutedEventArgs e)
+		{
+			var mainWindow = GetMainWindow();
+			if (mainWindow is null)
+			{
+				return;
+			}
+
+			var dialog = new AddEditReservationDialog(isEditMode: false);
+			dialog.ApplyConfiguration(_configuration);
+
+			dialog.CancelRequested += (_, _) => mainWindow.DialogHost.Close(dialog, false);
+
+			dialog.SaveRequested += async (_, _) =>
+			{
+				if (!dialog.ValidateForm(out var newReservation) || newReservation is null)
+				{
+					return;
+				}
+
+				try
+				{
+					using var scope = App.ServiceProvider.CreateScope();
+					var reservationService = scope.ServiceProvider.GetRequiredService<IReservationService>();
+
+					var result = await reservationService.AddAsync(newReservation);
+					if (!result.IsSuccess)
+					{
+						if (result.ValidationErrors.Count > 0)
+						{
+							dialog.ApplyValidationErrors(result.ValidationErrors);
+						}
+						else
+						{
+							MessageBox.Show(
+								result.Message ?? "Failed to add reservation.",
+								"Error",
+								MessageBoxButton.OK,
+								MessageBoxImage.Error);
+						}
+						return;
+					}
+
+					mainWindow.DialogHost.Close(dialog, true);
+					await LoadReservationsAsync(result.Data?.Id);
+				}
+				catch (Exception ex)
+				{
+					MessageBox.Show(
+						$"An unexpected error occurred while adding the reservation.\n\n{ex.Message}",
+						"Error",
+						MessageBoxButton.OK,
+						MessageBoxImage.Error);
+				}
+			};
+
+			mainWindow.DialogHost.Show(dialog);
+		}
+
+		private async void EditReservations_Click(object sender, RoutedEventArgs e)
+		{
+			if (ReservationsDataGrid.SelectedItem is not ReservationRowItem selectedRow)
+			{
+				return;
+			}
+
+			var mainWindow = GetMainWindow();
+			if (mainWindow is null)
+			{
+				return;
+			}
+
+			Reservation? freshReservation;
+			try
+			{
+				using var scope = App.ServiceProvider.CreateScope();
+				var reservationService = scope.ServiceProvider.GetRequiredService<IReservationService>();
+				freshReservation = await reservationService.GetByIdAsync(selectedRow.Id);
+			}
+			catch (Exception ex)
+			{
+				MessageBox.Show(
+					$"Failed to load reservation details.\n\n{ex.Message}",
+					"Error",
+					MessageBoxButton.OK,
+					MessageBoxImage.Error);
+				return;
+			}
+
+			if (freshReservation is null)
+			{
+				MessageBox.Show(
+					"The selected reservation no longer exists.",
+					"Not Found",
+					MessageBoxButton.OK,
+					MessageBoxImage.Warning);
+				await LoadReservationsAsync();
+				return;
+			}
+
+			bool requiresUnlock = freshReservation.Status is ReservationStatus.Cancelled or ReservationStatus.NoShow;
+
+			if (requiresUnlock)
+			{
+				var unlockDialog = new UnlockReservationDialog();
+
+				unlockDialog.CancelRequested += (_, _) =>
+				{
+					mainWindow.DialogHost.Close(unlockDialog, false);
+				};
+
+				unlockDialog.ConfirmRequested += (_, _) =>
+				{
+					mainWindow.DialogHost.Close(unlockDialog, true);
+					OpenEditReservationDialog(mainWindow, freshReservation, unlockCancelledOrNoShow: true);
+				};
+
+				mainWindow.DialogHost.Show(unlockDialog);
+				return;
+			}
+
+			OpenEditReservationDialog(mainWindow, freshReservation, unlockCancelledOrNoShow: false);
+		}
+
+		private void OpenEditReservationDialog(MainWindow mainWindow, Reservation reservation, bool unlockCancelledOrNoShow)
+		{
+			var dialog = new AddEditReservationDialog(isEditMode: true);
+			dialog.ApplyConfiguration(_configuration);
+			dialog.LoadReservation(reservation);
+
+			dialog.CancelRequested += (_, _) => mainWindow.DialogHost.Close(dialog, false);
+
+			dialog.SaveRequested += async (_, _) =>
+			{
+				if (!dialog.ValidateForm(out var updatedReservation) || updatedReservation is null)
+				{
+					return;
+				}
+
+				updatedReservation.Status = unlockCancelledOrNoShow
+					? ReservationStatus.Expected
+					: reservation.Status;
+
+				try
+				{
+					using var scope = App.ServiceProvider.CreateScope();
+					var reservationService = scope.ServiceProvider.GetRequiredService<IReservationService>();
+
+					var result = await reservationService.UpdateAsync(updatedReservation, unlockCancelledOrNoShow);
+					if (!result.IsSuccess)
+					{
+						if (result.ValidationErrors.Count > 0)
+						{
+							dialog.ApplyValidationErrors(result.ValidationErrors);
+						}
+						else
+						{
+							MessageBox.Show(
+								result.Message ?? "Failed to update reservation.",
+								"Error",
+								MessageBoxButton.OK,
+								MessageBoxImage.Error);
+						}
+						return;
+					}
+
+					mainWindow.DialogHost.Close(dialog, true);
+					await LoadReservationsAsync(updatedReservation.Id);
+				}
+				catch (Exception ex)
+				{
+					MessageBox.Show(
+						$"An unexpected error occurred while updating the reservation.\n\n{ex.Message}",
+						"Error",
+						MessageBoxButton.OK,
+						MessageBoxImage.Error);
+				}
+			};
+
+			mainWindow.DialogHost.Show(dialog);
+		}
+
+		private void DeleteReservations_Click(object sender, RoutedEventArgs e)
+		{
+			if (ReservationsDataGrid.SelectedItem is not ReservationRowItem selectedRow)
+			{
+				return;
+			}
+
+			var mainWindow = GetMainWindow();
+			if (mainWindow is null)
+			{
+				return;
+			}
+
+			var dialog = new DeleteReservationsDialog();
+
+			dialog.CancelRequested += (_, _) => mainWindow.DialogHost.Close(dialog, false);
+
+			dialog.DeleteRequested += async (_, _) =>
+			{
+				try
+				{
+					using var scope = App.ServiceProvider.CreateScope();
+					var reservationService = scope.ServiceProvider.GetRequiredService<IReservationService>();
+
+					var result = await reservationService.DeleteAsync(selectedRow.Id);
+					if (!result.IsSuccess)
+					{
+						MessageBox.Show(
+							result.Message ?? "Failed to delete reservation.",
+							"Error",
+							MessageBoxButton.OK,
+							MessageBoxImage.Error);
+						return;
+					}
+
+					mainWindow.DialogHost.Close(dialog, true);
+					await LoadReservationsAsync();
+				}
+				catch (Exception ex)
+				{
+					MessageBox.Show(
+						$"An unexpected error occurred while deleting the reservation.\n\n{ex.Message}",
+						"Error",
+						MessageBoxButton.OK,
+						MessageBoxImage.Error);
+				}
+			};
+
+			mainWindow.DialogHost.Show(dialog);
+		}
+
+		private void Filter_Click(object sender, RoutedEventArgs e)
+		{
+			var mainWindow = GetMainWindow();
+			if (mainWindow is null)
+			{
+				return;
+			}
+
+			var dialog = new FilterReservationsDialog();
+			dialog.ApplyConfiguration(_configuration);
+			dialog.LoadCriteria(_activeCriteria);
+
+			dialog.CancelRequested += (_, _) => mainWindow.DialogHost.Close(dialog, false);
+
+			dialog.ApplyRequested += async (_, _) =>
+			{
+				string? currentSearch = string.IsNullOrWhiteSpace(SearchBox.Text) ? null : SearchBox.Text;
+
+				_activeCriteria = new ReservationFilterCriteria
+				{
+					SearchText = currentSearch,
+					Date = dialog.BuiltCriteria.Date,
+					Time = dialog.BuiltCriteria.Time,
+					Guests = dialog.BuiltCriteria.Guests,
+					Zones = dialog.BuiltCriteria.Zones,
+					ZoneMatchMode = dialog.BuiltCriteria.ZoneMatchMode,
+					TableIds = dialog.BuiltCriteria.TableIds,
+					TableMatchMode = dialog.BuiltCriteria.TableMatchMode
+				};
+
+				HasActiveFilters = HasNonSearchFilters(_activeCriteria);
+
+				mainWindow.DialogHost.Close(dialog, true);
+				await LoadReservationsAsync();
+			};
+
+			mainWindow.DialogHost.Show(dialog);
+		}
+	}
 }

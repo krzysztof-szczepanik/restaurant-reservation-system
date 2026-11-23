@@ -36,5 +36,9 @@ namespace RestaurantReservationSystem.UI.Controls.Sidebar {
         private void Settings_Checked(object sender, RoutedEventArgs e) {
             RequestNavigation("Settings");
         }
-    }
+		public void SelectReservations()
+		{
+			ReservationsNavigationButton.IsChecked = true;
+		}
+	}
 }

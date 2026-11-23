@@ -10,167 +10,196 @@ using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Interop;
 
-namespace RestaurantReservationSystem.UI {
-    public partial class MainWindow : Window {
+namespace RestaurantReservationSystem.UI
+{
+	public partial class MainWindow : Window
+	{
 
-        // CONSTANTS:
-        private const int DWMWA_CAPTION_COLOR = 35;
-        private const int GWL_EXSTYLE = -20;
-        private const int WS_EX_DLGMODALFRAME = 0x00000001;
+		// CONSTANTS:
+		private const int DWMWA_CAPTION_COLOR = 35;
+		private const int GWL_EXSTYLE = -20;
+		private const int WS_EX_DLGMODALFRAME = 0x00000001;
 
-        private const uint SWP_NOSIZE = 0x0001;
-        private const uint SWP_NOMOVE = 0x0002;
-        private const uint SWP_NOZORDER = 0x0004;
-        private const uint SWP_FRAMECHANGED = 0x0020;
+		private const uint SWP_NOSIZE = 0x0001;
+		private const uint SWP_NOMOVE = 0x0002;
+		private const uint SWP_NOZORDER = 0x0004;
+		private const uint SWP_FRAMECHANGED = 0x0020;
 
-        private const int TITLE_BAR_COLOR = 0x00EFE7E0;
-
-
-        // FIELDS:
-        private bool _initialSetupSaving;
+		private const int TITLE_BAR_COLOR = 0x00EFE7E0;
 
 
-        // PROPERTIES:
-        public DialogHost DialogHost => MainDialogHost;
+		// FIELDS:
+		private bool _initialSetupSaving;
 
 
-        // CONSTRUCTORS:
-        public MainWindow() {
-            InitializeComponent();
-
-            SourceInitialized += (_, _) => ConfigureTitleBar();
-            Loaded += MainWindow_Loaded;
-        }
+		// PROPERTIES:
+		public DialogHost DialogHost => MainDialogHost;
 
 
-        // WINDOW CONFIGURATION:
-        private void ConfigureTitleBar() {
-            IntPtr hwnd = new WindowInteropHelper(this).Handle;
-            long style = GetWindowLongPtr(hwnd, GWL_EXSTYLE).ToInt64();
+		// CONSTRUCTORS:
+		public MainWindow()
+		{
+			InitializeComponent();
 
-            SetWindowLongPtr(hwnd, GWL_EXSTYLE, new IntPtr(style | WS_EX_DLGMODALFRAME));
-            SetWindowPos(hwnd, IntPtr.Zero, 0, 0, 0, 0, SWP_NOSIZE | SWP_NOMOVE | SWP_NOZORDER | SWP_FRAMECHANGED);
-
-            int captionColor = TITLE_BAR_COLOR;
-            DwmSetWindowAttribute(hwnd, DWMWA_CAPTION_COLOR, ref captionColor, sizeof(int));
-        }
+			SourceInitialized += (_, _) => ConfigureTitleBar();
+			Loaded += MainWindow_Loaded;
+		}
 
 
-        // NAVIGATION:
-        private void NavigateTo(string destination) {
-            switch (destination) {
-                case "Today":
-                    MainContentArea.Content = new TodayView();
-                    break;
+		// WINDOW CONFIGURATION:
+		private void ConfigureTitleBar()
+		{
+			IntPtr hwnd = new WindowInteropHelper(this).Handle;
+			long style = GetWindowLongPtr(hwnd, GWL_EXSTYLE).ToInt64();
 
-                case "Reservations":
-                    MainContentArea.Content = new ReservationsView();
-                    break;
+			SetWindowLongPtr(hwnd, GWL_EXSTYLE, new IntPtr(style | WS_EX_DLGMODALFRAME));
+			SetWindowPos(hwnd, IntPtr.Zero, 0, 0, 0, 0, SWP_NOSIZE | SWP_NOMOVE | SWP_NOZORDER | SWP_FRAMECHANGED);
 
-                case "Tables":
-                    MainContentArea.Content = new TablesView();
-                    break;
-
-                case "Settings":
-                    MainContentArea.Content = new SettingsView();
-                    break;
-            }
-        }
+			int captionColor = TITLE_BAR_COLOR;
+			DwmSetWindowAttribute(hwnd, DWMWA_CAPTION_COLOR, ref captionColor, sizeof(int));
+		}
 
 
-        // EVENT HANDLERS:
-        private async void MainWindow_Loaded(object sender, RoutedEventArgs e) {
-            Loaded -= MainWindow_Loaded;
+		// NAVIGATION:
+		private void NavigateTo(string destination)
+		{
+			switch (destination)
+			{
+				case "Today":
+					MainContentArea.Content = new TodayView();
+					break;
 
-            try {
-                using var scope = App.ServiceProvider.CreateScope();
-                var configurationService = scope.ServiceProvider.GetRequiredService<IConfigurationService>();
+				case "Reservations":
+					MainContentArea.Content = new ReservationsView();
+					break;
 
-                var configuration = await configurationService.GetAsync();
+				case "Tables":
+					MainContentArea.Content = new TablesView();
+					break;
 
-                if (configuration is null) {
-                    ShowInitialSetup();
-                    return;
-                }
+				case "Settings":
+					MainContentArea.Content = new SettingsView();
+					break;
+			}
+		}
 
-                NavigateTo("Today");
-            } catch (Exception ex) {
-                MessageBox.Show(
-                    $"Failed to load application configuration.\n\n{ex.Message}",
-                    "Configuration Error",
-                    MessageBoxButton.OK,
-                    MessageBoxImage.Error);
+		public void NavigateToReservations()
+		{
+			MainSidebar.SelectReservations();
+			NavigateTo("Reservations");
+		}
 
-                Close();
-            }
-        }
+		// EVENT HANDLERS:
+		private async void MainWindow_Loaded(object sender, RoutedEventArgs e)
+		{
+			Loaded -= MainWindow_Loaded;
 
-        private void Sidebar_NavigationRequested(object sender, string destination) {
-            NavigateTo(destination);
-        }
+			try
+			{
+				using var scope = App.ServiceProvider.CreateScope();
+				var configurationService = scope.ServiceProvider.GetRequiredService<IConfigurationService>();
 
+				var configuration = await configurationService.GetAsync();
 
-        // HELPER METHODS:
-        private void ShowInitialSetup() {
-            var dialog = new InitialSetupDialog();
+				if (configuration is null)
+				{
+					ShowInitialSetup();
+					return;
+				}
 
-            dialog.SaveRequested += async (_, _) => {
-                await SaveInitialSetupAsync(dialog);
-            };
+				NavigateTo("Today");
+			}
+			catch (Exception ex)
+			{
+				MessageBox.Show(
+					$"Failed to load application configuration.\n\n{ex.Message}",
+					"Configuration Error",
+					MessageBoxButton.OK,
+					MessageBoxImage.Error);
 
-            MainDialogHost.Show(dialog);
-        }
+				Close();
+			}
+		}
 
-        private async Task SaveInitialSetupAsync(InitialSetupDialog dialog) {
-            if (_initialSetupSaving) {
-                return;
-            }
-
-            _initialSetupSaving = true;
-
-            try {
-                var configuration = dialog.GetConfiguration();
-
-                using var scope = App.ServiceProvider.CreateScope();
-                var configurationService = scope.ServiceProvider.GetRequiredService<IConfigurationService>();
-
-                var result = await configurationService.SaveInitialAsync(configuration);
-
-                if (!result.IsSuccess) {
-                    MessageBox.Show(
-                        "Failed to save initial configuration. Please check the selected fields.",
-                        "Initial Setup Error",
-                        MessageBoxButton.OK,
-                        MessageBoxImage.Warning);
-
-                    return;
-                }
-
-                MainDialogHost.CloseAll();
-                NavigateTo("Today");
-            } catch (Exception ex) {
-                MessageBox.Show(
-                    $"Failed to save initial configuration.\n\n{ex.Message}",
-                    "Initial Setup Error",
-                    MessageBoxButton.OK,
-                    MessageBoxImage.Error);
-            } finally {
-                _initialSetupSaving = false;
-            }
-        }
+		private void Sidebar_NavigationRequested(object sender, string destination)
+		{
+			NavigateTo(destination);
+		}
 
 
-        // NATIVE METHODS:
-        [DllImport("dwmapi.dll")]
-        private static extern int DwmSetWindowAttribute(IntPtr hwnd, int attribute, ref int value, int size);
+		// HELPER METHODS:
+		internal void ShowInitialSetup()
+		{
+			MainContentArea.Content = null;
 
-        [DllImport("user32.dll", EntryPoint = "GetWindowLongPtrW")]
-        private static extern IntPtr GetWindowLongPtr(IntPtr hwnd, int index);
+			var dialog = new InitialSetupDialog();
 
-        [DllImport("user32.dll", EntryPoint = "SetWindowLongPtrW")]
-        private static extern IntPtr SetWindowLongPtr(IntPtr hwnd, int index, IntPtr newStyle);
+			dialog.SaveRequested += async (_, _) =>
+			{
+				await SaveInitialSetupAsync(dialog);
+			};
 
-        [DllImport("user32.dll")]
-        private static extern bool SetWindowPos(IntPtr hwnd, IntPtr insertAfter, int x, int y, int width, int height, uint flags);
-    }
+			MainDialogHost.Show(dialog);
+		}
+
+		private async Task SaveInitialSetupAsync(InitialSetupDialog dialog)
+		{
+			if (_initialSetupSaving)
+			{
+				return;
+			}
+
+			_initialSetupSaving = true;
+
+			try
+			{
+				var configuration = dialog.GetConfiguration();
+
+				using var scope = App.ServiceProvider.CreateScope();
+				var configurationService = scope.ServiceProvider.GetRequiredService<IConfigurationService>();
+
+				var result = await configurationService.SaveInitialAsync(configuration);
+
+				if (!result.IsSuccess)
+				{
+					MessageBox.Show(
+						"Failed to save initial configuration. Please check the selected fields.",
+						"Initial Setup Error",
+						MessageBoxButton.OK,
+						MessageBoxImage.Warning);
+
+					return;
+				}
+
+				MainDialogHost.CloseAll();
+				NavigateTo("Today");
+			}
+			catch (Exception ex)
+			{
+				MessageBox.Show(
+					$"Failed to save initial configuration.\n\n{ex.Message}",
+					"Initial Setup Error",
+					MessageBoxButton.OK,
+					MessageBoxImage.Error);
+			}
+			finally
+			{
+				_initialSetupSaving = false;
+			}
+		}
+
+
+		// NATIVE METHODS:
+		[DllImport("dwmapi.dll")]
+		private static extern int DwmSetWindowAttribute(IntPtr hwnd, int attribute, ref int value, int size);
+
+		[DllImport("user32.dll", EntryPoint = "GetWindowLongPtrW")]
+		private static extern IntPtr GetWindowLongPtr(IntPtr hwnd, int index);
+
+		[DllImport("user32.dll", EntryPoint = "SetWindowLongPtrW")]
+		private static extern IntPtr SetWindowLongPtr(IntPtr hwnd, int index, IntPtr newStyle);
+
+		[DllImport("user32.dll")]
+		private static extern bool SetWindowPos(IntPtr hwnd, IntPtr insertAfter, int x, int y, int width, int height, uint flags);
+	}
 }
